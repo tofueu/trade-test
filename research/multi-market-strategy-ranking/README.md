@@ -24,6 +24,19 @@
 
 新增策略程式測試止盈候選 0.75R、1R、1.5R、2R、3R，以前四年 IS 的收益／回撤選擇每個「商品 × 策略」的止盈目標，之後才計算五年與 OOS 成績。因此新增策略結果表列的是 IS 選出的 TP，不是五種 TP 候選的完整交叉表。
 
+## 完整排名所含策略與程式
+
+完整 9,556 列排名由四個策略家族組成，共 32 種訊號規則；同一訊號會展開不同出場法、商品與倉位法，因此列數不是策略數。
+
+| 排名家族 | 策略數 | 程式／規則 |
+|---|---:|---|
+| 原單指標 × 出場變體 | 8 | `five_year_multi_market_kelly.py`、`five_year_exit_method_sweep.py`：Donchian、MACD、RSI+EMA、EMA交叉、Supertrend、布林、RSI2、量能突破。 | 
+| 雙指標／週線複合 | 8 | `five_year_compound_strategy_sweep.py`：EMA200+RSI14、EMA200+RSI2、Donchian+MACD、MACD+RSI50、Supertrend+EMA200/RSI50、週線EMA20/50+日線Donchian/MACD。 | 
+| 新指標 × 純固定盈虧 | 9 | `five_year_low_drawdown_fixed_rr.py`：EMA200+RSI14/RSI2/MACD、Donchian+ADX、布林+RSI、Supertrend+EMA200、週線EMA+日線MACD/Donchian、Stoch+EMA200。 | 
+| 新增趨勢／突破／均值回歸 | 7 | `run_strategies.py`：上表七種策略。 | 
+
+`combine_all_backtest_rankings.py` 和 `merge_additional_rankings.py` 用來按既有欄位重新合併、排序並輸出總榜。程式碼涵蓋本次 9,556 列五年排名中的策略家族；其他不同期間／週期的研究（例如 4 小時或 15 分鐘回測）不屬於這份五年多市場總榜。
+
 ## 倉位法與收益欄位
 
 每個測試組合計算四種倉位法：固定 1R（初始本金的 10%）、全凱利、半凱利、四分之一凱利。凱利比例由前四年 IS 的交易結果估計。單筆風險金額固定以初始本金計算，收益採逐筆損益加總，不按每筆結餘複利。
@@ -38,6 +51,8 @@
 
 - `src/run_strategies.py`：七種新增策略及五年固定 TP/SL 回測程式。
 - `src/five_year_multi_market_kelly.py`：共用行情下載、技術指標、成本及風險統計程式。
+- `src/five_year_exit_method_sweep.py`、`src/five_year_compound_strategy_sweep.py`、`src/five_year_low_drawdown_fixed_rr.py`：總榜其餘三個策略家族的回測程式。
+- `src/combine_all_backtest_rankings.py`、`src/merge_additional_rankings.py`：產生及更新綜合排名的整理程式。
 - `results/complete_ranking_9556.csv.gz`：原策略、複合策略、固定盈虧策略與新增策略合併排名（Gzip 壓縮 CSV，解壓後可用試算表開啟）。
 - `results/complete_ranking_9556.csv.gz` 可用 `gzip -dk complete_ranking_9556.csv.gz` 解壓；如在手機上，可用支援 Gzip 的檔案 App 解壓後匯入試算表。
 - `results/overall_top50.csv`：總排名前 50 名。
@@ -55,7 +70,18 @@ python -m pip install -r requirements.txt
 python src/run_strategies.py
 ```
 
-首次執行會下載行情並建立 `src/five_year_market_data/` 快取；輸出 CSV 會建立在 `src/`。
+首次執行會下載行情並建立 `src/five_year_market_data/` 快取；輸出 CSV 會建立在 `src/`。若要從原始資料重建五年總榜，依序執行：
+
+```bash
+python src/five_year_exit_method_sweep.py
+python src/five_year_compound_strategy_sweep.py
+python src/five_year_low_drawdown_fixed_rr.py
+python src/combine_all_backtest_rankings.py
+python src/run_strategies.py
+python src/merge_additional_rankings.py
+```
+
+這會重新下載／計算五年資料，運行時間較長；本次只提供可重現命令，未再次執行完整掃描。
 
 ## 研究限制
 
