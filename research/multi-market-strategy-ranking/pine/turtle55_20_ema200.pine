@@ -29,31 +29,30 @@ var float long_tp = na
 var float short_sl = na
 var float short_tp = na
 var int target_state = 0
-var int last_entered_target_state = 0
 
 // Update target state based on signal conditions
 if long_cond
     target_state := 1
 else if short_cond
     target_state := -1
-else
+else if target_state == 1 and close < lo20
+    target_state := 0
+else if target_state == -1 and close > hi20
     target_state := 0
 
 // Gate entries by target-state transition to match Python backtest loop, preserving same-next-open reversals
-if target_state == 1 and target_state != last_entered_target_state
+if target_state == 1 and ta.change(target_state) != 0
     dist = sl_atr_mult * atr_val
     // Adjust risk per contract using syminfo.pointvalue for futures contract sizing parity
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
     strategy.entry("Long", strategy.long, qty=qty_val)
-    last_entered_target_state := 1
 
-if target_state == -1 and target_state != last_entered_target_state
+if target_state == -1 and ta.change(target_state) != 0
     dist = sl_atr_mult * atr_val
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
     strategy.entry("Short", strategy.short, qty=qty_val)
-    last_entered_target_state := -1
 
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
