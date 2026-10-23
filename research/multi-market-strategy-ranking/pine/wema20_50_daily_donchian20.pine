@@ -15,14 +15,14 @@ input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(24.578, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
 use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
 
-w_ema20 = request.security(syminfo.tickerid, "W", ta.ema(close, 20)[1], barmerge.gaps_off, barmerge.lookahead_off)
-w_ema50 = request.security(syminfo.tickerid, "W", ta.ema(close, 50)[1], barmerge.gaps_off, barmerge.lookahead_off)
+w_ema20 = request.security(syminfo.tickerid, "W", ta.ema(close, 20)[1], barmerge.gaps_off, barmerge.lookahead_on)
+w_ema50 = request.security(syminfo.tickerid, "W", ta.ema(close, 50)[1], barmerge.gaps_off, barmerge.lookahead_on)
 hi20 = ta.highest(high[1], 20)
 lo20 = ta.lowest(low[1], 20)
 atr_val = ta.atr(14)
 
-long_cond  = w_ema20 > w_ema50 and close > hi20
-short_cond = w_ema20 < w_ema50 and close < lo20
+long_cond  = w_ema20 > w_ema50 and close[1] <= hi20[1] and close > hi20
+short_cond = w_ema20 < w_ema50 and close[1] >= lo20[1] and close < lo20
 var float long_sl = na
 var float long_tp = na
 var float short_sl = na
@@ -37,14 +37,14 @@ if not short_cond
     short_state_entered := false
 
 // Allow immediate reversal entry or new position entry, preventing same-state re-entry after SL/TP
-if long_cond and not long_state_entered
+if long_cond and not long_state_entered and strategy.position_size == 0
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Long", strategy.long, qty=qty_val)
     long_state_entered := true
     short_state_entered := false
 
-if short_cond and not short_state_entered
+if short_cond and not short_state_entered and strategy.position_size == 0
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Short", strategy.short, qty=qty_val)
