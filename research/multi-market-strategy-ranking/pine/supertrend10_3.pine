@@ -21,8 +21,8 @@ atr_val = ta.atr(14)
 st_bull = st_dir < 0
 st_bear = st_dir > 0
 
-long_cond  = st_bull
-short_cond = st_bear
+long_cond  = st_bull and st_dir[1] > 0
+short_cond = st_bear and st_dir[1] < 0
 
 var float long_sl = na
 var float short_sl = na
