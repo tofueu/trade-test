@@ -1,5 +1,5 @@
 //@version=6
-// Python Source: research/multi-market-strategy-ranking/src/five_year_low_drawdown_fixed_rr.py (signals())
+// Python Sources: five_year_low_drawdown_fixed_rr.py::signals() [Fixed RR Event] and five_year_compound_strategy_sweep.py::custom_signals() [Stateful Signal Exit]
 // Ranking Strategy Name: EMA200+RSI14_pullback
 // Representative Top Config: ETHUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 純固定TP 3.0R／初始SL 1.5ATR | Sizing: 全凱利 (IS Kelly: 55.257%)
 // Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
@@ -71,10 +71,10 @@ if ta.change(strategy.position_size) != 0
 
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
-    if exit_mode == "Stateful Signal Exit" and (close < ema_val or rsi_val >= 60)
+    if exit_mode == "Stateful Signal Exit" and target_state == 0 and (close < ema_val or rsi_val >= 60)
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
-    if exit_mode == "Stateful Signal Exit" and (close > ema_val or rsi_val <= 40)
+    if exit_mode == "Stateful Signal Exit" and target_state == 0 and (close > ema_val or rsi_val <= 40)
         strategy.close("Short")
