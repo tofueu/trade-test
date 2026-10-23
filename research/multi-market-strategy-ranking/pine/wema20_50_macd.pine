@@ -15,8 +15,8 @@ input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(26.521, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
 use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
 
-w_ema20 = request.security(syminfo.tickerid, "W", ta.ema(close, 20)[1], barmerge.gaps_off, barmerge.lookahead_off)
-w_ema50 = request.security(syminfo.tickerid, "W", ta.ema(close, 50)[1], barmerge.gaps_off, barmerge.lookahead_off)
+w_ema20 = request.security(syminfo.tickerid, "W", ta.ema(close, 20)[1], barmerge.gaps_off, barmerge.lookahead_on)
+w_ema50 = request.security(syminfo.tickerid, "W", ta.ema(close, 50)[1], barmerge.gaps_off, barmerge.lookahead_on)
 [macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
 atr_val = ta.atr(14)
 
@@ -63,10 +63,10 @@ if ta.change(strategy.position_size) != 0
         short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
-    if macd_line < sig_line or w_ema20 < w_ema50
+    if (macd_line < sig_line or w_ema20 < w_ema50) and not short_cond
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL Short", "Short", stop=short_sl)
-    if macd_line > sig_line or w_ema20 > w_ema50
+    if (macd_line > sig_line or w_ema20 > w_ema50) and not long_cond
         strategy.close("Short")
