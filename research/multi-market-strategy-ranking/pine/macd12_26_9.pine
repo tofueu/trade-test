@@ -1,5 +1,5 @@
 //@version=6
-// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals())
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals(), market_backtest())
 // Ranking Strategy Name: MACD12_26_9
 // Representative Top Config: XRPUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 20.067%)
 // Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
@@ -56,12 +56,17 @@ if ta.change(strategy.position_size) != 0
         short_sl := entry_p + dist
         short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 
+// Python market_backtest() applies an opposite target at the next open before testing
+// the old position's stop. Cancel that protective order on the signal bar so a gap
+// through the stop cannot outrank the already-known signal exit/reversal.
 if strategy.position_size > 0
-    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
-    if target_state == 0 and (short_cond)
-        strategy.close("Long")
+    if short_cond
+        strategy.cancel("SL/TP Long")
+    else
+        strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
 
 if strategy.position_size < 0
-    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
-    if target_state == 0 and (long_cond)
-        strategy.close("Short")
+    if long_cond
+        strategy.cancel("SL/TP Short")
+    else
+        strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
