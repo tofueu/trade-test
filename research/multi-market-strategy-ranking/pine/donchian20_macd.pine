@@ -26,20 +26,29 @@ var float long_sl = na
 var float long_tp = na
 var float short_sl = na
 var float short_tp = na
+var bool long_state_entered = false
+var bool short_state_entered = false
 
-// State transition entry gating matching Python side == 0 rule
-long_entry_trigger  = long_cond and not long_cond[1] and strategy.position_size == 0
-short_entry_trigger = short_cond and not short_cond[1] and strategy.position_size == 0
+// Reset state flags when signal condition toggles off
+if not long_cond
+    long_state_entered := false
+if not short_cond
+    short_state_entered := false
 
-if long_entry_trigger
+// Allow immediate reversal entry or new position entry, preventing same-state re-entry after SL/TP
+if long_cond and not long_state_entered
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Long", strategy.long, qty=qty_val)
+    long_state_entered := true
+    short_state_entered := false
 
-if short_entry_trigger
+if short_cond and not short_state_entered
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Short", strategy.short, qty=qty_val)
+    short_state_entered := true
+    long_state_entered := false
 
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
