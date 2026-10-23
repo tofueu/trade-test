@@ -4,10 +4,10 @@
 
 ## 策略總數與去重核驗說明
 
-在 4 個 Python 策略腳本中，共定義了 32 個策略條目。產出的排名結果數據表 (`complete_ranking_9556.csv.gz` 與 `strategy_max_return_kelly_details.csv`) 中包含 31 個不重複策略名稱：
+相關 Python 原始碼包含多個策略實作函式；排名結果 `strategy_max_return_kelly_details.csv` 列出 31 個策略名稱，去重後為 30 種獨立邏輯：
 1. **策略去重（30 種獨立邏輯）**：經逐項核驗 Python 原始碼，`RSI2_EMA200`（位於 `five_year_multi_market_kelly.py`）與 `EMA200+RSI2_mean_reversion`（位於 `five_year_compound_strategy_sweep.py`）之進出場邏輯完全相同。因此將兩者合併歸納為 1 個獨立 Pine 腳本 (`rsi2_ema200.pine`)，共建立 **30 份獨立 Pine Script v6 策略**。
-2. **重複定義條目說明**：`EMA200+RSI14_pullback` 在排名數據中同時涵蓋 Pure Fixed-RR 版本與 Compound Signal Exit 版本，Pine 腳本 (`ema200_rsi14_pullback.pine`) 透過 `exit_mode` 參數提供兩種出場模式切換，完全覆蓋兩種 Python 實作變體。
-3. **參數與配置獨立化**：所有策略在商品、週期、倉位大小 (Sizing)、止盈止損 (SL/TP) 的差異均透過 Pine Script 的 `input` 參數進行設定，不重複複製策略檔。
+2. **同名不同出場變體**：`EMA200+RSI14_pullback` 的 Pine 檔透過 `exit_mode` 對應固定 R 出場和 EMA/RSI 訊號出場兩種排名變體；未包含 `five_year_exit_method_sweep.py` 中所有 ATR trailing/不同 R 倍數掃描組合。
+3. **參數與配置獨立化**：商品與週期由 TradingView 圖表選擇；部位風險、止損止盈及出場模式等可配置項由 Pine `input` 提供，配置差異不另複製同邏輯檔案。
 
 ---
 
@@ -15,11 +15,11 @@
 
 | 策略名稱 (Ranking Name) | 去重邏輯分類 | Python 檔 / 函式 | Pine Script 檔案 | 代表排名配置 (商品 | 市場 | 週期 | 倉位 | 風控/出場) | Cost & Engine 注意事項 | TV 實測狀態 |
 |---|---|---|---|---|---|---|
-| **MACD12_26_9** | MACD (12,26,9) 雙線交叉 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/macd12_26_9.pine`](macd12_26_9.pine) | **XRPUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (20.1%)<br>風控: 訊號出場(無固定TP) | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
+| **MACD12_26_9** | MACD (12,26,9) 雙線交叉 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/macd12_26_9.pine`](macd12_26_9.pine) | **XRPUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (20.1%)<br>風控: 訊號出場(無固定TP) | 依各腳本使用狀態轉換或空倉事件門控；合約數依 pointvalue 校正；0.10%/side 佣金近似 Python 費用與價格滑價合計，並非相同滑價模型 | **未測** |
 | **Supertrend+RSI50** | Supertrend(10,3) + RSI14>50 複合策略 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/supertrend_rsi50.pine`](supertrend_rsi50.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (20.1%)<br>風控: 訊號出場(無固定TP) | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Supertrend10_3** | Supertrend(10,3) 趨勢追蹤 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/supertrend10_3.pine`](supertrend10_3.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (24.5%)<br>風控: 訊號出場(無固定TP) | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Supertrend+EMA200** | Supertrend(10,3) + EMA200 濾網 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/supertrend_ema200.pine`](supertrend_ema200.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (23.5%)<br>風控: 訊號出場(無固定TP) | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
-| **Stoch14+EMA200** | Stoch(14) 超賣/超買 + EMA200 均值回歸 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/stoch14_ema200.pine`](stoch14_ema200.pine) | **GC=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (39.9%)<br>風控: 純固定TP 2.0R／初始SL 1.5ATR | Target-state 轉換門控；pointvalue 下單量校正；費率: $2.50/口 + 1 tick滑價 | **未測** |
+| **Stoch14+EMA200** | Stoch(14) 超賣/超買 + EMA200 均值回歸 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/stoch14_ema200.pine`](stoch14_ema200.pine) | **GC=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (39.9%)<br>風控: 純固定TP 2.0R／初始SL 1.5ATR | 依各腳本使用狀態轉換或空倉事件門控；合約數依 pointvalue 校正；期貨費用 $2.50/口/side + 1 tick/side | **未測** |
 | **Supertrend+EMA200_flip** | Supertrend(10,3) 翻轉 + EMA200 濾網 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/supertrend_ema200_flip.pine`](supertrend_ema200_flip.pine) | **NQ=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (44.4%)<br>風控: 純固定TP 3.0R／初始SL 1.5ATR | Target-state 轉換門控；pointvalue 下單量校正；費率: $2.50/口 + 1 tick滑價 | **未測** |
 | **WEMA20_50+Donchian20** | 週線 EMA(20/50) + 日線 Donchian(20) 突破 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/wema20_50_donchian20.pine`](wema20_50_donchian20.pine) | **NQ=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (46.0%)<br>風控: 固定4R+訊號出場 | Target-state 轉換門控；pointvalue 下單量校正；費率: $2.50/口 + 1 tick滑價；週線 request.security[1] (lookahead_on) | **未測** |
 | **WEMA20_50+MACD** | 週線 EMA(20/50) + 日線 MACD 交叉 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/wema20_50_macd.pine`](wema20_50_macd.pine) | **SI=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (26.5%)<br>風控: ATR移動止盈2x+訊號出場 | Target-state 轉換門控；pointvalue 下單量校正；費率: $2.50/口 + 1 tick滑價；週線 request.security[1] (lookahead_on) | **未測** |
@@ -30,9 +30,9 @@
 | **MACD+RSI50** | MACD 交叉 + RSI(14)>50 趨勢動能 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/macd_rsi50.pine`](macd_rsi50.pine) | **XRPUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (10.5%)<br>風控: 訊號出場(無固定TP) | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Donchian20_Volume_EMA200** | Donchian(20) + 1.5倍量能 + EMA200 濾網 | `run_strategies.py`<br>`make_state()` | [`pine/donchian20_volume_ema200.pine`](donchian20_volume_ema200.pine) | **GC=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (63.5%)<br>風控: IS選定固定TP 1R／初始SL 1.5ATR＋策略出場 | Target-state 轉換門控；pointvalue 下單量校正；費率: $2.50/口 + 1 tick滑價 | **未測** |
 | **Keltner20_1.5ATR_EMA200** | Keltner(20, 1.5ATR) 通道突破 + EMA200 | `run_strategies.py`<br>`make_state()` | [`pine/keltner20_15atr_ema200.pine`](keltner20_15atr_ema200.pine) | **YM=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (47.2%)<br>風控: IS選定固定TP 0.75R／初始SL 1.5ATR＋策略出場 | Target-state 轉換門控；pointvalue 下單量校正；費率: $2.50/口 + 1 tick滑價 | **未測** |
-| **-<br>*(等價: Donchian(20) + ADX(14)>20 突破)*** | Donchian20+ADX14 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/donchian20_adx14.pine`](donchian20_adx14.pine) | **-** (-)<br>週期: 1D (日線)<br>部位: - (20.1%)<br>風控: - | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.4 pips 滑價 | **未測** |
+| **Donchian20+ADX14** | Donchian(20) 突破 + ADX(14)>20 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/donchian20_adx14.pine`](donchian20_adx14.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (IS Kelly: 20.282%)<br>風控: 純固定TP 1.5R／初始SL 1.5ATR | 依各腳本使用狀態轉換或空倉事件門控；合約數依 pointvalue 校正；FX 以 4 ticks/side 近似 0.4 pip 成本 | **未測** |
 | **EMA200+MACD_cross** | EMA200 方向 + MACD 交叉 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/ema200_macd_cross.pine`](ema200_macd_cross.pine) | **GC=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (20.6%)<br>風控: 純固定TP 3.0R／初始SL 1.5ATR | Target-state 轉換門控；pointvalue 下單量校正；費率: $2.50/口 + 1 tick滑價 | **未測** |
-| **-<br>*(等價: Donchian(20) 突破 + MACD 同向濾網)*** | Donchian20+MACD | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/donchian20_macd.pine`](donchian20_macd.pine) | **-** (-)<br>週期: 1D (日線)<br>部位: - (20.1%)<br>風控: - | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.4 pips 滑價 | **未測** |
+| **Donchian20+MACD** | Donchian(20) 突破 + MACD 同向濾網 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/donchian20_macd.pine`](donchian20_macd.pine) | **DOGEUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (IS Kelly: 21.555%)<br>風控: 訊號出場(無固定TP) | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.4 pips 滑價 | **未測** |
 | **Turtle55_20_EMA200** | Turtle 55/20 通道突破 + EMA200 | `run_strategies.py`<br>`make_state()` | [`pine/turtle55_20_ema200.pine`](turtle55_20_ema200.pine) | **ETHUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (34.3%)<br>風控: IS選定固定TP 1.5R／初始SL 1.5ATR＋策略出場 | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Bollinger20+RSI14_reentry** | 布林(20,2σ) 帶外返回 + RSI14 濾網 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/bollinger20_rsi14_reentry.pine`](bollinger20_rsi14_reentry.pine) | **DOGEUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (17.8%)<br>風控: 純固定TP 3.0R／初始SL 1.5ATR | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Supertrend_ADX20** | Supertrend(10,3) + ADX(14)>20 強趨勢 | `run_strategies.py`<br>`make_state()` | [`pine/supertrend_adx20.pine`](supertrend_adx20.pine) | **DOGEUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (40.6%)<br>風控: IS選定固定TP 0.75R／初始SL 1.5ATR＋策略出場 | Target-state 轉換門控；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
@@ -50,12 +50,12 @@
 
 ## Python 實作與 TradingView / Pine Script 平台差異與限制說明
 
-依據 PR 審查意見（Comments #6362723774, #6363140734, #6363214309, #6365371345, #6366183824, #6366889661, #6367049157, #6367472891, #6367965217），本專案轉譯之 30 份 Pine 腳本已做出以下精確對齊與限制說明：
+依據 PR 審查意見（Comments #6362723774, #6363140734, #6363214309, #6365371345, #6366183824, #6366889661, #6367049157, #6367472891, #6367965217），本專案包含 30 份獨立 Pine 腳本。以下是已對照與尚未確認的部分；在 Pine v6 實際編譯及 TradingView 執行前，不宣稱完全等價：
 
-1. **Target-State 轉換門控與雙變體支援 (Target-State Gating & Dual Variant Support)**：
+1. **策略狀態分類與雙變體支援 (State Classification & Dual Variant Support)**：
    - **持續狀態策略 (21 Persistent State Strategies)**：追蹤目標部位狀態 `target_state in {-1, 0, 1}`，僅在 `target_state` 改變時觸發建倉，並保持該狀態直到 Python 出場條件成立 (`target_state := 0`)。若因 SL/TP 平倉，在同一個未改變的 `target_state` 期間不會重複建倉，但當反轉訊號出現時可於同一開盤價執行反轉建倉。
-   - **純固定盈虧事件策略 (9 Pure Fixed-RR Event Strategies)**：如 `five_year_low_drawdown_fixed_rr.py` 之事件型策略，要求 `strategy.position_size == 0` 方可於新事件觸發時建倉。
-   - **`EMA200+RSI14_pullback.pine`**：提供 `exit_mode` 選擇參數，完全覆蓋 `five_year_low_drawdown_fixed_rr.py`（Pure Fixed-RR 模式）與 `five_year_compound_strategy_sweep.py`（Compound Signal Exit 模式）兩種 Python 實作變體。
+   - **純固定盈虧事件策略 (8 Pure Fixed-RR Event Scripts)**：如 `five_year_low_drawdown_fixed_rr.py` 之事件型策略，要求 `strategy.position_size == 0` 方可於新事件觸發時建倉。
+   - **`EMA200+RSI14_pullback.pine`**：提供 `exit_mode` 選擇參數，對應目前排名中 `five_year_low_drawdown_fixed_rr.py`（Pure Fixed-RR 模式）與 `five_year_compound_strategy_sweep.py`（Compound Signal Exit 模式）兩種 Python 實作變體。
 
 2. **期貨點值與部位 Sizing 校正 (Point-Value Contract Sizing Multiplier)**：
    - **Python 實作**：`fixed_risk_stats()` 美元風險金額 $R = 10,000 	imes 	ext{risk\_pct}$，下單張數 $N = R / 	ext{SL\_dist}$。
