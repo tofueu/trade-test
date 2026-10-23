@@ -63,10 +63,10 @@ if ta.change(strategy.position_size) != 0
 
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
-    if close < ema_val or rsi_val > 70
+    if target_state == 0 and (close < ema_val or rsi_val > 70)
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
-    if close > ema_val or rsi_val < 30
+    if target_state == 0 and (close > ema_val or rsi_val < 30)
         strategy.close("Short")
