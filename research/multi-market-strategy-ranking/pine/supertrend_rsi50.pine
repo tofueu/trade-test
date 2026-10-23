@@ -24,45 +24,43 @@ st_bear = st_dir > 0
 
 long_cond  = st_bull and rsi_val > 50
 short_cond = st_bear and rsi_val < 50
-var float long_sl = na
-var float long_tp = na
-var float short_sl = na
-var float short_tp = na
-var int target_state = 0
 
-// Update target state based on signal conditions
+var float long_sl = na
+var float short_sl = na
+var int target_state = 0
+var int last_entered_target_state = 0
+
 if long_cond
     target_state := 1
 else if short_cond
     target_state := -1
-else
+else if target_state == 1 and (st_bear or rsi_val <= 50)
+    target_state := 0
+else if target_state == -1 and (st_bull or rsi_val >= 50)
     target_state := 0
 
-// Gate entries by target-state transition to match Python backtest loop, preserving same-next-open reversals
-if target_state == 1 and ta.change(target_state) != 0
+if target_state == 1 and target_state != last_entered_target_state
     dist = sl_atr_mult * atr_val
-    // Adjust risk per contract using syminfo.pointvalue for futures contract sizing parity
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
     strategy.entry("Long", strategy.long, qty=qty_val)
+    last_entered_target_state := 1
 
-if target_state == -1 and ta.change(target_state) != 0
+if target_state == -1 and target_state != last_entered_target_state
     dist = sl_atr_mult * atr_val
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
     strategy.entry("Short", strategy.short, qty=qty_val)
+    last_entered_target_state := -1
 
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
         entry_p = strategy.opentrades.entry_price(0)
-        dist = sl_atr_mult * atr_val[1]
-        long_sl := entry_p - dist
-        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+        long_sl := entry_p - sl_atr_mult * atr_val[1]
     else if strategy.position_size < 0
         entry_p = strategy.opentrades.entry_price(0)
-        dist = sl_atr_mult * atr_val[1]
-        short_sl := entry_p + dist
-        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
+        short_sl := entry_p + sl_atr_mult * atr_val[1]
+
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
     if st_bear or rsi_val <= 50
