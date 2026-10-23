@@ -64,10 +64,10 @@ if ta.change(strategy.position_size) != 0
 
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
-    if ta.crossunder(macd_line, sig_line) or close < ema_val
+    if target_state == 0 and (ta.crossunder(macd_line, sig_line) or close < ema_val)
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
-    if ta.crossover(macd_line, sig_line) or close > ema_val
+    if target_state == 0 and (ta.crossover(macd_line, sig_line) or close > ema_val)
         strategy.close("Short")
