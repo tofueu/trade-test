@@ -60,10 +60,10 @@ if ta.change(strategy.position_size) != 0
 
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
-    if close < lo10 or macd_line < sig_line
+    if target_state == 0 and (close < lo10 or macd_line < sig_line)
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL Short", "Short", stop=short_sl)
-    if close > hi10 or macd_line > sig_line
+    if target_state == 0 and (close > hi10 or macd_line > sig_line)
         strategy.close("Short")
