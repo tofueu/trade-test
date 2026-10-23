@@ -1,0 +1,47 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py & five_year_compound_strategy_sweep.py
+// Ranking Strategy Names: RSI2_EMA200 / EMA200+RSI2_mean_reversion (Identical Logic)
+// Representative Top Config: ES=F | Traditional futures | Timeframe: 1D | Exit: Fixed 1R + Signal Exit | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("RSI 2 + EMA 200 Mean Reversion Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+rsi_len     = input.int(2, title="RSI Length")
+ema_len     = input.int(200, title="EMA Length")
+rsi_long_entry = input.float(10.0, title="RSI Long Entry Threshold")
+rsi_short_entry = input.float(90.0, title="RSI Short Entry Threshold")
+rsi_long_exit  = input.float(70.0, title="RSI Long Exit Threshold")
+rsi_short_exit = input.float(30.0, title="RSI Short Exit Threshold")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+tp_r_mult   = input.float(1.0, title="TP R Multiplier")
+
+rsi_val = ta.rsi(close, rsi_len)
+ema_val = ta.ema(close, ema_len)
+atr_val = ta.atr(14)
+
+long_cond  = close > ema_val and rsi_val < rsi_long_entry
+short_cond = close < ema_val and rsi_val > rsi_short_entry
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    long_tp := close + tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    short_tp := close - tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if close < ema_val or rsi_val > rsi_long_exit
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if close > ema_val or rsi_val < rsi_short_exit
+        strategy.close("Short")

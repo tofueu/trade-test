@@ -1,0 +1,41 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py (custom_signals)
+// Ranking Strategy Name: Donchian20+MACD
+// Representative Top Config: DOGEUSDT | Crypto futures | Timeframe: 1D | Exit: Signal Exit (No Fixed TP) | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("Donchian 20 + MACD Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+donch_len = input.int(20, title="Donchian Channel Length")
+fast_len  = input.int(12, title="MACD Fast Length")
+slow_len  = input.int(26, title="MACD Slow Length")
+sig_len   = input.int(9, title="MACD Signal Length")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+
+hi20 = ta.highest(high[1], donch_len)
+lo20 = ta.lowest(low[1], donch_len)
+[macd_line, sig_line, _] = ta.macd(close, fast_len, slow_len, sig_len)
+atr_val = ta.atr(14)
+
+long_cond  = close > hi20 and macd_line > sig_line
+short_cond = close < lo20 and macd_line < sig_line
+
+var float long_sl = na
+var float short_sl = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL Long", "Long", stop=long_sl)
+    if close < lo20 or macd_line < sig_line
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL Short", "Short", stop=short_sl)
+    if close > hi20 or macd_line > sig_line
+        strategy.close("Short")

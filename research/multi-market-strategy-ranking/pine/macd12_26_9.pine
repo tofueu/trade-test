@@ -1,0 +1,43 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals)
+// Ranking Strategy Name: MACD12_26_9
+// Representative Top Config: XRPUSDT | Crypto futures | Timeframe: 1D | Exit: Signal Exit (No Fixed TP) | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("MACD12_26_9 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+fast_len = input.int(12, title="Fast Length")
+slow_len = input.int(26, title="Slow Length")
+sig_len  = input.int(9, title="Signal Length")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)")
+
+[macd_line, sig_line, _] = ta.macd(close, fast_len, slow_len, sig_len)
+atr_val = ta.atr(14)
+
+long_cond  = ta.crossover(macd_line, sig_line)
+short_cond = ta.crossunder(macd_line, sig_line)
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    long_tp := tp_r_mult > 0 ? close + tp_r_mult * (sl_atr_mult * atr_val) : na
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    short_tp := tp_r_mult > 0 ? close - tp_r_mult * (sl_atr_mult * atr_val) : na
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if short_cond
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if long_cond
+        strategy.close("Short")

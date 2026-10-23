@@ -1,0 +1,42 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py (custom_signals)
+// Ranking Strategy Name: Supertrend+EMA200
+// Representative Top Config: SOLUSDT | Crypto futures | Timeframe: 1D | Exit: Signal Exit (No Fixed TP) | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("Supertrend + EMA200 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+st_period   = input.int(10, title="Supertrend Period")
+st_mult     = input.float(3.0, title="Supertrend Multiplier")
+ema_len     = input.int(200, title="EMA Length")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+
+[st_val, st_dir] = ta.supertrend(st_mult, st_period)
+ema_val = ta.ema(close, ema_len)
+atr_val = ta.atr(14)
+
+st_bull = st_dir < 0
+st_bear = st_dir > 0
+
+long_cond  = st_bull and ta.change(st_dir) and close > ema_val
+short_cond = st_bear and ta.change(st_dir) and close < ema_val
+
+var float long_sl = na
+var float short_sl = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL Long", "Long", stop=long_sl)
+    if st_bear or close < ema_val
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL Short", "Short", stop=short_sl)
+    if st_bull or close > ema_val
+        strategy.close("Short")

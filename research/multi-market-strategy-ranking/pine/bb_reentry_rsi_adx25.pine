@@ -1,0 +1,47 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/run_strategies.py (make_state)
+// Ranking Strategy Name: BB_Reentry_RSI_ADX25
+// Representative Top Config: AUDUSD=X | FX | Timeframe: 1D | Exit: IS Fixed TP 1R / SL 1.5ATR + Strategy Exit | Sizing: Half Kelly
+// TV Status: 未測 (Untested)
+strategy("BB Re-entry + RSI + ADX25 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+bb_len      = input.int(20, title="Bollinger Length")
+bb_mult     = input.float(2.0, title="Bollinger StdDev Multiplier")
+rsi_len     = input.int(14, title="RSI Length")
+adx_len     = input.int(14, title="ADX Length")
+adx_thresh  = input.float(25.0, title="ADX Max Threshold")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+tp_r_mult   = input.float(1.0, title="TP R Multiplier")
+
+[bb_mid, bb_up, bb_dn] = ta.bb(close, bb_len, bb_mult)
+rsi_val  = ta.rsi(close, rsi_len)
+[_, _, adx_val] = ta.dmi(adx_len, adx_len)
+atr_val  = ta.atr(14)
+
+long_cond  = adx_val < adx_thresh and close[1] <= bb_dn[1] and close > bb_dn and rsi_val < 45
+short_cond = adx_val < adx_thresh and close[1] >= bb_up[1] and close < bb_up and rsi_val > 55
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    long_tp := close + tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    short_tp := close - tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if close >= bb_mid
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if close <= bb_mid
+        strategy.close("Short")

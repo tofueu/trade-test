@@ -1,0 +1,48 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/run_strategies.py (make_state)
+// Ranking Strategy Name: Supertrend_ADX20
+// Representative Top Config: DOGEUSDT | Crypto futures | Timeframe: 1D | Exit: IS Fixed TP 0.75R / SL 1.5ATR + Strategy Exit | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("Supertrend + ADX20 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+st_period   = input.int(10, title="Supertrend Period")
+st_mult     = input.float(3.0, title="Supertrend Multiplier")
+adx_len     = input.int(14, title="ADX Length")
+adx_thresh  = input.float(20.0, title="ADX Threshold")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+tp_r_mult   = input.float(0.75, title="TP R Multiplier")
+
+[st_val, st_dir] = ta.supertrend(st_mult, st_period)
+[_, _, adx_val]  = ta.dmi(adx_len, adx_len)
+atr_val  = ta.atr(14)
+
+st_bull = st_dir < 0
+st_bear = st_dir > 0
+
+long_cond  = st_bull and ta.change(st_dir) and adx_val > adx_thresh
+short_cond = st_bear and ta.change(st_dir) and adx_val > adx_thresh
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    long_tp := close + tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    short_tp := close - tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if st_bear
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if st_bull
+        strategy.close("Short")

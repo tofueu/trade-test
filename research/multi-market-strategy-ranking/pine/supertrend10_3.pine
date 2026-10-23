@@ -1,0 +1,40 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals)
+// Ranking Strategy Name: Supertrend10_3
+// Representative Top Config: SOLUSDT | Crypto futures | Timeframe: 1D | Exit: Signal Exit (No Fixed TP) | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("Supertrend (10, 3) Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+st_period   = input.int(10, title="Supertrend Period")
+st_mult     = input.float(3.0, title="Supertrend Multiplier")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+
+[st_val, st_dir] = ta.supertrend(st_mult, st_period)
+atr_val = ta.atr(14)
+
+st_bull = st_dir < 0
+st_bear = st_dir > 0
+
+long_cond  = st_bull and ta.change(st_dir)
+short_cond = st_bear and ta.change(st_dir)
+
+var float long_sl = na
+var float short_sl = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL Long", "Long", stop=long_sl)
+    if st_bear
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL Short", "Short", stop=short_sl)
+    if st_bull
+        strategy.close("Short")

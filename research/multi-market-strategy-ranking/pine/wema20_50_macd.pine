@@ -1,0 +1,41 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py (custom_signals)
+// Ranking Strategy Name: WEMA20_50+MACD
+// Representative Top Config: SI=F | Traditional futures | Timeframe: 1D | Exit: ATR Trailing TP 2x + Signal Exit | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("Weekly EMA 20/50 + Daily MACD Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+fast_len = input.int(12, title="MACD Fast Length")
+slow_len = input.int(26, title="MACD Slow Length")
+sig_len  = input.int(9, title="MACD Signal Length")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+
+w_ema20 = request.security(syminfo.tickerid, "W", ta.ema(close, 20), barmerge.gaps_off, barmerge.lookahead_off)
+w_ema50 = request.security(syminfo.tickerid, "W", ta.ema(close, 50), barmerge.gaps_off, barmerge.lookahead_off)
+
+[macd_line, sig_line, _] = ta.macd(close, fast_len, slow_len, sig_len)
+atr_val = ta.atr(14)
+
+long_cond  = w_ema20 > w_ema50 and ta.crossover(macd_line, sig_line)
+short_cond = w_ema20 < w_ema50 and ta.crossunder(macd_line, sig_line)
+
+var float long_sl = na
+var float short_sl = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL Long", "Long", stop=long_sl)
+    if ta.crossunder(macd_line, sig_line) or w_ema20 < w_ema50
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL Short", "Short", stop=short_sl)
+    if ta.crossover(macd_line, sig_line) or w_ema20 > w_ema50
+        strategy.close("Short")

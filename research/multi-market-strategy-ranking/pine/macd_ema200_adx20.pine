@@ -1,0 +1,48 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/run_strategies.py (make_state)
+// Ranking Strategy Name: MACD_EMA200_ADX20
+// Representative Top Config: BTCUSDT | Crypto futures | Timeframe: 1D | Exit: IS Fixed TP 3R / SL 1.5ATR + Strategy Exit | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("MACD + EMA200 + ADX20 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+fast_len    = input.int(12, title="MACD Fast Length")
+slow_len    = input.int(26, title="MACD Slow Length")
+sig_len     = input.int(9, title="MACD Signal Length")
+ema_len     = input.int(200, title="EMA Length")
+adx_len     = input.int(14, title="ADX Length")
+adx_thresh  = input.float(20.0, title="ADX Threshold")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+tp_r_mult   = input.float(3.0, title="TP R Multiplier")
+
+[macd_line, sig_line, _] = ta.macd(close, fast_len, slow_len, sig_len)
+ema_val  = ta.ema(close, ema_len)
+[_, _, adx_val] = ta.dmi(adx_len, adx_len)
+atr_val  = ta.atr(14)
+
+long_cond  = adx_val > adx_thresh and ta.crossover(macd_line, sig_line) and close > ema_val
+short_cond = adx_val > adx_thresh and ta.crossunder(macd_line, sig_line) and close < ema_val
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    long_tp := close + tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    short_tp := close - tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if ta.crossunder(macd_line, sig_line) or close < ema_val
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if ta.crossover(macd_line, sig_line) or close > ema_val
+        strategy.close("Short")

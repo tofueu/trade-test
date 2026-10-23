@@ -1,0 +1,47 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_low_drawdown_fixed_rr.py (signals)
+// Ranking Strategy Name: EMA200+RSI2_extreme
+// Representative Top Config: BTCUSDT | Crypto futures | Timeframe: 1D | Exit: Pure Fixed TP 3.0R / SL 1.5ATR | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("EMA200 + RSI2 Extreme Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+rsi_len     = input.int(2, title="RSI Length")
+ema_len     = input.int(200, title="EMA Length")
+rsi_long_entry  = input.float(5.0, title="RSI Long Entry Threshold")
+rsi_short_entry = input.float(95.0, title="RSI Short Entry Threshold")
+rsi_long_exit   = input.float(60.0, title="RSI Long Exit Threshold")
+rsi_short_exit  = input.float(40.0, title="RSI Short Exit Threshold")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+tp_r_mult   = input.float(3.0, title="TP R Multiplier")
+
+rsi_val = ta.rsi(close, rsi_len)
+ema_val = ta.ema(close, ema_len)
+atr_val = ta.atr(14)
+
+long_cond  = close > ema_val and rsi_val < rsi_long_entry
+short_cond = close < ema_val and rsi_val > rsi_short_entry
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    long_tp := close + tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    short_tp := close - tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if rsi_val > rsi_long_exit
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if rsi_val < rsi_short_exit
+        strategy.close("Short")

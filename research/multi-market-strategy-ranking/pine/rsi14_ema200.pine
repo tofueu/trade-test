@@ -1,0 +1,43 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals)
+// Ranking Strategy Name: RSI14_EMA200
+// Representative Top Config: XRPUSDT | Crypto futures | Timeframe: 1D | Exit: Fixed 2R + Signal Exit | Sizing: Full Kelly
+// TV Status: 未測 (Untested)
+strategy("RSI 14 + EMA 200 Pullback Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+
+rsi_len     = input.int(14, title="RSI Length")
+ema_len     = input.int(200, title="EMA Length")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+tp_r_mult   = input.float(2.0, title="TP R Multiplier")
+
+rsi_val = ta.rsi(close, rsi_len)
+ema_val = ta.ema(close, ema_len)
+atr_val = ta.atr(14)
+
+long_cond  = close > ema_val and rsi_val[1] <= 30 and rsi_val > 30
+short_cond = close < ema_val and rsi_val[1] >= 70 and rsi_val < 70
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+if long_cond
+    long_sl := close - sl_atr_mult * atr_val
+    long_tp := close + tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Long", strategy.long)
+
+if short_cond
+    short_sl := close + sl_atr_mult * atr_val
+    short_tp := close - tp_r_mult * (sl_atr_mult * atr_val)
+    strategy.entry("Short", strategy.short)
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if close < ema_val or rsi_val >= 60
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if close > ema_val or rsi_val <= 40
+        strategy.close("Short")
