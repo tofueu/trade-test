@@ -20,8 +20,8 @@ hi20 = ta.highest(high[1], 20)
 lo20 = ta.lowest(low[1], 20)
 atr_val = ta.atr(14)
 
-long_cond  = w_ema20 > w_ema50 and close > hi20
-short_cond = w_ema20 < w_ema50 and close < lo20
+long_cond  = w_ema20 > w_ema50 and close[1] <= hi20[1] and close > hi20
+short_cond = w_ema20 < w_ema50 and close[1] >= lo20[1] and close < lo20
 var float long_sl = na
 var float long_tp = na
 var float short_sl = na
