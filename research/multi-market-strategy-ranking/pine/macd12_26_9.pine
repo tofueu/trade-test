@@ -18,8 +18,8 @@ use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizi
 [macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
 atr_val = ta.atr(14)
 
-long_cond  = macd_line > sig_line
-short_cond = macd_line < sig_line
+long_cond  = ta.crossover(macd_line, sig_line)
+short_cond = ta.crossunder(macd_line, sig_line)
 
 var float long_sl = na
 var float long_tp = na
