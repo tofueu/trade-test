@@ -2,71 +2,55 @@
 // Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals())
 // Ranking Strategy Name: Supertrend10_3
 // Representative Top Config: SOLUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 24.544%)
-// Cost Settings: Crypto: 0.10% total fee+slippage (5 bps fee + 5 bps slippage accounted as 0.10% percentage cost per side)
+// Cost Settings: Crypto: 0.10% total per side (5 bps fee + 5 bps slippage)
 // TV Status: 未測 (Untested)
 strategy("Supertrend10_3 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=true, process_orders_on_close=false)
 
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
-sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat, tooltip="Initial SL distance in ATR multiples (Python default 1.5 ATR)")
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
 tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
-risk_pct = input.float(24.544, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size, tooltip="Python R-based non-compounding sizing (Initial Capital * risk_pct)")
-use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size, tooltip="Uses strategy.initial_capital * risk_pct (matches Python fixed_risk_stats)")
+risk_pct = input.float(24.544, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
+use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
 
-// Indicator Calculations
-atr_val = ta.atr(14)
-ema200_val = ta.ema(close, 200)
-[macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
 [st_val, st_dir] = ta.supertrend(3.0, 10)
-[_, _, adx_val] = ta.dmi(14, 14)
-hi20 = ta.highest(high[1], 20)
-lo20 = ta.lowest(low[1], 20)
-hi10 = ta.highest(high[1], 10)
-lo10 = ta.lowest(low[1], 10)
-rsi_val = ta.rsi(close, 14)
+atr_val = ta.atr(14)
 
 st_bull = st_dir < 0
 st_bear = st_dir > 0
 
-long_cond  = ta.crossover(close, hi20) or (close > ema200_val and ta.crossover(macd_line, sig_line))
-short_cond = ta.crossunder(close, lo20) or (close < ema200_val and ta.crossunder(macd_line, sig_line))
+long_cond  = st_bull and ta.change(st_dir)
+short_cond = st_bear and ta.change(st_dir)
 
 var float long_sl = na
-var float long_tp = na
 var float short_sl = na
-var float short_tp = na
 
 if long_cond
     dist = sl_atr_mult * atr_val
-    // Non-compounding fixed initial capital stake matching Python fixed_risk_stats()
-    risk_stake = strategy.initial_capital * (risk_pct / 100.0)
-    qty_val = use_risk_sizing and dist > 0 ? risk_stake / dist : na
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Long", strategy.long, qty=qty_val)
 
 if short_cond
     dist = sl_atr_mult * atr_val
-    risk_stake = strategy.initial_capital * (risk_pct / 100.0)
-    qty_val = use_risk_sizing and dist > 0 ? risk_stake / dist : na
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Short", strategy.short, qty=qty_val)
 
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
         entry_p = strategy.opentrades.entry_price(0)
-        sig_atr = atr_val[1]
-        dist = sl_atr_mult * sig_atr
-        long_sl := entry_p - dist
-        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+        long_sl := entry_p - sl_atr_mult * atr_val[1]
     else if strategy.position_size < 0
         entry_p = strategy.opentrades.entry_price(0)
-        sig_atr = atr_val[1]
-        dist = sl_atr_mult * sig_atr
-        short_sl := entry_p + dist
-        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
+        short_sl := entry_p + sl_atr_mult * atr_val[1]
 
 if strategy.position_size > 0
-    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    strategy.exit("SL Long", "Long", stop=long_sl)
+    if st_bear
+        strategy.close("Long")
 
 if strategy.position_size < 0
-    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    strategy.exit("SL Short", "Short", stop=short_sl)
+    if st_bull
+        strategy.close("Short")
