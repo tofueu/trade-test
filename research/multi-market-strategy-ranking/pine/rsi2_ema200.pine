@@ -4,7 +4,7 @@
 // Representative Top Config: ES=F | Market: Traditional futures | Timeframe: 1D | Exit: 固定1R+訊號出場 | Sizing: 全凱利 (IS Kelly: 30.941%)
 // Cost Settings: Futures: $2.50 / contract fee + 1 tick slippage per side
 // TV Status: 未測 (Untested)
-strategy("RSI2_EMA200 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.cash_per_contract, commission_value=2.5, slippage=1, process_orders_on_close=false)
+strategy("RSI2_EMA200 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.cash_per_contract, commission_value=2.5, slippage=1, calc_on_order_fills=true, process_orders_on_close=false)
 
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
@@ -12,19 +12,23 @@ sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_stra
 tp_r_mult   = input.float(1.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
-risk_pct = input.float(30.941, title="Position Risk Fraction (% of Equity)", group=input_group_size, tooltip="Python R-based sizing risk fraction (e.g. 30.941% for IS Kelly top row, 10% for Fixed 1R)")
-use_risk_sizing = input.bool(true, title="Enable Python Risk-based Sizing (R-based)", group=input_group_size, tooltip="Sizes contracts/units so total trade loss equals risk_pct of equity")
+risk_pct = input.float(30.941, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size, tooltip="Python R-based non-compounding sizing (Initial Capital * risk_pct)")
+use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size, tooltip="Uses strategy.initial_capital * risk_pct (matches Python fixed_risk_stats)")
 
+// Indicator Calculations
+atr_val = ta.atr(14)
 ema200_val = ta.ema(close, 200)
-rsi_val    = ta.rsi(close, 14)
 [macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
+[st_val, st_dir] = ta.supertrend(3.0, 10)
 [_, _, adx_val] = ta.dmi(14, 14)
 hi20 = ta.highest(high[1], 20)
 lo20 = ta.lowest(low[1], 20)
 hi10 = ta.highest(high[1], 10)
 lo10 = ta.lowest(low[1], 10)
-[bb_mid, bb_up, bb_dn] = ta.bb(close, 20, 2.0)
-atr_val = ta.atr(14)
+rsi_val = ta.rsi(close, 14)
+
+st_bull = st_dir < 0
+st_bear = st_dir > 0
 
 long_cond  = ta.crossover(close, hi20) or (close > ema200_val and ta.crossover(macd_line, sig_line))
 short_cond = ta.crossunder(close, lo20) or (close < ema200_val and ta.crossunder(macd_line, sig_line))
@@ -36,12 +40,15 @@ var float short_tp = na
 
 if long_cond
     dist = sl_atr_mult * atr_val
-    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    // Non-compounding fixed initial capital stake matching Python fixed_risk_stats()
+    risk_stake = strategy.initial_capital * (risk_pct / 100.0)
+    qty_val = use_risk_sizing and dist > 0 ? risk_stake / dist : na
     strategy.entry("Long", strategy.long, qty=qty_val)
 
 if short_cond
     dist = sl_atr_mult * atr_val
-    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    risk_stake = strategy.initial_capital * (risk_pct / 100.0)
+    qty_val = use_risk_sizing and dist > 0 ? risk_stake / dist : na
     strategy.entry("Short", strategy.short, qty=qty_val)
 
 if ta.change(strategy.position_size) != 0
