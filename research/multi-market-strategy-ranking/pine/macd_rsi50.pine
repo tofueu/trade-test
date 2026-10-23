@@ -2,7 +2,7 @@
 // Python Source: research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py (custom_signals())
 // Ranking Strategy Name: MACD+RSI50
 // Representative Top Config: XRPUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 10.519%)
-// Cost Settings: Crypto: 0.10% total per side (5 bps fee + 5 bps slippage)
+// Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
 // TV Status: 未測 (Untested)
 strategy("MACD+RSI50 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=true, process_orders_on_close=false)
 
