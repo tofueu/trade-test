@@ -64,10 +64,10 @@ if ta.change(strategy.position_size) != 0
         short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
-    if st_bear
+    if (st_bear) and not short_cond
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL Short", "Short", stop=short_sl)
-    if st_bull
+    if (st_bull) and not long_cond
         strategy.close("Short")
