@@ -1,5 +1,5 @@
 //@version=6
-// Python Source: research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py / five_year_low_drawdown_fixed_rr.py (custom_signals() / signals())
+// Python Source: research/multi-market-strategy-ranking/src/five_year_low_drawdown_fixed_rr.py (signals())
 // Ranking Strategy Name: EMA200+RSI14_pullback
 // Representative Top Config: ETHUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 純固定TP 3.0R／初始SL 1.5ATR | Sizing: 全凱利 (IS Kelly: 55.257%)
 // Cost Settings: Crypto: 0.10% total per side (5 bps fee + 5 bps slippage)
@@ -9,7 +9,7 @@ strategy("EMA200+RSI14_pullback Strategy", overlay=true, initial_capital=10000, 
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
 sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
-tp_r_mult   = input.float(3.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
+tp_r_mult   = input.float(3.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(55.257, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
@@ -51,10 +51,6 @@ if ta.change(strategy.position_size) != 0
 
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
-    if close < ema_val or rsi_val >= 60
-        strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
-    if close > ema_val or rsi_val <= 40
-        strategy.close("Short")

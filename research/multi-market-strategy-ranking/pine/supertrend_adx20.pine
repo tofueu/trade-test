@@ -9,7 +9,7 @@ strategy("Supertrend_ADX20 Strategy", overlay=true, initial_capital=10000, defau
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
 sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
-tp_r_mult   = input.float(0.75, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
+tp_r_mult   = input.float(0.75, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(40.554, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)

@@ -9,7 +9,7 @@ strategy("WEMA20_50+MACD Strategy", overlay=true, initial_capital=10000, default
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
 sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
-tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
+tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(26.521, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
@@ -21,11 +21,13 @@ w_ema50 = request.security(syminfo.tickerid, "W", ta.ema(close, 50), barmerge.ga
 [macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
 atr_val = ta.atr(14)
 
-long_cond  = w_ema20 > w_ema50 and ta.crossover(macd_line, sig_line)
-short_cond = w_ema20 < w_ema50 and ta.crossunder(macd_line, sig_line)
+long_cond  = w_ema20 > w_ema50 and macd_line > sig_line
+short_cond = w_ema20 < w_ema50 and macd_line < sig_line
 
 var float long_sl = na
+var float long_tp = na
 var float short_sl = na
+var float short_tp = na
 
 if long_cond
     dist = sl_atr_mult * atr_val
@@ -40,17 +42,21 @@ if short_cond
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
         entry_p = strategy.opentrades.entry_price(0)
-        long_sl := entry_p - sl_atr_mult * atr_val[1]
+        dist = sl_atr_mult * atr_val[1]
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
     else if strategy.position_size < 0
         entry_p = strategy.opentrades.entry_price(0)
-        short_sl := entry_p + sl_atr_mult * atr_val[1]
+        dist = sl_atr_mult * atr_val[1]
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
-    if ta.crossunder(macd_line, sig_line) or w_ema20 < w_ema50
+    if macd_line < sig_line or w_ema20 < w_ema50
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL Short", "Short", stop=short_sl)
-    if ta.crossover(macd_line, sig_line) or w_ema20 > w_ema50
+    if macd_line > sig_line or w_ema20 > w_ema50
         strategy.close("Short")

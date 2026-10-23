@@ -9,7 +9,7 @@ strategy("MACD+RSI50 Strategy", overlay=true, initial_capital=10000, default_qty
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
 sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
-tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
+tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(10.519, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
@@ -19,11 +19,13 @@ use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizi
 rsi_val = ta.rsi(close, 14)
 atr_val = ta.atr(14)
 
-long_cond  = ta.crossover(macd_line, sig_line) and rsi_val > 50
-short_cond = ta.crossunder(macd_line, sig_line) and rsi_val < 50
+long_cond  = macd_line > sig_line and rsi_val > 50
+short_cond = macd_line < sig_line and rsi_val < 50
 
 var float long_sl = na
+var float long_tp = na
 var float short_sl = na
+var float short_tp = na
 
 if long_cond
     dist = sl_atr_mult * atr_val
@@ -38,17 +40,21 @@ if short_cond
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
         entry_p = strategy.opentrades.entry_price(0)
-        long_sl := entry_p - sl_atr_mult * atr_val[1]
+        dist = sl_atr_mult * atr_val[1]
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
     else if strategy.position_size < 0
         entry_p = strategy.opentrades.entry_price(0)
-        short_sl := entry_p + sl_atr_mult * atr_val[1]
+        dist = sl_atr_mult * atr_val[1]
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
-    if ta.crossunder(macd_line, sig_line) or rsi_val <= 50
+    if macd_line < sig_line or rsi_val <= 50
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL Short", "Short", stop=short_sl)
-    if ta.crossover(macd_line, sig_line) or rsi_val >= 50
+    if macd_line > sig_line or rsi_val >= 50
         strategy.close("Short")

@@ -9,7 +9,7 @@ strategy("Bollinger20+RSI14_reentry Strategy", overlay=true, initial_capital=100
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
 sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
-tp_r_mult   = input.float(3.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
+tp_r_mult   = input.float(3.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(17.806, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
@@ -42,12 +42,12 @@ if ta.change(strategy.position_size) != 0
         entry_p = strategy.opentrades.entry_price(0)
         dist = sl_atr_mult * atr_val[1]
         long_sl := entry_p - dist
-        long_tp := entry_p + tp_r_mult * dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
     else if strategy.position_size < 0
         entry_p = strategy.opentrades.entry_price(0)
         dist = sl_atr_mult * atr_val[1]
         short_sl := entry_p + dist
-        short_tp := entry_p - tp_r_mult * dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
