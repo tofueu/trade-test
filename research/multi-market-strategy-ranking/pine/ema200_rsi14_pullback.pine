@@ -9,7 +9,8 @@ strategy("EMA200+RSI14_pullback Strategy", overlay=true, initial_capital=10000, 
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
 sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
-tp_r_mult   = input.float(3.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
+tp_r_mult   = input.float(3.0, title="Fixed TP (R)", group=input_group_strat)
+use_signal_exit = input.bool(false, title="Use EMA/RSI signal exit (compound variant)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(55.257, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
@@ -35,14 +36,14 @@ if not short_cond
     short_state_entered := false
 
 // Allow immediate reversal entry or new position entry, preventing same-state re-entry after SL/TP
-if long_cond and not long_state_entered and strategy.position_size == 0
+if long_cond and not long_state_entered and (use_signal_exit or strategy.position_size == 0)
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Long", strategy.long, qty=qty_val)
     long_state_entered := true
     short_state_entered := false
 
-if short_cond and not short_state_entered and strategy.position_size == 0
+if short_cond and not short_state_entered and (use_signal_exit or strategy.position_size == 0)
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Short", strategy.short, qty=qty_val)
@@ -62,6 +63,10 @@ if ta.change(strategy.position_size) != 0
         short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if use_signal_exit and (close < ema_val or rsi_val >= 60) and not short_cond
+        strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if use_signal_exit and (close > ema_val or rsi_val <= 40) and not long_cond
+        strategy.close("Short")
