@@ -52,6 +52,16 @@ if target_state == -1 and ta.change(target_state) != 0
     strategy.entry("Short", strategy.short, qty=qty_val)
 
 if ta.change(strategy.position_size) != 0
+    if strategy.position_size > 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+    else if strategy.position_size < 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 if strategy.position_size > 0
     if close < kelt_mid or short_cond
         strategy.cancel("SL/TP Long")
