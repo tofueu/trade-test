@@ -21,18 +21,21 @@ atr_val = ta.atr(14)
 
 long_cond  = close > ema_val and ta.crossover(macd_line, sig_line)
 short_cond = close < ema_val and ta.crossunder(macd_line, sig_line)
-
 var float long_sl = na
 var float long_tp = na
 var float short_sl = na
 var float short_tp = na
 
-if long_cond
+// State transition entry gating matching Python side == 0 rule
+long_entry_trigger  = long_cond and not long_cond[1] and strategy.position_size == 0
+short_entry_trigger = short_cond and not short_cond[1] and strategy.position_size == 0
+
+if long_entry_trigger
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Long", strategy.long, qty=qty_val)
 
-if short_cond
+if short_entry_trigger
     dist = sl_atr_mult * atr_val
     qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
     strategy.entry("Short", strategy.short, qty=qty_val)
@@ -48,7 +51,6 @@ if ta.change(strategy.position_size) != 0
         dist = sl_atr_mult * atr_val[1]
         short_sl := entry_p + dist
         short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
-
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
 
