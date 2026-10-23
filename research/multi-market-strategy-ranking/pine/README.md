@@ -38,7 +38,7 @@
 | **Supertrend_ADX20** | Supertrend(10,3) + ADX(14)>20 強趨勢 | `run_strategies.py`<br>`make_state()` | [`pine/supertrend_adx20.pine`](supertrend_adx20.pine) | **DOGEUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (40.6%)<br>風控: IS選定固定TP 0.75R／初始SL 1.5ATR＋策略出場 | 狀態轉換進場門控；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Volume_Donchian20** | 量能 1.5倍 + Donchian(20) 突破 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/volume_donchian20.pine`](volume_donchian20.pine) | **GC=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (27.7%)<br>風控: 固定4R+訊號出場 | 狀態轉換進場門控；費率: $2.50/口 + 1 tick滑價 | **未測** |
 | **RSI2_EMA200<br>*(等價: EMA200+RSI2_mean_reversion)*** | EMA200 趨勢 + RSI(2) 極端回歸 (去重邏輯) | `five_year_multi_market_kelly.py / five_year_compound_strategy_sweep.py`<br>`make_signals() / custom_signals()` | [`pine/rsi2_ema200.pine`](rsi2_ema200.pine) | **ES=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (30.9%)<br>風控: 固定1R+訊號出場 | 狀態轉換進場門控；費率: $2.50/口 + 1 tick滑價 | **未測** |
-| **EMA200+RSI2_extreme** | EMA200 趨勢 + RSI(2)<5/95 極致反轉 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/ema200_rsi2_extreme.pine`](ema200_rsi2_extreme.pine) | **BTCUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (13.5%)<br>風控: 純固定TP 3.0R／初始SL 1.5ATR | 狀態轉換進場門控；費率: 0.10% (5bps費+5bps滑價) | **未測** |
+| **EMA200+RSI2_extreme** | EMA200 趨勢 + RSI(2) 10/90 極端反轉 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/ema200_rsi2_extreme.pine`](ema200_rsi2_extreme.pine) | **BTCUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (13.5%)<br>風控: 純固定TP 3.0R／初始SL 1.5ATR | 狀態轉換進場門控；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **EMA200+RSI14_pullback** | EMA200 趨勢 + RSI(14) 30/70 回檔拉回 | `five_year_compound_strategy_sweep.py / five_year_low_drawdown_fixed_rr.py`<br>`custom_signals() / signals()` | [`pine/ema200_rsi14_pullback.pine`](ema200_rsi14_pullback.pine) | **ETHUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (55.3%)<br>風控: 純固定TP 3.0R／初始SL 1.5ATR | 狀態轉換進場門控；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **WEMA20_50+DailyMACD** | 週線 EMA(20/50) + 日線 MACD 固定盈虧 | `five_year_low_drawdown_fixed_rr.py`<br>`signals()` | [`pine/wema20_50_daily_macd.pine`](wema20_50_daily_macd.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (19.7%)<br>風控: 純固定TP 3.0R／初始SL 1.5ATR | 狀態轉換進場門控；費率: 0.10% (5bps費+5bps滑價)；週線 W-SUN request.security[1] | **未測** |
 | **Bollinger20_2** | 布林通道(20,2σ) 帶外返回中軌出場 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/bollinger20_2.pine`](bollinger20_2.pine) | **SI=F** (Traditional futures)<br>週期: 1D (日線)<br>部位: 全凱利 (19.1%)<br>風控: ATR移動止盈2x+訊號出場 | 狀態轉換進場門控；費率: $2.50/口 + 1 tick滑價 | **未測** |
@@ -53,7 +53,7 @@
 依據 PR 審查意見（Comments #6362723774, #6363140734, #6363214309, #6365371345），本專案轉譯之 30 份 Pine 腳本已做出以下精確對齊與限制說明：
 
 1. **狀態轉換進場門控 (State-Transition Entry Gating)**：
-   - **Python 實作**：`market_backtest()` 僅在 `state` 發生狀態轉換且 `side == 0` 時建立新部位；若部位觸及止損止盈平倉，Python 將保持空倉 (`side = 0`)，直到訊號發生下一次狀態翻轉。
+   - **Python 實作**：`market_backtest()` 只在空倉時依訊號轉換建立新部位；持有反向部位時先於下一根開盤平倉，再於同一開盤依新方向進場。止損／止盈平倉後，持續不變的訊號不會觸發重複進場，須等下一次訊號轉換。
    - **Pine Script 對齊**：全 30 份 Pine 腳本均採用 `long_entry_trigger = long_cond and not long_cond[1] and strategy.position_size == 0` 狀態轉換門控，防止止損出場後於同一個持續訊號中被動重複建倉。
 
 2. **週線指標無前瞻對齊 (Weekly EMA Completed Week Indexing)**：
