@@ -17,6 +17,8 @@ use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizi
 
 hi20 = ta.highest(high[1], 20)
 lo20 = ta.lowest(low[1], 20)
+hi10 = ta.highest(high[1], 10)
+lo10 = ta.lowest(low[1], 10)
 [macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
 atr_val = ta.atr(14)
 
@@ -63,10 +65,10 @@ if ta.change(strategy.position_size) != 0
         short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
-    if close < lo20 or macd_line < sig_line
+    if (close < lo10 or macd_line < sig_line) and not short_cond
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL Short", "Short", stop=short_sl)
-    if close > hi20 or macd_line > sig_line
+    if (close > hi10 or macd_line > sig_line) and not long_cond
         strategy.close("Short")
