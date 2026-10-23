@@ -2,7 +2,7 @@
 // Python Source: research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py (custom_signals())
 // Ranking Strategy Name: Donchian20+MACD
 // Representative Top Config: DOGEUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 21.555%)
-// Cost Settings: TV approximation = 0.10% commission/side; Python = 5 bps fee + 5 bps adverse slippage (fill-path difference)
+// Cost Settings: Crypto: 0.10% total per side (5 bps fee + 5 bps slippage)
 // TV Status: 未測 (Untested)
 strategy("Donchian20+MACD Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=true, process_orders_on_close=false)
 
@@ -17,8 +17,6 @@ use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizi
 
 hi20 = ta.highest(high[1], 20)
 lo20 = ta.lowest(low[1], 20)
-hi10 = ta.highest(high[1], 10)
-lo10 = ta.lowest(low[1], 10)
 [macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
 atr_val = ta.atr(14)
 
@@ -28,29 +26,32 @@ var float long_sl = na
 var float long_tp = na
 var float short_sl = na
 var float short_tp = na
-var bool long_state_entered = false
-var bool short_state_entered = false
+var int target_state = 0
+var int last_entered_target_state = 0
 
-// Reset state flags when signal condition toggles off
-if not long_cond
-    long_state_entered := false
-if not short_cond
-    short_state_entered := false
+// Update target state based on signal conditions
+if long_cond
+    target_state := 1
+else if short_cond
+    target_state := -1
+else
+    target_state := 0
 
-// Allow immediate reversal entry or new position entry, preventing same-state re-entry after SL/TP
-if long_cond and not long_state_entered
+// Gate entries by target-state transition to match Python backtest loop, preserving same-next-open reversals
+if target_state == 1 and target_state != last_entered_target_state
     dist = sl_atr_mult * atr_val
-    qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
+    // Adjust risk per contract using syminfo.pointvalue for futures contract sizing parity
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
     strategy.entry("Long", strategy.long, qty=qty_val)
-    long_state_entered := true
-    short_state_entered := false
+    last_entered_target_state := 1
 
-if short_cond and not short_state_entered
+if target_state == -1 and target_state != last_entered_target_state
     dist = sl_atr_mult * atr_val
-    qty_val = use_risk_sizing and dist > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / dist : na
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
     strategy.entry("Short", strategy.short, qty=qty_val)
-    short_state_entered := true
-    long_state_entered := false
+    last_entered_target_state := -1
 
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
@@ -65,10 +66,10 @@ if ta.change(strategy.position_size) != 0
         short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
-    if (close < lo10 or macd_line < sig_line) and not short_cond
+    if close < lo20 or macd_line < sig_line
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL Short", "Short", stop=short_sl)
-    if (close > hi10 or macd_line > sig_line) and not long_cond
+    if close > hi20 or macd_line > sig_line
         strategy.close("Short")
