@@ -19,8 +19,8 @@ ema50 = ta.ema(close, 50)
 ema200 = ta.ema(close, 200)
 atr_val = ta.atr(14)
 
-long_cond  = ema50 > ema200
-short_cond = ema50 < ema200
+long_cond  = ta.crossover(ema50, ema200)
+short_cond = ta.crossunder(ema50, ema200)
 
 var float long_sl = na
 var float short_sl = na
