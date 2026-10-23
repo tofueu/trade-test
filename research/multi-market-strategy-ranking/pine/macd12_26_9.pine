@@ -1,15 +1,23 @@
 //@version=6
-// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals)
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals())
 // Ranking Strategy Name: MACD12_26_9
-// Representative Top Config: XRPUSDT | Crypto futures | Timeframe: 1D | Exit: Signal Exit (No Fixed TP) | Sizing: Full Kelly
+// Representative Top Config: XRPUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 20.067%)
+// Cost Settings: Crypto: 5 bps (0.05%) fee + 1 tick slippage per side
 // TV Status: 未測 (Untested)
-strategy("MACD12_26_9 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+strategy("MACD12_26_9 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.05, slippage=1, process_orders_on_close=false)
+
+// --- Input Parameters ---
+input_group_strat = "Strategy Parameters"
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat, tooltip="Initial SL distance in ATR multiples (Python default 1.5 ATR)")
+tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
+
+input_group_size = "Position Sizing & Risk"
+risk_pct = input.float(20.067, title="Position Risk Fraction (% of Equity)", group=input_group_size, tooltip="Python R-based sizing risk fraction (e.g. 20.067% for IS Kelly top row, 10% for Fixed 1R)")
+use_risk_sizing = input.bool(true, title="Enable Python Risk-based Sizing (R-based)", group=input_group_size, tooltip="Sizes contracts/units so total trade loss equals risk_pct of equity")
 
 fast_len = input.int(12, title="Fast Length")
 slow_len = input.int(26, title="Slow Length")
 sig_len  = input.int(9, title="Signal Length")
-sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
-tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)")
 
 [macd_line, sig_line, _] = ta.macd(close, fast_len, slow_len, sig_len)
 atr_val = ta.atr(14)
@@ -23,14 +31,30 @@ var float short_sl = na
 var float short_tp = na
 
 if long_cond
-    long_sl := close - sl_atr_mult * atr_val
-    long_tp := tp_r_mult > 0 ? close + tp_r_mult * (sl_atr_mult * atr_val) : na
-    strategy.entry("Long", strategy.long)
+    sig_atr = atr_val
+    dist = sl_atr_mult * sig_atr
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    strategy.entry("Long", strategy.long, qty=qty_val)
 
 if short_cond
-    short_sl := close + sl_atr_mult * atr_val
-    short_tp := tp_r_mult > 0 ? close - tp_r_mult * (sl_atr_mult * atr_val) : na
-    strategy.entry("Short", strategy.short)
+    sig_atr = atr_val
+    dist = sl_atr_mult * sig_atr
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    strategy.entry("Short", strategy.short, qty=qty_val)
+
+if ta.change(strategy.position_size) != 0
+    if strategy.position_size > 0
+        entry_p = strategy.opentrades.entry_price(0)
+        sig_atr = atr_val[1]
+        dist = sl_atr_mult * sig_atr
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+    else if strategy.position_size < 0
+        entry_p = strategy.opentrades.entry_price(0)
+        sig_atr = atr_val[1]
+        dist = sl_atr_mult * sig_atr
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)

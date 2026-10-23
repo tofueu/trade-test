@@ -1,25 +1,33 @@
 //@version=6
-// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py & five_year_compound_strategy_sweep.py
-// Ranking Strategy Names: RSI2_EMA200 / EMA200+RSI2_mean_reversion (Identical Logic)
-// Representative Top Config: ES=F | Traditional futures | Timeframe: 1D | Exit: Fixed 1R + Signal Exit | Sizing: Full Kelly
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py / five_year_compound_strategy_sweep.py (make_signals() / custom_signals())
+// Ranking Strategy Name: RSI2_EMA200 (Alias: EMA200+RSI2_mean_reversion)
+// Representative Top Config: ES=F | Market: Traditional futures | Timeframe: 1D | Exit: 固定1R+訊號出場 | Sizing: 全凱利 (IS Kelly: 30.941%)
+// Cost Settings: Futures: $2.50 / contract fee + 1 tick slippage per side
 // TV Status: 未測 (Untested)
-strategy("RSI 2 + EMA 200 Mean Reversion Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+strategy("RSI2_EMA200 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.cash_per_contract, commission_value=2.5, slippage=1, process_orders_on_close=false)
 
-rsi_len     = input.int(2, title="RSI Length")
-ema_len     = input.int(200, title="EMA Length")
-rsi_long_entry = input.float(10.0, title="RSI Long Entry Threshold")
-rsi_short_entry = input.float(90.0, title="RSI Short Entry Threshold")
-rsi_long_exit  = input.float(70.0, title="RSI Long Exit Threshold")
-rsi_short_exit = input.float(30.0, title="RSI Short Exit Threshold")
-sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
-tp_r_mult   = input.float(1.0, title="TP R Multiplier")
+// --- Input Parameters ---
+input_group_strat = "Strategy Parameters"
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat, tooltip="Initial SL distance in ATR multiples (Python default 1.5 ATR)")
+tp_r_mult   = input.float(1.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
 
-rsi_val = ta.rsi(close, rsi_len)
-ema_val = ta.ema(close, ema_len)
+input_group_size = "Position Sizing & Risk"
+risk_pct = input.float(30.941, title="Position Risk Fraction (% of Equity)", group=input_group_size, tooltip="Python R-based sizing risk fraction (e.g. 30.941% for IS Kelly top row, 10% for Fixed 1R)")
+use_risk_sizing = input.bool(true, title="Enable Python Risk-based Sizing (R-based)", group=input_group_size, tooltip="Sizes contracts/units so total trade loss equals risk_pct of equity")
+
+ema200_val = ta.ema(close, 200)
+rsi_val    = ta.rsi(close, 14)
+[macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
+[_, _, adx_val] = ta.dmi(14, 14)
+hi20 = ta.highest(high[1], 20)
+lo20 = ta.lowest(low[1], 20)
+hi10 = ta.highest(high[1], 10)
+lo10 = ta.lowest(low[1], 10)
+[bb_mid, bb_up, bb_dn] = ta.bb(close, 20, 2.0)
 atr_val = ta.atr(14)
 
-long_cond  = close > ema_val and rsi_val < rsi_long_entry
-short_cond = close < ema_val and rsi_val > rsi_short_entry
+long_cond  = ta.crossover(close, hi20) or (close > ema200_val and ta.crossover(macd_line, sig_line))
+short_cond = ta.crossunder(close, lo20) or (close < ema200_val and ta.crossunder(macd_line, sig_line))
 
 var float long_sl = na
 var float long_tp = na
@@ -27,21 +35,31 @@ var float short_sl = na
 var float short_tp = na
 
 if long_cond
-    long_sl := close - sl_atr_mult * atr_val
-    long_tp := close + tp_r_mult * (sl_atr_mult * atr_val)
-    strategy.entry("Long", strategy.long)
+    dist = sl_atr_mult * atr_val
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    strategy.entry("Long", strategy.long, qty=qty_val)
 
 if short_cond
-    short_sl := close + sl_atr_mult * atr_val
-    short_tp := close - tp_r_mult * (sl_atr_mult * atr_val)
-    strategy.entry("Short", strategy.short)
+    dist = sl_atr_mult * atr_val
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    strategy.entry("Short", strategy.short, qty=qty_val)
+
+if ta.change(strategy.position_size) != 0
+    if strategy.position_size > 0
+        entry_p = strategy.opentrades.entry_price(0)
+        sig_atr = atr_val[1]
+        dist = sl_atr_mult * sig_atr
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+    else if strategy.position_size < 0
+        entry_p = strategy.opentrades.entry_price(0)
+        sig_atr = atr_val[1]
+        dist = sl_atr_mult * sig_atr
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
 
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
-    if close < ema_val or rsi_val > rsi_long_exit
-        strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
-    if close > ema_val or rsi_val < rsi_short_exit
-        strategy.close("Short")

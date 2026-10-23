@@ -1,13 +1,22 @@
 //@version=6
-// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals)
+// Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals())
 // Ranking Strategy Name: Supertrend10_3
-// Representative Top Config: SOLUSDT | Crypto futures | Timeframe: 1D | Exit: Signal Exit (No Fixed TP) | Sizing: Full Kelly
+// Representative Top Config: SOLUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 24.544%)
+// Cost Settings: Crypto: 5 bps (0.05%) fee + 1 tick slippage per side
 // TV Status: 未測 (Untested)
-strategy("Supertrend (10, 3) Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, process_orders_on_close=false)
+strategy("Supertrend10_3 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.05, slippage=1, process_orders_on_close=false)
 
-st_period   = input.int(10, title="Supertrend Period")
-st_mult     = input.float(3.0, title="Supertrend Multiplier")
-sl_atr_mult = input.float(1.5, title="SL ATR Multiplier")
+// --- Input Parameters ---
+input_group_strat = "Strategy Parameters"
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat, tooltip="Initial SL distance in ATR multiples (Python default 1.5 ATR)")
+tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit)", group=input_group_strat)
+
+input_group_size = "Position Sizing & Risk"
+risk_pct = input.float(24.544, title="Position Risk Fraction (% of Equity)", group=input_group_size, tooltip="Python R-based sizing risk fraction (e.g. 24.544% for IS Kelly top row, 10% for Fixed 1R)")
+use_risk_sizing = input.bool(true, title="Enable Python Risk-based Sizing (R-based)", group=input_group_size, tooltip="Sizes contracts/units so total trade loss equals risk_pct of equity")
+
+st_period = input.int(10, title="Supertrend Period")
+st_mult   = input.float(3.0, title="Supertrend Multiplier")
 
 [st_val, st_dir] = ta.supertrend(st_mult, st_period)
 atr_val = ta.atr(14)
@@ -22,12 +31,22 @@ var float long_sl = na
 var float short_sl = na
 
 if long_cond
-    long_sl := close - sl_atr_mult * atr_val
-    strategy.entry("Long", strategy.long)
+    dist = sl_atr_mult * atr_val
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    strategy.entry("Long", strategy.long, qty=qty_val)
 
 if short_cond
-    short_sl := close + sl_atr_mult * atr_val
-    strategy.entry("Short", strategy.short)
+    dist = sl_atr_mult * atr_val
+    qty_val = use_risk_sizing and dist > 0 ? (strategy.equity * (risk_pct / 100.0)) / dist : na
+    strategy.entry("Short", strategy.short, qty=qty_val)
+
+if ta.change(strategy.position_size) != 0
+    if strategy.position_size > 0
+        entry_p = strategy.opentrades.entry_price(0)
+        long_sl := entry_p - sl_atr_mult * atr_val[1]
+    else if strategy.position_size < 0
+        entry_p = strategy.opentrades.entry_price(0)
+        short_sl := entry_p + sl_atr_mult * atr_val[1]
 
 if strategy.position_size > 0
     strategy.exit("SL Long", "Long", stop=long_sl)
