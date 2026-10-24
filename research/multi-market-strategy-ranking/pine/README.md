@@ -76,3 +76,18 @@
 
 4. **環境限制與「未測」標示 (Environment Limitations & Execution Status)**：
    - 沙盒環境未包含原生 Pine Script v6 編譯器或 TradingView 線上回測執行連線。因此，**所有 30 份 Pine 策略於 TradingView 實測狀態均標示為「未測」**，絕不手動估算或填寫未經 TradingView 歷史回測引擎真正執行的績效數據。
+
+
+---
+
+## 另行獨立研究項目標示 (Pending Strategy Research Item)
+
+* **項目名稱**：15 分鐘 RSI 與 5 分鐘均線組合策略 (15-minute RSI + 5-minute MA strategy combination)
+* **當前狀態**：`SPEC_PENDING`（缺少完整規格說明）
+* **缺少之規格參數**：
+  1. 進場條件與跨時間週期對齊規則（5m MA 交叉與 15m RSI 閾值之具體判定邏輯）。
+  2. 出場機制（訊號出場、指標反轉或固定盈虧倍數）。
+  3. 風控與止盈止損參數（初始 SL 之 ATR 倍數與 TP 之 R 倍數）。
+  4. 倉位大小與風險比率（Initial Capital 風險百分比或凱利比率）。
+  5. 歷史行情數據源與商品清單（Binance/Yahoo 5m/15m K 線資料彙整）。
+* **說明**：依據指導原則，本專案不自行捏造交易規則或將未定義策略混入現有 30 份 Pine 腳本中，維持 `SPEC_PENDING` 狀態等待完整規格確立。
