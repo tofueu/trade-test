@@ -4,7 +4,7 @@
 // Representative Top Config: AUDUSD=X | Market: FX | Timeframe: 1D | Exit: IS選定固定TP 1R／初始SL 1.5ATR＋策略出場 | Sizing: 半凱利 (IS Kelly: 31.401%)
 // Cost Settings: FX: 0.4 pips (4 ticks) slippage per side
 // TV Status: 未測 (Untested)
-strategy("BB_Reentry_RSI_ADX25 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.cash_per_contract, commission_value=0.0, slippage=4, calc_on_order_fills=true, process_orders_on_close=false)
+strategy("BB_Reentry_RSI_ADX25 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.cash_per_contract, commission_value=0.0, slippage=4, calc_on_order_fills=false, process_orders_on_close=false)
 
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
@@ -43,13 +43,19 @@ if target_state == 1 and ta.change(target_state) != 0
     // Adjust risk per contract using syminfo.pointvalue for futures contract sizing parity
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    long_sl_armed = close - sl_atr_mult * atr_val
+    long_tp_armed = tp_r_mult > 0 ? close + tp_r_mult * (sl_atr_mult * atr_val) : na
     strategy.entry("Long", strategy.long, qty=qty_val)
+    strategy.exit("SL/TP Long", "Long", stop=long_sl_armed, limit=long_tp_armed)
 
 if target_state == -1 and ta.change(target_state) != 0
     dist = sl_atr_mult * atr_val
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    short_sl_armed = close + sl_atr_mult * atr_val
+    short_tp_armed = tp_r_mult > 0 ? close - tp_r_mult * (sl_atr_mult * atr_val) : na
     strategy.entry("Short", strategy.short, qty=qty_val)
+    strategy.exit("SL/TP Short", "Short", stop=short_sl_armed, limit=short_tp_armed)
 
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
@@ -65,11 +71,9 @@ if ta.change(strategy.position_size) != 0
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
     if target_state == 0 and (close >= bb_mid)
-        strategy.cancel("SL/TP Long")
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
     if target_state == 0 and (close <= bb_mid)
-        strategy.cancel("SL/TP Short")
         strategy.close("Short")

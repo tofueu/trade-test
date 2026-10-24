@@ -4,7 +4,7 @@
 // Representative Top Config: BTCUSDT | Market: Crypto futures | Timeframe: 1D | Exit: IS選定固定TP 3R／初始SL 1.5ATR＋策略出場 | Sizing: 全凱利 (IS Kelly: 15.091%)
 // Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
 // TV Status: 未測 (Untested)
-strategy("MACD_EMA200_ADX20 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=true, process_orders_on_close=false)
+strategy("MACD_EMA200_ADX20 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=false, process_orders_on_close=false)
 
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
@@ -42,13 +42,19 @@ if target_state == 1 and ta.change(target_state) != 0
     dist = sl_atr_mult * atr_val
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    long_sl_armed = close - sl_atr_mult * atr_val
+    long_tp_armed = tp_r_mult > 0 ? close + tp_r_mult * (sl_atr_mult * atr_val) : na
     strategy.entry("Long", strategy.long, qty=qty_val)
+    strategy.exit("SL/TP Long", "Long", stop=long_sl_armed, limit=long_tp_armed)
 
 if target_state == -1 and ta.change(target_state) != 0
     dist = sl_atr_mult * atr_val
     risk_per_contract = dist * syminfo.pointvalue
     qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    short_sl_armed = close + sl_atr_mult * atr_val
+    short_tp_armed = tp_r_mult > 0 ? close - tp_r_mult * (sl_atr_mult * atr_val) : na
     strategy.entry("Short", strategy.short, qty=qty_val)
+    strategy.exit("SL/TP Short", "Short", stop=short_sl_armed, limit=short_tp_armed)
 
 if ta.change(strategy.position_size) != 0
     if strategy.position_size > 0
