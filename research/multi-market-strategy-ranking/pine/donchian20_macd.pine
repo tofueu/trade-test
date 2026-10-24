@@ -65,14 +65,14 @@ if ta.change(strategy.position_size) != 0
         short_sl := entry_p + sl_atr_mult * atr_val[1]
 if strategy.position_size > 0
     if close < lo10 or macd_line < sig_line or short_cond
-        strategy.cancel("SL Long")
+        strategy.cancel("SL/TP Long")
         strategy.close("Long")
     else
-        strategy.exit("SL Long", "Long", stop=long_sl)
+        strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
 
 if strategy.position_size < 0
     if close > hi10 or macd_line > sig_line or long_cond
-        strategy.cancel("SL Short")
+        strategy.cancel("SL/TP Short")
         strategy.close("Short")
     else
-        strategy.exit("SL Short", "Short", stop=short_sl)
+        strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
