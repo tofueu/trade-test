@@ -15,7 +15,7 @@
 
 | 策略名稱 (Ranking Name) | 去重邏輯分類 | Python 檔 / 函式 | Pine Script 檔案 | 代表排名配置 (商品 | 市場 | 週期 | 倉位 | 風控/出場) | Cost & Engine 注意事項 | TV 實測狀態 |
 |---|---|---|---|---|---|---|
-| **MACD12_26_9** | MACD (12,26,9) 雙線交叉 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/macd12_26_9.pine`](macd12_26_9.pine) | **XRPUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (20.1%)<br>風控: 訊號出場(無固定TP) | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
+| **MACD12_26_9** | MACD (12,26,9) 雙線交叉 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/macd12_26_9.pine`](macd12_26_9.pine) | **XRPUSDT** (Crypto futures)<br>排名代表週期: 1D (日線)<br>Pine訊號週期: 留白=圖表週期；或選同級/較高週期<br>部位: 全凱利 (20.1%)<br>風控: 訊號出場(無固定TP) | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Supertrend+RSI50** | Supertrend(10,3) + RSI14>50 複合策略 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/supertrend_rsi50.pine`](supertrend_rsi50.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (20.1%)<br>風控: 訊號出場(無固定TP) | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Supertrend10_3** | Supertrend(10,3) 趨勢追蹤 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/supertrend10_3.pine`](supertrend10_3.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (24.5%)<br>風控: 訊號出場(無固定TP) | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **Supertrend+EMA200** | Supertrend(10,3) + EMA200 濾網 | `five_year_compound_strategy_sweep.py`<br>`custom_signals()` | [`pine/supertrend_ema200.pine`](supertrend_ema200.pine) | **SOLUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (23.5%)<br>風控: 訊號出場(無固定TP) | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
@@ -45,6 +45,16 @@
 | **MACD_EMA200_ADX20** | MACD 交叉 + EMA200 趨勢 + ADX>20 | `run_strategies.py`<br>`make_state()` | [`pine/macd_ema200_adx20.pine`](macd_ema200_adx20.pine) | **BTCUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (15.1%)<br>風控: IS選定固定TP 3R／初始SL 1.5ATR＋策略出場 | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
 | **BB_Reentry_RSI_ADX25** | 布林返回 + RSI + ADX<25 低動能震盪 | `run_strategies.py`<br>`make_state()` | [`pine/bb_reentry_rsi_adx25.pine`](bb_reentry_rsi_adx25.pine) | **AUDUSD=X** (FX)<br>週期: 1D (日線)<br>部位: 半凱利 (31.4%)<br>風控: IS選定固定TP 1R／初始SL 1.5ATR＋策略出場 | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.4 pips 滑價 | **未測** |
 | **RSI14_EMA200** | EMA200 趨勢 + RSI(14) 超賣/超買進場 | `five_year_multi_market_kelly.py`<br>`make_signals()` | [`pine/rsi14_ema200.pine`](rsi14_ema200.pine) | **XRPUSDT** (Crypto futures)<br>週期: 1D (日線)<br>部位: 全凱利 (23.8%)<br>風控: 固定2R+訊號出場 | calc_on_order_fills=false 無前瞻預裝 SL；pointvalue 下單量校正；費率: 0.10% (5bps費+5bps滑價) | **未測** |
+
+---
+
+## 第一名策略的圖表／選擇週期設定
+
+- `macd12_26_9.pine` 新增「Signal timeframe」輸入；留白時跟隨圖表週期，例如圖表切至 4 小時即以 4 小時 MACD(12,26,9) 與 ATR(14) 計算。也可選擇等於或高於圖表的訊號週期。
+- 為避免高週期未收盤資料造成重繪，選擇高於圖表的週期時，只使用已確認的高週期訊號，並在新高週期開始後第一根圖表 K 棒收盤時判斷，再於下一根圖表 K 棒開盤送出市價單。這會比原 Python「下一根訊號週期開盤」晚最多一根圖表 K 棒；屬於 Pine 執行模型差異。
+- 不接受低於圖表週期、或不能整數對齊的週期組合。要用 1 小時訊號，請把圖表也設為 1 小時或更低。
+- 訊號、ATR 止損、止盈與倉位公式未改；仍保留 20.067% 初始資金風險率與 1.5 ATR 初始止損。Pine v6 預設 100% 保證金下，較小 ATR 算出的名目部位可能超過本金而被模擬器拒單。未經確認不調整槓桿、保證金或部位上限。
+- 這項週期選擇修改尚未在 Pine 編譯器或 TradingView 實測；此策略仍標示「未測」。
 
 ---
 
