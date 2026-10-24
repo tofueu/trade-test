@@ -30,10 +30,10 @@
 
 | 排名家族 | 策略數 | 程式／規則 |
 |---|---:|---|
-| 原單指標 × 出場變體 | 8 | `five_year_multi_market_kelly.py`、`five_year_exit_method_sweep.py`：Donchian、MACD、RSI+EMA、EMA交叉、Supertrend、布林、RSI2、量能突破。 |
-| 雙指標／週線複合 | 8 | `five_year_compound_strategy_sweep.py`：EMA200+RSI14、EMA200+RSI2、Donchian+MACD、MACD+RSI50、Supertrend+EMA200/RSI50、週線EMA20/50+日線Donchian/MACD。 |
-| 新指標 × 純固定盈虧 | 9 | `five_year_low_drawdown_fixed_rr.py`：EMA200+RSI14/RSI2/MACD、Donchian+ADX、布林+RSI、Supertrend+EMA200、週線EMA+日線MACD/Donchian、Stoch+EMA200。 |
-| 新增趨勢／突破／均值回歸 | 7 | `run_strategies.py`：上表七種策略。 |
+| 原單指標 × 出場變體 | 8 | `five_year_multi_market_kelly.py`、`five_year_exit_method_sweep.py`：Donchian、MACD、RSI+EMA、EMA交叉、Supertrend、布林、RSI2、量能突破。 | 
+| 雙指標／週線複合 | 8 | `five_year_compound_strategy_sweep.py`：EMA200+RSI14、EMA200+RSI2、Donchian+MACD、MACD+RSI50、Supertrend+EMA200/RSI50、週線EMA20/50+日線Donchian/MACD。 | 
+| 新指標 × 純固定盈虧 | 9 | `five_year_low_drawdown_fixed_rr.py`：EMA200+RSI14/RSI2/MACD、Donchian+ADX、布林+RSI、Supertrend+EMA200、週線EMA+日線MACD/Donchian、Stoch+EMA200。 | 
+| 新增趨勢／突破／均值回歸 | 7 | `run_strategies.py`：上表七種策略。 | 
 
 `combine_all_backtest_rankings.py` 和 `merge_additional_rankings.py` 用來按既有欄位重新合併、排序並輸出總榜。程式碼涵蓋本次 9,556 列五年排名中的策略家族；其他不同期間／週期的研究（例如 4 小時或 15 分鐘回測）不屬於這份五年多市場總榜。
 
