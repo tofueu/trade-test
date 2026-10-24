@@ -2,12 +2,14 @@
 // Python Source: research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py (make_signals(), market_backtest())
 // Ranking Strategy Name: MACD12_26_9
 // Representative Top Config: XRPUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 20.067%)
+// Signal timeframe input: blank follows chart; a selected timeframe must be equal to or an integer multiple of the chart timeframe.
 // Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
 // TV Status: 未測 (Untested)
 strategy("MACD12_26_9 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=false, process_orders_on_close=false)
 
 // --- Input Parameters ---
 input_group_strat = "Strategy Parameters"
+signal_timeframe = input.timeframe("", title="Signal timeframe (blank = chart timeframe)", group=input_group_strat, tooltip="Leave blank to use the chart timeframe. A selected timeframe must be equal to or an integer multiple of the chart timeframe. Lower-timeframe signals require the chart to use that timeframe.")
 sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
 tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
 
@@ -15,11 +17,41 @@ input_group_size = "Position Sizing & Risk"
 risk_pct = input.float(20.067, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
 use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
 
-[macd_line, sig_line, _] = ta.macd(close, 12, 26, 9)
-atr_val = ta.atr(14)
+// Validate the selected signal timeframe. Lower-timeframe requests are intentionally rejected,
+// and higher-timeframe selections must align with chart bars to avoid silently missing signals.
+chart_tf_seconds = timeframe.in_seconds()
+signal_tf = signal_timeframe == "" ? timeframe.period : signal_timeframe
+signal_tf_seconds = timeframe.in_seconds(signal_tf)
+if na(chart_tf_seconds) or na(signal_tf_seconds)
+    runtime.error("Use a time-based chart and a valid signal timeframe.")
+if signal_tf_seconds < chart_tf_seconds
+    runtime.error("Signal timeframe must be equal to or higher than the chart timeframe.")
+if signal_tf_seconds % chart_tf_seconds != 0
+    runtime.error("Signal timeframe must be an integer multiple of the chart timeframe.")
 
-long_cond  = ta.crossover(macd_line, sig_line)
-short_cond = ta.crossunder(macd_line, sig_line)
+// The chart-timeframe signals preserve the original strategy's same-bar-close detection.
+[macd_chart, signal_chart, _] = ta.macd(close, 12, 26, 9)
+long_chart_signal = ta.crossover(macd_chart, signal_chart)
+short_chart_signal = ta.crossunder(macd_chart, signal_chart)
+atr_chart = ta.atr(14)
+
+// For a selected higher timeframe, use only the last completed signal/ATR bar.
+// lookahead_on + [1] keeps historical and realtime values consistent (no developing-HTF repaint).
+f_confirmed_signal_data() =>
+    [macd_htf, signal_htf, _] = ta.macd(close, 12, 26, 9)
+    [ta.crossover(macd_htf, signal_htf)[1], ta.crossunder(macd_htf, signal_htf)[1], ta.atr(14)[1]]
+
+[long_htf_signal, short_htf_signal, atr_htf] = request.security(
+    syminfo.tickerid, signal_tf, f_confirmed_signal_data(),
+    gaps=barmerge.gaps_off, lookahead=barmerge.lookahead_on)
+
+use_higher_signal_tf = signal_tf_seconds > chart_tf_seconds
+// On a lower chart timeframe, act once at the first chart-bar close after the higher
+// timeframe candle is confirmed; market orders still fill on the next chart-bar open.
+new_signal_period = timeframe.change(signal_tf)
+long_cond = use_higher_signal_tf ? (new_signal_period and long_htf_signal) : long_chart_signal
+short_cond = use_higher_signal_tf ? (new_signal_period and short_htf_signal) : short_chart_signal
+atr_val = use_higher_signal_tf ? atr_htf : atr_chart
 
 var float long_sl = na
 var float long_tp = na
