@@ -53,7 +53,7 @@
 依據 PR 審查意見（Comments #6362723774, #6363140734, #6363214309, #6365371345, #6366183824, #6366889661, #6367049157, #6367472891, #6367965217, #6380908626），本專案轉譯之 30 份 Pine 腳本已做出以下精確對齊與限制說明：
 
 1. **無前瞻性防護止損預裝 (`calc_on_order_fills=false`)**：
-   - 全 30 份 Pine 腳本將 `calc_on_order_fills` 設定為 `false`，消除 TradingView 對成交重新計算所產生的前瞻警示（look-ahead caution）。在訊號棒（$t-1$ 收盤）提交 `strategy.entry` 訂單的同時，同步預裝防護性止損單 (`long_sl_armed = close - sl_atr_mult * atr_val`)，確保於下一根 K 線（$t$ 開盤）成交當下即享有即時防護止損，並於部位建立後精確重錨至實際成交價。
+   - 全 30 份 Pine 腳本將 `calc_on_order_fills` 設定為 `false`。訊號棒收盤時，腳本以該棒已完成的 ATR 計算 `loss`／`profit` tick 距離，並與 `strategy.entry` 同時提交保護單；TradingView 以實際成交價為基準計算相對 tick 距離，避免跳空時把止損錯錨在前一棒收盤價。距離會依商品最小跳動單位取整，與 Python 的連續價格距離可能相差最多約半個 tick。持倉後的固定止損則在後續計算中以成交價及前一棒 ATR 重錨；因未啟用成交後立即重算，成交棒內的成交順序與 Python 逐棒引擎仍需在 TradingView 實測確認，不宣稱完全等價。所有腳本仍標示「未測」。
 
 2. **Target-State 轉換門控與雙變體支援 (Target-State Gating & Dual Variant Support)**：
    - **持續狀態策略 (21 Persistent State Strategies)**：追蹤目標部位狀態 `target_state in {-1, 0, 1}`，僅在 `target_state` 改變時觸發建倉，並保持該狀態直到 Python 出場條件成立 (`target_state := 0`)。當反轉訊號出現時可於同一開盤價執行反轉建倉，若發生訊號出場則使用 `strategy.cancel()` 撤銷舊止損單優先執行訊號平倉/反轉。
