@@ -56,9 +56,11 @@ if ta.change(strategy.position_size) != 0
 if strategy.position_size > 0
     strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
     if exit_mode == "Compound Signal Exit (EMA200 / RSI 60/40)" and not short_cond and (close < ema_val or rsi_val >= 60)
+        strategy.cancel("SL/TP Long")
         strategy.close("Long")
 
 if strategy.position_size < 0
     strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
     if exit_mode == "Compound Signal Exit (EMA200 / RSI 60/40)" and not long_cond and (close > ema_val or rsi_val <= 40)
+        strategy.cancel("SL/TP Short")
         strategy.close("Short")
