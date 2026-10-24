@@ -4,7 +4,7 @@
 // Representative Top Config: XRPUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 訊號出場(無固定TP) | Sizing: 全凱利 (IS Kelly: 20.067%)
 // Signal timeframe input: blank follows chart; a selected timeframe must be equal to or an integer multiple of the chart timeframe.
 // Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
-// TV Status: 未測 (Untested)
+// TV Status: 未測 (Untested)\n// Timeframe sizing: daily 20.067%; 4H 10.0335%; other timeframes use input default 20.067%.
 strategy("MACD12_26_9 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=false, process_orders_on_close=false)
 
 // --- Input Parameters ---
@@ -14,7 +14,10 @@ sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_stra
 tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
 
 input_group_size = "Position Sizing & Risk"
-risk_pct = input.float(20.067, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
+daily_risk_pct = input.float(20.067, title="Daily Risk % of Initial Capital", group=input_group_size)
+h4_risk_pct = input.float(10.0335, title="4H Risk % of Initial Capital", group=input_group_size)
+other_risk_pct = input.float(20.067, title="Other Timeframes Risk % of Initial Capital", group=input_group_size)
+risk_pct = timeframe.period == "240" ? h4_risk_pct : timeframe.isdaily ? daily_risk_pct : other_risk_pct
 use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
 
 // Validate the selected signal timeframe. Lower-timeframe requests are intentionally rejected,
