@@ -1,0 +1,14 @@
+//@version=6
+// Ranking Strategy Name: 15m_RSI
+// TV Status: UNVERIFIED
+// SPEC_PENDING: The explicit entry/exit rules and python backtest for the 15m RSI strategy are pending.
+// This is a placeholder for the concrete Pine v6 script once the Python backtest specifications are located.
+
+strategy("15m RSI Pending", overlay=true, initial_capital=10000)
+
+// Placeholder logic
+rsi_val = ta.rsi(close, 14)
+if ta.crossover(rsi_val, 30)
+    strategy.entry("Long", strategy.long)
+if ta.crossunder(rsi_val, 70)
+    strategy.close("Long")
