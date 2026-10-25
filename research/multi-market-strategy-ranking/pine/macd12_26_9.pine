@@ -16,7 +16,7 @@ tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)", g
 input_group_size = "Position Sizing & Risk"
 daily_risk_pct = input.float(20.067, title="Daily Risk % of Initial Capital", group=input_group_size)
 // 4H uses a slower MACD to reduce intraday noise; daily and other timeframes keep 12/26/9.
-h4_risk_pct = input.float(10.0335, title="4H Risk % of Initial Capital", group=input_group_size)
+h4_risk_pct = input.float(20.0, title="4H Risk % of Initial Capital", group=input_group_size)
 other_risk_pct = input.float(20.067, title="Other Timeframes Risk % of Initial Capital", group=input_group_size)
 risk_pct = timeframe.period == "240" ? h4_risk_pct : timeframe.isdaily ? daily_risk_pct : other_risk_pct
 use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
