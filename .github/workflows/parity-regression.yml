@@ -1,0 +1,33 @@
+name: Trade Test parity fail-closed regressions
+
+on:
+  pull_request:
+    branches:
+      - fix-pr7-spec-pending-5809664188861894620
+    paths:
+      - "research/multi-market-strategy-ranking/tests/equivalence/test_pine_equivalence.py"
+      - ".github/workflows/parity-regression.yml"
+  push:
+    branches:
+      - audit/tv-parity-fail-closed-20261025
+    paths:
+      - "research/multi-market-strategy-ranking/tests/equivalence/test_pine_equivalence.py"
+      - ".github/workflows/parity-regression.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  parity-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install offline test dependencies
+        run: python -m pip install pytest pandas
+      - name: Run fail-closed parity tests
+        run: python -m pytest -q research/multi-market-strategy-ranking/tests/equivalence/test_pine_equivalence.py
