@@ -1,0 +1,63 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_low_drawdown_fixed_rr.py (signals())
+// Ranking Strategy Name: EMA200+RSI2_extreme
+// Representative Top Config: BTCUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 純固定TP 3.0R／初始SL 1.5ATR | Sizing: 全凱利 (IS Kelly: 13.537%)
+// Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
+// TV Status: 未測 (Untested)
+strategy("EMA200+RSI2_extreme Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=false, process_orders_on_close=false)
+
+// --- Input Parameters ---
+input_group_strat = "Strategy Parameters"
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
+tp_r_mult   = input.float(3.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
+
+input_group_size = "Position Sizing & Risk"
+risk_pct = input.float(13.537, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
+use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
+rsi_val = ta.rsi(close, 2)
+ema_val = ta.ema(close, 200)
+atr_val = ta.atr(14)
+
+long_cond  = close > ema_val and rsi_val[1] >= 10 and rsi_val < 10
+short_cond = close < ema_val and rsi_val[1] <= 90 and rsi_val > 90
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+// Pure Fixed-RR Event Entry Gating: Requires flat position to trigger new event
+if long_cond and strategy.position_size == 0
+    dist = sl_atr_mult * atr_val
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    long_stop_ticks = int(math.round(dist / syminfo.mintick))
+    long_profit_ticks = tp_r_mult > 0 ? int(math.round(tp_r_mult * dist / syminfo.mintick)) : na
+    strategy.entry("Long", strategy.long, qty=qty_val)
+    strategy.exit("SL/TP Long", "Long", loss=long_stop_ticks, profit=long_profit_ticks)
+
+if short_cond and strategy.position_size == 0
+    dist = sl_atr_mult * atr_val
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    short_stop_ticks = int(math.round(dist / syminfo.mintick))
+    short_profit_ticks = tp_r_mult > 0 ? int(math.round(tp_r_mult * dist / syminfo.mintick)) : na
+    strategy.entry("Short", strategy.short, qty=qty_val)
+    strategy.exit("SL/TP Short", "Short", loss=short_stop_ticks, profit=short_profit_ticks)
+
+if ta.change(strategy.position_size) != 0
+    if strategy.position_size > 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+    else if strategy.position_size < 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
