@@ -15,6 +15,7 @@ tp_r_mult   = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)", g
 
 input_group_size = "Position Sizing & Risk"
 daily_risk_pct = input.float(20.067, title="Daily Risk % of Initial Capital", group=input_group_size)
+// 4H uses a slower MACD to reduce intraday noise; daily and other timeframes keep 12/26/9.
 h4_risk_pct = input.float(10.0335, title="4H Risk % of Initial Capital", group=input_group_size)
 other_risk_pct = input.float(20.067, title="Other Timeframes Risk % of Initial Capital", group=input_group_size)
 risk_pct = timeframe.period == "240" ? h4_risk_pct : timeframe.isdaily ? daily_risk_pct : other_risk_pct
@@ -33,7 +34,10 @@ if signal_tf_seconds % chart_tf_seconds != 0
     runtime.error("Signal timeframe must be an integer multiple of the chart timeframe.")
 
 // The chart-timeframe signals preserve the original strategy's same-bar-close detection.
-[macd_chart, signal_chart, _] = ta.macd(close, 12, 26, 9)
+fast_len = timeframe.period == "240" ? 24 : 12
+slow_len = timeframe.period == "240" ? 52 : 26
+sig_len = timeframe.period == "240" ? 18 : 9
+[macd_chart, signal_chart, _] = ta.macd(close, fast_len, slow_len, sig_len)
 long_chart_signal = ta.crossover(macd_chart, signal_chart)
 short_chart_signal = ta.crossunder(macd_chart, signal_chart)
 atr_chart = ta.atr(14)
@@ -41,7 +45,7 @@ atr_chart = ta.atr(14)
 // For a selected higher timeframe, use only the last completed signal/ATR bar.
 // lookahead_on + [1] keeps historical and realtime values consistent (no developing-HTF repaint).
 f_confirmed_signal_data() =>
-    [macd_htf, signal_htf, _] = ta.macd(close, 12, 26, 9)
+    [macd_htf, signal_htf, _] = ta.macd(close, fast_len, slow_len, sig_len)
     [ta.crossover(macd_htf, signal_htf)[1], ta.crossunder(macd_htf, signal_htf)[1], ta.atr(14)[1]]
 
 [long_htf_signal, short_htf_signal, atr_htf] = request.security(
