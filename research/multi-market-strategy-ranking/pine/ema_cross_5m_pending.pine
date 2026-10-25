@@ -1,0 +1,15 @@
+//@version=6
+// Ranking Strategy Name: 5m_EMA_Crossover
+// TV Status: UNVERIFIED
+// SPEC_PENDING: The explicit entry/exit rules and python backtest for the 5m EMA Crossover strategy are pending.
+// This is a placeholder for the concrete Pine v6 script once the Python backtest specifications are located.
+
+strategy("5m EMA Crossover Pending", overlay=true, initial_capital=10000)
+
+// Placeholder logic
+ema_fast = ta.ema(close, 9)
+ema_slow = ta.ema(close, 21)
+// if ta.crossover(ema_fast, ema_slow)
+//     strategy.entry("Long", strategy.long)
+// if ta.crossunder(ema_fast, ema_slow)
+//     strategy.close("Long")
