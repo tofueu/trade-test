@@ -1,0 +1,45 @@
+name: Trade Test real five-year intraday Python batch
+
+on:
+  push:
+    branches:
+      - audit/tv-parity-fail-closed-20261025-11672690887494441388
+    paths:
+      - 'research/multi-market-strategy-ranking/src/run_intraday.py'
+      - 'research/multi-market-strategy-ranking/tests/test_intraday.py'
+      - '.github/workflows/trade-test-intraday-real.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trade-test-intraday-btc-1h
+  cancel-in-progress: false
+
+jobs:
+  btcusdt-1h-five-years:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing research dependencies
+        run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Verify archive parser, qualification and ranking persistence
+        run: python -m unittest discover -s research/multi-market-strategy-ranking/tests -p 'test_intraday.py' -v
+      - name: Run actual Binance USD-M BTCUSDT 1h five-year Python batch
+        run: python research/multi-market-strategy-ranking/src/run_intraday.py --symbol BTCUSDT --timeframe 1h
+      - name: Persist only verified results to this isolated PR branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/multi-market-strategy-ranking/results/intraday/
+          if git diff --cached --quiet; then
+            echo 'No changed ranking files'
+            exit 0
+          fi
+          git commit -m 'data: real BTCUSDT 1h five-year ranking [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
