@@ -51,9 +51,24 @@ def parse_klines_zip(payload: bytes) -> pd.DataFrame:
     raw["timestamp"] = pd.to_datetime(timestamps, unit=unit, utc=True)
     for column in ("open", "high", "low", "close", "volume"):
         raw[column] = pd.to_numeric(raw[column], errors="raise")
-    if not np.isfinite(raw[["open", "high", "low", "close", "volume"]].to_numpy()).all():
-        raise ValueError("Non-finite Binance OHLCV value")
+    validate_ohlcv(raw)
     return raw[["timestamp", "open", "high", "low", "close", "volume"]]
+
+
+def validate_ohlcv(frame: pd.DataFrame) -> None:
+    """Fail closed on malformed exchange candles, including poisoned local cache."""
+    values = frame[["open", "high", "low", "close", "volume"]]
+    if not np.isfinite(values.to_numpy(dtype=float)).all():
+        raise ValueError("Non-finite Binance OHLCV value")
+    if (frame[["open", "high", "low", "close"]] <= 0).any().any():
+        raise ValueError("Non-positive Binance OHLC price")
+    if (frame["volume"] < 0).any():
+        raise ValueError("Negative Binance volume")
+    if ((frame["high"] < frame[["open", "low", "close"]].max(axis=1)) |
+            (frame["low"] > frame[["open", "high", "close"]].min(axis=1))).any():
+        raise ValueError("Inconsistent Binance OHLC range")
+    if frame["timestamp"].isna().any():
+        raise ValueError("Missing Binance candle timestamp")
 
 
 def download_archive(url: str) -> pd.DataFrame:
@@ -67,7 +82,8 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         raise ValueError("First verified batch supports BTCUSDT and known intraday intervals only")
     CACHE.mkdir(parents=True, exist_ok=True)
     cache_file = CACHE / f"{symbol}_{interval}_{START:%Y%m%d}_{END:%Y%m%d}.csv"
-    if cache_file.exists():
+    cache_hit = cache_file.exists()
+    if cache_hit:
         candles = pd.read_csv(cache_file, parse_dates=["timestamp"])
         candles["timestamp"] = pd.to_datetime(candles["timestamp"], utc=True)
     else:
@@ -86,14 +102,35 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         candles = pd.concat(frames, ignore_index=True)
         candles = candles.drop_duplicates("timestamp").sort_values("timestamp")
         candles = candles[(candles.timestamp >= WARM) & (candles.timestamp < END)]
-        candles.to_csv(cache_file, index=False)
     candles = candles.sort_values("timestamp").reset_index(drop=True)
+    # Cached CSVs are not trusted: validate again before accepting coverage.
+    validate_ohlcv(candles)
     step = pd.Timedelta(minutes=INTERVALS[interval])
     in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
     if in_window.empty or in_window.timestamp.iloc[0] > START or in_window.timestamp.iloc[-1] < END - step:
         raise RuntimeError("Five-year historical coverage incomplete; no qualified ranking")
+    # Indicator signals depend on pre-window candles (EMA200, ATR, ADX).
+    # A truncated cache can otherwise pass the five-year in-window test while
+    # silently changing strategy entries and the reported performance.
+    warmup = candles[(candles.timestamp >= WARM) & (candles.timestamp < START)]
+    if (warmup.empty or warmup.timestamp.iloc[0] != WARM
+            or warmup.timestamp.iloc[-1] != START - step
+            or (warmup.timestamp.diff().dropna() != step).any()):
+        raise RuntimeError("Indicator warm-up history incomplete; no qualified ranking")
     diffs = in_window.timestamp.diff().dropna()
     gaps = int((diffs != step).sum())
+    if gaps:
+        raise RuntimeError("Irregular or missing five-year candles; no qualified ranking")
+    # Never poison the cache with a partial download. Commit only fully
+    # validated history, atomically, so a later run can retry from the source.
+    if not cache_hit:
+        temporary = cache_file.with_name(cache_file.name + f".{os.getpid()}.tmp")
+        try:
+            candles.to_csv(temporary, index=False)
+            os.replace(temporary, cache_file)
+        finally:
+            if temporary.exists():
+                temporary.unlink()
     digest = hashlib.sha256(
         pd.util.hash_pandas_object(candles, index=False).values.tobytes()).hexdigest()
     coverage = {
@@ -122,6 +159,12 @@ def summarize_execution(trades: list[dict], fraction: float):
     trades after that point are hypothetical signals, not executed fills.
     """
     full = base.fixed_risk_stats(trades, fraction)
+    # The legacy daily engine records peak-to-trough drawdown before flooring
+    # a bankrupt account at zero. A final gap loss can therefore report >100%
+    # drawdown even though this cash-equity model does not permit debt. Keep
+    # its actual return, fill count and halt decision, but cap drawdown at the
+    # 100% loss of all starting equity. Do not rewrite legacy daily results.
+    full = (full[0], min(100.0, max(0.0, full[1])), full[2], full[3])
     executed = trades[:int(full[2])]
     is_executed = [t for t in executed if pd.Timestamp(t["entry_time"]) < OOS]
     oos_executed = [t for t in executed if pd.Timestamp(t["entry_time"]) >= OOS]

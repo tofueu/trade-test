@@ -76,6 +76,82 @@ class IntradayTests(unittest.TestCase):
                 z.writestr("not-a-csv.txt", "ignored")
             intraday.parse_klines_zip(buffer.getvalue())
 
+    def test_invalid_exchange_ohlcv_rejected_before_ranking(self):
+        invalid_rows = (
+            "1633824000000,100,99,90,105,1\n",
+            "1633824000000,100,110,90,105,-1\n",
+            "1633824000000,0,110,90,105,1\n",
+        )
+        for row in invalid_rows:
+            with self.subTest(row=row), self.assertRaises(ValueError):
+                intraday.parse_klines_zip(zip_csv(row))
+
+    def test_cached_ohlcv_is_validated_before_coverage_claim(self):
+        start = pd.Timestamp("2021-10-10T00:00:00Z")
+        end = pd.Timestamp("2021-10-10T02:00:00Z")
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            name = cache / "BTCUSDT_1h_20211010_20211010.csv"
+            pd.DataFrame({
+                "timestamp": [start, start + pd.Timedelta(hours=1)],
+                "open": [100, 100], "high": [99, 110],
+                "low": [90, 90], "close": [105, 105], "volume": [1, 1],
+            }).to_csv(name, index=False)
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "START", start),
+                  patch.object(intraday, "END", end)):
+                with self.assertRaisesRegex(ValueError, "OHLC range"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1h")
+
+    def test_missing_indicator_warmup_cannot_pass_five_year_coverage(self):
+        start = pd.Timestamp("2021-10-10T00:00:00Z")
+        end = start + pd.Timedelta(hours=2)
+        warm = start - pd.Timedelta(days=1)
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            path = cache / "BTCUSDT_1h_20211010_20211010.csv"
+            times = pd.date_range(warm + pd.Timedelta(hours=1),
+                                  end - pd.Timedelta(hours=1), freq="h")
+            pd.DataFrame({
+                "timestamp": times, "open": 100, "high": 110,
+                "low": 90, "close": 105, "volume": 1,
+            }).to_csv(path, index=False)
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "WARM", warm),
+                  patch.object(intraday, "START", start),
+                  patch.object(intraday, "END", end)):
+                with self.assertRaisesRegex(RuntimeError, "warm-up"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1h")
+                # Complete warm-up history must still be accepted.
+                times = pd.date_range(warm, end - pd.Timedelta(hours=1), freq="h")
+                pd.DataFrame({
+                    "timestamp": times, "open": 100, "high": 110,
+                    "low": 90, "close": 105, "volume": 1,
+                }).to_csv(path, index=False)
+                _, provenance = intraday.load_real_ohlcv("BTCUSDT", "1h")
+                self.assertEqual(provenance["missing_or_irregular_intervals"], 0)
+                self.assertEqual(provenance["bar_count"], 2)
+
+    def test_incomplete_download_never_poisoned_cache(self):
+        start = pd.Timestamp("2021-10-10T00:00:00Z")
+        end = start + pd.Timedelta(hours=2)
+        warm = start - pd.Timedelta(days=1)
+        # All mocked archives contain only one hour: cannot cover two hours.
+        partial = pd.DataFrame({
+            "timestamp": [start], "open": [100], "high": [110],
+            "low": [90], "close": [105], "volume": [1],
+        })
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "WARM", warm),
+                  patch.object(intraday, "START", start),
+                  patch.object(intraday, "END", end),
+                  patch.object(intraday, "download_archive", return_value=partial)):
+                with self.assertRaisesRegex(RuntimeError, "coverage incomplete"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1h")
+                self.assertFalse((cache / "BTCUSDT_1h_20211010_20211010.csv").exists())
+
     def test_strict_five_year_return_trade_and_coverage_gate(self):
         coverage = {"missing_or_irregular_intervals": 0}
         good = {"五年交易數": 70, "五年收益_pct": 100.01}
@@ -128,6 +204,28 @@ class IntradayTests(unittest.TestCase):
         self.assertEqual(full[2], 2)
         self.assertEqual(len(oos_exec), 1)
         self.assertAlmostEqual(oos_pct, -5.0)
+
+    def test_bankruptcy_drawdown_never_exceeds_100_percent(self):
+        # Legacy fixed_risk_stats computes drawdown before it floors equity
+        # at zero; an adverse gap with R=-11 at 10% risk produced 110% DD.
+        trades = [{"entry_time": "2022-01-01T00:00:00Z",
+                   "R": -11.0, "reason": "止損"}]
+        legacy = intraday.base.fixed_risk_stats(trades, 0.10)
+        self.assertGreater(legacy[1], 100.0)
+        full, executed, _, _, reasons, _ = intraday.summarize_execution(trades, 0.10)
+        self.assertEqual(full[0], -100.0)
+        self.assertEqual(full[1], 100.0)
+        self.assertEqual(full[2], 1)
+        self.assertTrue(full[3])
+        self.assertEqual(len(executed), 1)
+        self.assertEqual(reasons["止損"], 1)
+
+    def test_normal_drawdown_is_unchanged(self):
+        trades = [{"entry_time": "2022-01-01T00:00:00Z",
+                   "R": -1.0, "reason": "止損"}]
+        legacy = intraday.base.fixed_risk_stats(trades, 0.10)
+        full, *_ = intraday.summarize_execution(trades, 0.10)
+        self.assertEqual(full, legacy)
 
     def test_zero_trade_kelly_variant_never_occupies_top50(self):
         coverage = {"symbol": "BTCUSDT", "timeframe": "1h",
