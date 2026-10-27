@@ -75,5 +75,51 @@ class IntradayTests(unittest.TestCase):
                 self.assertEqual(metadata["qualified_rows"], 1)
 
 
+    def test_capital_stop_excludes_unexecuted_signal_exit_counts(self):
+        trades = [
+            {"entry_time": "2022-01-01T00:00:00Z", "R": -10.0, "reason": "止損"},
+            {"entry_time": "2025-11-01T00:00:00Z", "R": 3.0, "reason": "止盈"},
+        ]
+        full, executed, is_exec, oos_exec, reasons, oos_pct = intraday.summarize_execution(trades, 0.10)
+        self.assertEqual(full[2], 1)
+        self.assertTrue(full[3])
+        self.assertEqual(len(executed), 1)
+        self.assertEqual(len(is_exec), 1)
+        self.assertEqual(len(oos_exec), 0)
+        self.assertEqual(reasons.get("止損", 0), 1)
+        self.assertEqual(reasons.get("止盈", 0), 0)
+        self.assertEqual(oos_pct, 0.0)
+
+    def test_oos_return_uses_executed_stake_without_account_reset(self):
+        trades = [
+            {"entry_time": "2022-01-01T00:00:00Z", "R": 1.0, "reason": "止盈"},
+            {"entry_time": "2025-11-01T00:00:00Z", "R": -0.5, "reason": "止損"},
+        ]
+        full, executed, is_exec, oos_exec, reasons, oos_pct = intraday.summarize_execution(trades, 0.10)
+        self.assertEqual(full[2], 2)
+        self.assertEqual(len(oos_exec), 1)
+        self.assertAlmostEqual(oos_pct, -5.0)
+
+    def test_zero_trade_kelly_variant_never_occupies_top50(self):
+        coverage = {"symbol": "BTCUSDT", "timeframe": "1h",
+                    "missing_or_irregular_intervals": 0}
+        rows = [
+            {"策略": "NoRisk", "五年交易數": 0, "五年收益_pct": 0.0},
+            {"策略": "Executed", "五年交易數": 100, "五年收益_pct": -90.0},
+        ]
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(intraday, "OUTPUT", Path(folder)):
+                intraday.write_rankings(rows, coverage)
+                prefix = Path(folder) / "new_BTCUSDT_1h_five_year"
+                all_rows = pd.read_csv(str(prefix) + "_ranking.csv")
+                top50 = pd.read_csv(str(prefix) + "_top50.csv")
+                self.assertEqual(all_rows["策略"].tolist(), ["Executed", "NoRisk"])
+                self.assertEqual(top50["策略"].tolist(), ["Executed"])
+                self.assertEqual(all_rows["有實際成交"].tolist(), [True, False])
+                metadata = json.loads(Path(str(prefix) + "_provenance.json").read_text())
+                self.assertEqual(metadata["zero_execution_rows"], 1)
+                self.assertEqual(metadata["executed_ranking_rows"], 1)
+
+
 if __name__ == "__main__":
     unittest.main()
