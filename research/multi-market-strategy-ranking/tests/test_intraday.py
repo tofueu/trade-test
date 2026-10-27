@@ -74,6 +74,55 @@ class IntradayTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "OHLC range"):
                     intraday.load_real_ohlcv("BTCUSDT", "1h")
 
+    def test_missing_indicator_warmup_cannot_pass_five_year_coverage(self):
+        start = pd.Timestamp("2021-10-10T00:00:00Z")
+        end = start + pd.Timedelta(hours=2)
+        warm = start - pd.Timedelta(days=1)
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            path = cache / "BTCUSDT_1h_20211010_20211010.csv"
+            times = pd.date_range(warm + pd.Timedelta(hours=1),
+                                  end - pd.Timedelta(hours=1), freq="h")
+            pd.DataFrame({
+                "timestamp": times, "open": 100, "high": 110,
+                "low": 90, "close": 105, "volume": 1,
+            }).to_csv(path, index=False)
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "WARM", warm),
+                  patch.object(intraday, "START", start),
+                  patch.object(intraday, "END", end)):
+                with self.assertRaisesRegex(RuntimeError, "warm-up"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1h")
+                # Complete warm-up history must still be accepted.
+                times = pd.date_range(warm, end - pd.Timedelta(hours=1), freq="h")
+                pd.DataFrame({
+                    "timestamp": times, "open": 100, "high": 110,
+                    "low": 90, "close": 105, "volume": 1,
+                }).to_csv(path, index=False)
+                _, provenance = intraday.load_real_ohlcv("BTCUSDT", "1h")
+                self.assertEqual(provenance["missing_or_irregular_intervals"], 0)
+                self.assertEqual(provenance["bar_count"], 2)
+
+    def test_incomplete_download_never_poisoned_cache(self):
+        start = pd.Timestamp("2021-10-10T00:00:00Z")
+        end = start + pd.Timedelta(hours=2)
+        warm = start - pd.Timedelta(days=1)
+        # All mocked archives contain only one hour: cannot cover two hours.
+        partial = pd.DataFrame({
+            "timestamp": [start], "open": [100], "high": [110],
+            "low": [90], "close": [105], "volume": [1],
+        })
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "WARM", warm),
+                  patch.object(intraday, "START", start),
+                  patch.object(intraday, "END", end),
+                  patch.object(intraday, "download_archive", return_value=partial)):
+                with self.assertRaisesRegex(RuntimeError, "coverage incomplete"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1h")
+                self.assertFalse((cache / "BTCUSDT_1h_20211010_20211010.csv").exists())
+
     def test_strict_five_year_return_trade_and_coverage_gate(self):
         coverage = {"missing_or_irregular_intervals": 0}
         good = {"五年交易數": 70, "五年收益_pct": 100.01}
