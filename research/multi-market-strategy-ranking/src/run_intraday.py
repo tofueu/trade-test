@@ -115,20 +115,46 @@ def qualifies(row: dict, coverage: dict) -> bool:
             and float(row["五年收益_pct"]) > 100.0)
 
 
+def summarize_execution(trades: list[dict], fraction: float):
+    """Restrict trade and exit statistics to positions actually funded/executed.
+
+    The shared legacy fixed-risk engine halts when available equity is too low;
+    trades after that point are hypothetical signals, not executed fills.
+    """
+    full = base.fixed_risk_stats(trades, fraction)
+    executed = trades[:int(full[2])]
+    is_executed = [t for t in executed if pd.Timestamp(t["entry_time"]) < OOS]
+    oos_executed = [t for t in executed if pd.Timestamp(t["entry_time"]) >= OOS]
+    reasons = pd.Series([t["reason"] for t in executed]).value_counts().to_dict() if executed else {}
+    # OOS P&L is expressed against the original capital, without restarting a
+    # bankrupt/underfunded strategy with a fresh account at the OOS boundary.
+    oos_return_pct = 100.0 * fraction * sum(float(t["R"]) for t in oos_executed)
+    return full, executed, is_executed, oos_executed, reasons, oos_return_pct
+
+
 def write_rankings(rows: list[dict], coverage: dict) -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     stem = f"new_{coverage['symbol']}_{coverage['timeframe']}_five_year"
-    frame = pd.DataFrame(rows).sort_values("五年收益_pct", ascending=False)
-    frame = frame.reset_index(drop=True)
-    frame.insert(0, "新策略排名", np.arange(1, len(frame) + 1))
+    frame = pd.DataFrame(rows)
     frame["符合門檻"] = [qualifies(row, coverage) for row in frame.to_dict("records")]
+    frame["有實際成交"] = frame["五年交易數"].astype(int) > 0
+    # Do not let zero-risk Kelly variants (0 executed trades, 0% return)
+    # outrank genuinely executed strategies that lost money.
+    frame = frame.sort_values(["符合門檻", "有實際成交", "五年收益_pct"],
+                              ascending=[False, False, False]).reset_index(drop=True)
+    frame.insert(0, "新策略排名", np.arange(1, len(frame) + 1))
     frame.to_csv(OUTPUT / f"{stem}_ranking.csv", index=False, encoding="utf-8-sig")
-    frame.head(50).to_csv(OUTPUT / f"{stem}_top50.csv", index=False, encoding="utf-8-sig")
+    frame[frame["有實際成交"]].head(50).to_csv(
+        OUTPUT / f"{stem}_top50.csv", index=False, encoding="utf-8-sig")
     with (OUTPUT / f"{stem}_provenance.json").open("w", encoding="utf-8") as f:
         json.dump({**coverage, "completed_strategy_names": sorted(set(frame["策略"])),
-                   "ranking_rows": len(frame), "qualified_rows": int(frame["符合門檻"].sum())},
+                   "ranking_rows": len(frame), "qualified_rows": int(frame["符合門檻"].sum()),
+                   "executed_ranking_rows": int(frame["有實際成交"].sum()),
+                   "zero_execution_rows": int((~frame["有實際成交"]).sum()),
+                   "oos_return_definition": "Executed OOS R times initial stake, divided by initial capital; no capital reset"},
                   f, ensure_ascii=False, indent=2)
-    print("RANKING", len(frame), "QUALIFIED", int(frame["符合門檻"].sum()), flush=True)
+    print("RANKING", len(frame), "EXECUTED", int(frame["有實際成交"].sum()),
+          "QUALIFIED", int(frame["符合門檻"].sum()), flush=True)
 
 
 def main() -> None:
@@ -155,11 +181,12 @@ def main() -> None:
         oos_tr = [t for t in trades if pd.Timestamp(t["entry_time"]) >= OOS]
         kelly = base.formula_stats(is_tr)["kelly"]
         kelly = max(0., float(kelly)) if math.isfinite(kelly) else 0.
-        reasons = pd.Series([t["reason"] for t in trades]).value_counts().to_dict()
         for alloc, fraction in (("固定1R", .10), ("全凱利", kelly),
                                 ("半凱利", kelly / 2), ("四分之一凱利", kelly / 4)):
-            full = base.fixed_risk_stats(trades, fraction)
-            oos = base.fixed_risk_stats(oos_tr, fraction)
+            full, executed, is_executed, oos_executed, reasons, oos_return = summarize_execution(trades, fraction)
+            wins = [float(t["R"]) for t in executed if float(t["R"]) > 0]
+            losses = [-float(t["R"]) for t in executed if float(t["R"]) <= 0]
+            rr = ((sum(wins) / len(wins)) / (sum(losses) / len(losses))) if wins and losses and sum(losses) > 0 else None
             rows.append({
                 "市場": "Crypto futures", "商品": args.symbol, "代碼": args.symbol,
                 "時區": args.timeframe, "策略": name, "策略規則": old.RULES[name],
@@ -169,8 +196,11 @@ def main() -> None:
                 "止盈出場數": int(reasons.get("止盈", 0)),
                 "止損出場數": int(reasons.get("止損", 0)),
                 "五年收益_pct": full[0], "五年最大回撤_pct": full[1],
-                "OOS收益_pct": oos[0], "OOS交易數": len(oos_tr),
-                "IS交易數": len(is_tr), "IS_Kelly_pct": kelly * 100,
+                "五年勝率_pct": (100.0 * len(wins) / len(executed)) if executed else None,
+                "五年盈虧比": rr,
+                "五年獲利因子": (sum(wins) / sum(losses)) if losses and sum(losses) > 0 else None,
+                "OOS收益_pct": oos_return, "OOS交易數": len(oos_executed),
+                "IS交易數": len(is_executed), "IS_Kelly_pct": kelly * 100,
                 "資料完整": coverage["missing_or_irregular_intervals"] == 0,
             })
         # Save a genuine, partial ranking after each completed strategy.
