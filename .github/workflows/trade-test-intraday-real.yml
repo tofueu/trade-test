@@ -13,14 +13,14 @@ permissions:
   contents: write
 
 concurrency:
-  group: trade-test-intraday-btc-1h
+  group: trade-test-intraday-btc-1h-30m
   cancel-in-progress: false
 
 jobs:
-  btcusdt-1h-five-years:
+  btcusdt-1h-30m-five-years:
     if: github.actor != 'github-actions[bot]'
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,7 +32,7 @@ jobs:
         run: python -m unittest discover -s research/multi-market-strategy-ranking/tests -p 'test_intraday.py' -v
       - name: Run actual Binance USD-M BTCUSDT 1h five-year Python batch
         run: python research/multi-market-strategy-ranking/src/run_intraday.py --symbol BTCUSDT --timeframe 1h
-      - name: Persist only verified results to this isolated PR branch
+      - name: Persist verified 1h results before 30m starts
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -41,5 +41,16 @@ jobs:
             echo 'No changed ranking files'
             exit 0
           fi
-          git commit -m 'data: real BTCUSDT 1h five-year ranking [skip ci]'
+          git commit -m 'data: corrected BTCUSDT 1h five-year ranking [skip ci]'
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+      - name: Run actual Binance USD-M BTCUSDT 30m five-year Python batch
+        run: python research/multi-market-strategy-ranking/src/run_intraday.py --symbol BTCUSDT --timeframe 30m
+      - name: Persist verified 30m results to this isolated PR branch
+        run: |
+          git add research/multi-market-strategy-ranking/results/intraday/
+          if git diff --cached --quiet; then
+            echo 'No changed 30m ranking files'
+            exit 0
+          fi
+          git commit -m 'data: real BTCUSDT 30m five-year ranking [skip ci]'
           git push origin "HEAD:${GITHUB_REF_NAME}"
