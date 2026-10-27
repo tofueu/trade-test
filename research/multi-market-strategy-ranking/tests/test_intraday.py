@@ -100,6 +100,28 @@ class IntradayTests(unittest.TestCase):
         self.assertEqual(len(oos_exec), 1)
         self.assertAlmostEqual(oos_pct, -5.0)
 
+    def test_bankruptcy_drawdown_never_exceeds_100_percent(self):
+        # Legacy fixed_risk_stats computes drawdown before it floors equity
+        # at zero; an adverse gap with R=-11 at 10% risk produced 110% DD.
+        trades = [{"entry_time": "2022-01-01T00:00:00Z",
+                   "R": -11.0, "reason": "止損"}]
+        legacy = intraday.base.fixed_risk_stats(trades, 0.10)
+        self.assertGreater(legacy[1], 100.0)
+        full, executed, _, _, reasons, _ = intraday.summarize_execution(trades, 0.10)
+        self.assertEqual(full[0], -100.0)
+        self.assertEqual(full[1], 100.0)
+        self.assertEqual(full[2], 1)
+        self.assertTrue(full[3])
+        self.assertEqual(len(executed), 1)
+        self.assertEqual(reasons["止損"], 1)
+
+    def test_normal_drawdown_is_unchanged(self):
+        trades = [{"entry_time": "2022-01-01T00:00:00Z",
+                   "R": -1.0, "reason": "止損"}]
+        legacy = intraday.base.fixed_risk_stats(trades, 0.10)
+        full, *_ = intraday.summarize_execution(trades, 0.10)
+        self.assertEqual(full, legacy)
+
     def test_zero_trade_kelly_variant_never_occupies_top50(self):
         coverage = {"symbol": "BTCUSDT", "timeframe": "1h",
                     "missing_or_irregular_intervals": 0}
