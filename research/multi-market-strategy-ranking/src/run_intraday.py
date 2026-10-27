@@ -122,6 +122,12 @@ def summarize_execution(trades: list[dict], fraction: float):
     trades after that point are hypothetical signals, not executed fills.
     """
     full = base.fixed_risk_stats(trades, fraction)
+    # The legacy daily engine records peak-to-trough drawdown before flooring
+    # a bankrupt account at zero. A final gap loss can therefore report >100%
+    # drawdown even though this cash-equity model does not permit debt. Keep
+    # its actual return, fill count and halt decision, but cap drawdown at the
+    # 100% loss of all starting equity. Do not rewrite legacy daily results.
+    full = (full[0], min(100.0, max(0.0, full[1])), full[2], full[3])
     executed = trades[:int(full[2])]
     is_executed = [t for t in executed if pd.Timestamp(t["entry_time"]) < OOS]
     oos_executed = [t for t in executed if pd.Timestamp(t["entry_time"]) >= OOS]
