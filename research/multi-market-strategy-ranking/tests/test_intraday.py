@@ -47,6 +47,33 @@ class IntradayTests(unittest.TestCase):
                 z.writestr("not-a-csv.txt", "ignored")
             intraday.parse_klines_zip(buffer.getvalue())
 
+    def test_invalid_exchange_ohlcv_rejected_before_ranking(self):
+        invalid_rows = (
+            "1633824000000,100,99,90,105,-1\\n",
+            "1633824000000,100,110,90,105,-1\\n",
+            "1633824000000,0,110,90,105,1\\n",
+        )
+        for row in invalid_rows:
+            with self.subTest(row=row), self.assertRaises(ValueError):
+                intraday.parse_klines_zip(zip_csv(row))
+
+    def test_cached_ohlcv_is_validated_before_coverage_claim(self):
+        start = pd.Timestamp("2021-10-10T00:00:00Z")
+        end = pd.Timestamp("2021-10-10T02:00:00Z")
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            name = cache / "BTCUSDT_1h_20211010_20211010.csv"
+            pd.DataFrame({
+                "timestamp": [start, start + pd.Timedelta(hours=1)],
+                "open": [100, 100], "high": [99, 110],
+                "low": [90, 90], "close": [105, 105], "volume": [1, 1],
+            }).to_csv(name, index=False)
+            with patch.object(intraday, "CACHE", cache), \\
+                 patch.object(intraday, "START", start), \\
+                 patch.object(intraday, "END", end):
+                with self.assertRaisesRegex(ValueError, "OHLC range"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1h")
+
     def test_strict_five_year_return_trade_and_coverage_gate(self):
         coverage = {"missing_or_irregular_intervals": 0}
         good = {"五年交易數": 70, "五年收益_pct": 100.01}
