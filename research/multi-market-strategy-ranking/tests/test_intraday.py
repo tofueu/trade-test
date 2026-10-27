@@ -49,9 +49,9 @@ class IntradayTests(unittest.TestCase):
 
     def test_invalid_exchange_ohlcv_rejected_before_ranking(self):
         invalid_rows = (
-            "1633824000000,100,99,90,105,-1\\n",
-            "1633824000000,100,110,90,105,-1\\n",
-            "1633824000000,0,110,90,105,1\\n",
+            "1633824000000,100,99,90,105,1\n",
+            "1633824000000,100,110,90,105,-1\n",
+            "1633824000000,0,110,90,105,1\n",
         )
         for row in invalid_rows:
             with self.subTest(row=row), self.assertRaises(ValueError):
@@ -68,9 +68,9 @@ class IntradayTests(unittest.TestCase):
                 "open": [100, 100], "high": [99, 110],
                 "low": [90, 90], "close": [105, 105], "volume": [1, 1],
             }).to_csv(name, index=False)
-            with patch.object(intraday, "CACHE", cache), \\
-                 patch.object(intraday, "START", start), \\
-                 patch.object(intraday, "END", end):
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "START", start),
+                  patch.object(intraday, "END", end)):
                 with self.assertRaisesRegex(ValueError, "OHLC range"):
                     intraday.load_real_ohlcv("BTCUSDT", "1h")
 
