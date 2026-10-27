@@ -26,6 +26,35 @@ def zip_csv(csv_text):
 
 
 class IntradayTests(unittest.TestCase):
+    def test_four_hour_real_cache_coverage_and_gap_detection(self):
+        """4h uses real four-hour bars; missing candles cannot qualify."""
+        self.assertEqual(intraday.INTERVALS["4h"], 240)
+        start = pd.Timestamp("2026-10-01T00:00:00Z")
+        end = pd.Timestamp("2026-10-01T16:00:00Z")
+        with tempfile.TemporaryDirectory() as folder:
+            with patch.object(intraday, "CACHE", Path(folder)), \
+                 patch.object(intraday, "START", start), \
+                 patch.object(intraday, "END", end):
+                file = Path(folder) / "BTCUSDT_4h_20261001_20261001.csv"
+                candles = pd.DataFrame({
+                    "timestamp": pd.date_range(start, periods=4, freq="4h"),
+                    "open": [100, 101, 102, 103],
+                    "high": [102, 103, 104, 105],
+                    "low": [99, 100, 101, 102],
+                    "close": [101, 102, 103, 104],
+                    "volume": [10, 11, 12, 13],
+                })
+                candles.to_csv(file, index=False)
+                loaded, provenance = intraday.load_real_ohlcv("BTCUSDT", "4h")
+                self.assertEqual(len(loaded), 4)
+                self.assertEqual(provenance["bar_count"], 4)
+                self.assertEqual(provenance["missing_or_irregular_intervals"], 0)
+                candles.drop(index=1).to_csv(file, index=False)
+                _, incomplete = intraday.load_real_ohlcv("BTCUSDT", "4h")
+                self.assertEqual(incomplete["missing_or_irregular_intervals"], 1)
+                self.assertFalse(intraday.qualifies(
+                    {"五年交易數": 70, "五年收益_pct": 101.0}, incomplete))
+
     def test_real_zip_parsing_ms_and_microseconds(self):
         for multiplier in (1000, 1000000):
             ts = 1633824000 * multiplier
