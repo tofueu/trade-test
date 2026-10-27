@@ -49,7 +49,7 @@ if strategy.position_size>0 and state!=LONG
     strategy.close("L",comment="Signal exit")
 if strategy.position_size<0 and state!=SHORT
     strategy.close("S",comment="Signal exit")
-if inWindow and strategy.position_size==0 and atr14>0 and state!=0
+if inWindow and strategy.position_size==0 and atr14>0 and state!=0 and state != state[1]
     qty=(strategy.equity*risk)/(atrMult*atr14)
     strategy.entry(state==LONG?"L":"S",state==LONG?strategy.long:strategy.short,qty=qty)
 strategy.exit("L-SL","L",stop=strategy.position_avg_price-atrMult*atr14)
