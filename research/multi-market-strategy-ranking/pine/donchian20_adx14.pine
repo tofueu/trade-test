@@ -6,7 +6,7 @@ risk=input.float(20.0,"Risk %",minval=0.01)/100
 atrMult=input.float(1.5,"Initial ATR",minval=0.1)
 tr=ta.tr(true)
 atr14=ta.ema(tr,27)
-adx=ta.adx(14)
+[plusDI,minusDI,adx]=ta.dmi(14,14)
 [mac,ms,_]=ta.macd(close,12,26,9)
 ema200=ta.ema(close,200)
 hi20=ta.highest(high[1],20)
