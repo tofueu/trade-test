@@ -1,0 +1,55 @@
+name: Trade Test real BTCUSDT 15m and 5m five-year Python batch
+
+on:
+  push:
+    branches:
+      - audit/tv-parity-fail-closed-20261025-11672690887494441388
+    paths:
+      - '.github/workflows/trade-test-intraday-15m-5m.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trade-test-intraday-btc-1h-30m
+  cancel-in-progress: false
+
+jobs:
+  btcusdt-15m-5m-five-years:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install existing research dependencies
+        run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Verify existing intraday data and ranking regression tests
+        run: python -m unittest discover -s research/multi-market-strategy-ranking/tests -p 'test_intraday.py' -v
+      - name: Run real Binance BTCUSDT 15m five-year batch
+        run: python research/multi-market-strategy-ranking/src/run_intraday.py --symbol BTCUSDT --timeframe 15m
+      - name: Persist 15m results to isolated branch before starting 5m
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/multi-market-strategy-ranking/results/intraday/
+          if git diff --cached --quiet; then
+            echo 'No new 15m ranking files'
+          else
+            git commit -m 'data: real BTCUSDT 15m five-year ranking [skip ci]'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+      - name: Run real Binance BTCUSDT 5m five-year batch
+        run: python research/multi-market-strategy-ranking/src/run_intraday.py --symbol BTCUSDT --timeframe 5m
+      - name: Persist 5m results to isolated branch
+        run: |
+          git add research/multi-market-strategy-ranking/results/intraday/
+          if git diff --cached --quiet; then
+            echo 'No new 5m ranking files'
+          else
+            git commit -m 'data: real BTCUSDT 5m five-year ranking [skip ci]'
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
