@@ -51,9 +51,24 @@ def parse_klines_zip(payload: bytes) -> pd.DataFrame:
     raw["timestamp"] = pd.to_datetime(timestamps, unit=unit, utc=True)
     for column in ("open", "high", "low", "close", "volume"):
         raw[column] = pd.to_numeric(raw[column], errors="raise")
-    if not np.isfinite(raw[["open", "high", "low", "close", "volume"]].to_numpy()).all():
-        raise ValueError("Non-finite Binance OHLCV value")
+    validate_ohlcv(raw)
     return raw[["timestamp", "open", "high", "low", "close", "volume"]]
+
+
+def validate_ohlcv(frame: pd.DataFrame) -> None:
+    """Fail closed on malformed exchange candles, including poisoned local cache."""
+    values = frame[["open", "high", "low", "close", "volume"]]
+    if not np.isfinite(values.to_numpy(dtype=float)).all():
+        raise ValueError("Non-finite Binance OHLCV value")
+    if (frame[["open", "high", "low", "close"]] <= 0).any().any():
+        raise ValueError("Non-positive Binance OHLC price")
+    if (frame["volume"] < 0).any():
+        raise ValueError("Negative Binance volume")
+    if ((frame["high"] < frame[["open", "low", "close"]].max(axis=1)) |
+            (frame["low"] > frame[["open", "high", "close"]].min(axis=1))).any():
+        raise ValueError("Inconsistent Binance OHLC range")
+    if frame["timestamp"].isna().any():
+        raise ValueError("Missing Binance candle timestamp")
 
 
 def download_archive(url: str) -> pd.DataFrame:
@@ -88,6 +103,8 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         candles = candles[(candles.timestamp >= WARM) & (candles.timestamp < END)]
         candles.to_csv(cache_file, index=False)
     candles = candles.sort_values("timestamp").reset_index(drop=True)
+    # Cached CSVs are not trusted: validate again before accepting coverage.
+    validate_ohlcv(candles)
     step = pd.Timedelta(minutes=INTERVALS[interval])
     in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
     if in_window.empty or in_window.timestamp.iloc[0] > START or in_window.timestamp.iloc[-1] < END - step:
