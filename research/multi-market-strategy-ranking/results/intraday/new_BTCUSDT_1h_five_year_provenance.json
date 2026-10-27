@@ -23,5 +23,8 @@
     "Turtle55_20_EMA200"
   ],
   "ranking_rows": 28,
-  "qualified_rows": 0
+  "qualified_rows": 0,
+  "executed_ranking_rows": 7,
+  "zero_execution_rows": 21,
+  "oos_return_definition": "Executed OOS R times initial stake, divided by initial capital; no capital reset"
 }
