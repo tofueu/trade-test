@@ -1,7 +1,7 @@
 """Real Binance USD-M intraday extension of the existing five-year Python engine.
 
 No daily-to-intraday extrapolation, no synthetic candles, no TradingView claim.
-A first BTCUSDT 1h batch uses the original signals, TP selection and risk stats.
+Each timeframe batch uses the original signals, TP selection and risk stats.
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ import run_strategies as old
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results" / "intraday"
 CACHE = ROOT / "src" / "five_year_market_data" / "intraday"
-INTERVALS = {"1h": 60, "30m": 30, "15m": 15, "5m": 5}
+INTERVALS = {"4h": 240, "1h": 60, "30m": 30, "15m": 15, "5m": 5}
 START = base.START
 END = base.END
 OOS = base.OOS
