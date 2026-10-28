@@ -89,6 +89,7 @@ class IntradayTests(unittest.TestCase):
             }).to_csv(path, index=False)
             with (patch.object(intraday, "CACHE", cache),
                   patch.object(intraday, "WARM", warm),
+                  patch.object(intraday, "MIN_WARMUP_BARS", 1),
                   patch.object(intraday, "START", start),
                   patch.object(intraday, "END", end)):
                 with self.assertRaisesRegex(RuntimeError, "warm-up"):
@@ -102,6 +103,41 @@ class IntradayTests(unittest.TestCase):
                 _, provenance = intraday.load_real_ohlcv("BTCUSDT", "1h")
                 self.assertEqual(provenance["missing_or_irregular_intervals"], 0)
                 self.assertEqual(provenance["bar_count"], 2)
+
+    def test_all_requested_independent_timeframes_are_supported(self):
+        expected = {
+            "1m": 1, "3m": 3, "5m": 5, "15m": 15, "30m": 30,
+            "1h": 60, "2h": 120, "4h": 240, "6h": 360,
+            "8h": 480, "12h": 720, "1d": 1440,
+        }
+        self.assertEqual(intraday.INTERVALS, expected)
+
+    def test_daily_ema200_warmup_uses_real_prior_candles(self):
+        start = pd.Timestamp("2021-10-10T00:00:00Z")
+        end = start + pd.Timedelta(days=2)
+        warm = start - pd.Timedelta(days=250)
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            path = cache / "BTCUSDT_1d_20211010_20211012.csv"
+            times = pd.date_range(warm, end - pd.Timedelta(days=1), freq="D")
+            pd.DataFrame({
+                "timestamp": times, "open": 100, "high": 110,
+                "low": 90, "close": 105, "volume": 1,
+            }).to_csv(path, index=False)
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "WARM", start - pd.Timedelta(days=39)),
+                  patch.object(intraday, "START", start),
+                  patch.object(intraday, "END", end)):
+                _, coverage = intraday.load_real_ohlcv("BTCUSDT", "1d")
+                self.assertEqual(coverage["warmup_bar_count"], 250)
+                self.assertEqual(coverage["warmup_start_utc"], warm.isoformat())
+                self.assertEqual(coverage["bar_count"], 2)
+                # Existing 39-day warm-up must never qualify daily EMA200.
+                truncated = pd.read_csv(path)
+                truncated = truncated.iloc[-41:]
+                truncated.to_csv(path, index=False)
+                with self.assertRaisesRegex(RuntimeError, "warm-up"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1d")
 
     def test_incomplete_download_never_poisoned_cache(self):
         start = pd.Timestamp("2021-10-10T00:00:00Z")
