@@ -1,0 +1,55 @@
+//@version=6
+strategy("Supertrend 10,3 | Python-equivalent", overlay=true, initial_capital=10000, pyramiding=0, process_orders_on_close=false, commission_type=strategy.commission.percent, commission_value=0.05)
+start=input.time(timestamp("10 Oct 2021 00:00 +0000"),"Test start")
+finish=input.time(timestamp("10 Oct 2026 00:00 +0000"),"Test end")
+risk=input.float(20.0,"Risk %",minval=0.01)/100
+atrMult=input.float(1.5,"Initial ATR",minval=0.1)
+tr=ta.tr(true)
+atr14=ta.ema(tr,27)
+atr10=ta.ema(tr,19)
+mid=(high+low)/2
+bu=mid+3*atr10
+bl=mid-3*atr10
+var float fu=na
+var float fl=na
+var int sd=0
+if not na(atr10)
+    if na(fu[1])
+        fu:=bu
+        fl:=bl
+        sd:=1
+    else
+        fu:=(bu<fu[1] or close[1]>fu[1])?bu:fu[1]
+        fl:=(bl>fl[1] or close[1]<fl[1])?bl:fl[1]
+        sd:=sd[1]<0 and close>fu?1:sd[1]>0 and close<fl?-1:sd[1]
+ema200=ta.ema(close,200)
+[mac,ms,_]=ta.macd(close,12,26,9)
+rsi=ta.rsi(close,14)
+ema20w=request.security(syminfo.tickerid,"W",ta.ema(close,20)[1],lookahead=barmerge.lookahead_off)
+ema50w=request.security(syminfo.tickerid,"W",ta.ema(close,50)[1],lookahead=barmerge.lookahead_off)
+wreg=ema20w>ema50w?1:ema20w<ema50w?-1:0
+hi20=ta.highest(high[1],20)
+lo20=ta.lowest(low[1],20)
+hi10=ta.highest(high[1],10)
+lo10=ta.lowest(low[1],10)
+inWindow=time>=start and time<=finish
+var int state=0
+LONG=1
+SHORT=-1
+
+longFlip=sd>0 and sd[1]<=0
+shortFlip=sd<0 and sd[1]>=0
+if longFlip
+    state:=LONG
+else if shortFlip
+    state:=SHORT
+if strategy.position_size>0 and state!=LONG
+    strategy.close("L",comment="Signal exit")
+if strategy.position_size<0 and state!=SHORT
+    strategy.close("S",comment="Signal exit")
+if inWindow and strategy.position_size==0 and atr14>0 and state!=0 and state != state[1]
+    qty=(strategy.equity*risk)/(atrMult*atr14)
+    strategy.entry(state==LONG?"L":"S",state==LONG?strategy.long:strategy.short,qty=qty)
+strategy.exit("L-SL","L",stop=strategy.position_avg_price-atrMult*atr14)
+strategy.exit("S-SL","S",stop=strategy.position_avg_price+atrMult*atr14)
+plot(sd>0?fl:fu,"Supertrend",color=sd>0?color.green:color.red)

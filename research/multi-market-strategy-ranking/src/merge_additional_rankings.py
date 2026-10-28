@@ -1,0 +1,31 @@
+from pathlib import Path
+import numpy as np
+import pandas as pd
+root=Path(__file__).resolve().parent
+old=pd.read_csv(root/'all_completed_five_year_tests_ranked.csv')
+new=pd.read_csv(root/'additional_fixed_rr_results.csv')
+old=old[old['測試類型']!='新增趨勢／突破／均值回歸×固定TP/SL'].copy()
+old=old.drop(columns=['綜合收益排名'],errors='ignore')
+new=new.drop(columns=['新增策略排名'],errors='ignore')
+allrows=pd.concat([old,new],ignore_index=True,sort=False)
+allrows=allrows.sort_values(['五年收益_pct','OOS收益_pct'],ascending=False).reset_index(drop=True)
+allrows.insert(0,'綜合收益排名',np.arange(1,len(allrows)+1))
+allrows.to_csv(root/'all_completed_five_year_tests_ranked.csv',index=False,encoding='utf-8-sig')
+allrows.head(50).to_csv(root/'all_completed_five_year_tests_top50.csv',index=False,encoding='utf-8-sig')
+pos=allrows[(allrows['五年收益_pct']>0)&(allrows['OOS收益_pct']>0)].copy().sort_values(['五年收益_pct','OOS收益_pct'],ascending=False).reset_index(drop=True)
+pos.insert(0,'五年與OOS皆正收益排名',np.arange(1,len(pos)+1))
+pos.to_csv(root/'all_completed_five_year_tests_positive_oos.csv',index=False,encoding='utf-8-sig')
+pos50=pos[pos['五年交易數']>50].copy().sort_values(['五年收益_pct','OOS收益_pct'],ascending=False).reset_index(drop=True)
+pos50.insert(0,'正收益且超50筆排名',np.arange(1,len(pos50)+1))
+pos50.to_csv(root/'all_completed_five_year_tests_positive_oos_over50.csv',index=False,encoding='utf-8-sig')
+# New-test-only, genuinely higher-sample candidates, ranked by return.
+newpos=new[(new['五年收益_pct']>0)&(new['OOS收益_pct']>0)&(new['五年交易數']>20)].copy().sort_values(['五年收益_pct','OOS收益_pct'],ascending=False).reset_index(drop=True)
+newpos.insert(0,'新增策略排名_正收益且交易超20',np.arange(1,len(newpos)+1))
+newpos.to_csv(root/'additional_fixed_rr_positive_over20.csv',index=False,encoding='utf-8-sig')
+print('TOTAL',len(allrows),'new',len(new),'positive both',len(pos),'positive both >50',len(pos50),'new positive both >20',len(newpos))
+print('NEW POSITIVE >20 TOP20')
+print(newpos.head(20)[['新增策略排名_正收益且交易超20','商品','策略','出場方式','倉位法','五年交易數','固定止盈數','止損出場數','五年收益_pct','五年最大回撤_pct','OOS收益_pct','OOS交易數']].to_string(index=False))
+print('NEW LOW DD POSITIVE >20 TOP15')
+print(newpos.sort_values(['五年最大回撤_pct','五年收益_pct']).head(15)[['商品','策略','出場方式','倉位法','五年交易數','固定止盈數','五年收益_pct','五年最大回撤_pct','OOS收益_pct','OOS交易數']].to_string(index=False))
+print('OVERALL TOP20')
+print(allrows.head(20)[['綜合收益排名','測試類型','商品','策略','出場方式','倉位法','五年交易數','固定止盈數','止損出場數','五年收益_pct','五年最大回撤_pct','OOS收益_pct','OOS交易數']].to_string(index=False))
