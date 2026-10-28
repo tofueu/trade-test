@@ -24,7 +24,10 @@ import run_strategies as old
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "results" / "intraday"
 CACHE = ROOT / "src" / "five_year_market_data" / "intraday"
-INTERVALS = {"1h": 60, "30m": 30, "15m": 15, "5m": 5}
+INTERVALS = {"1m": 1, "3m": 3, "5m": 5, "15m": 15, "30m": 30, "1h": 60, "2h": 120, "4h": 240, "6h": 360, "8h": 480, "12h": 720, "1d": 1440}
+# Longer single-timeframe bars need enough historical candles for EMA200.
+# Keep the existing 2021-09 warm-up where it already supplies >=250 bars.
+MIN_WARMUP_BARS = 250
 START = base.START
 END = base.END
 OOS = base.OOS
@@ -82,13 +85,15 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         raise ValueError("First verified batch supports BTCUSDT and known intraday intervals only")
     CACHE.mkdir(parents=True, exist_ok=True)
     cache_file = CACHE / f"{symbol}_{interval}_{START:%Y%m%d}_{END:%Y%m%d}.csv"
+    step = pd.Timedelta(minutes=INTERVALS[interval])
+    warm_start = min(WARM, START - MIN_WARMUP_BARS * step)
     cache_hit = cache_file.exists()
     if cache_hit:
         candles = pd.read_csv(cache_file, parse_dates=["timestamp"])
         candles["timestamp"] = pd.to_datetime(candles["timestamp"], utc=True)
     else:
         frames = []
-        for month in pd.period_range("2021-09", ARCHIVE_LAST_MONTH, freq="M"):
+        for month in pd.period_range(warm_start.strftime("%Y-%m"), ARCHIVE_LAST_MONTH, freq="M"):
             name = f"{symbol}-{interval}-{month}.zip"
             url = f"{SOURCE}/monthly/klines/{symbol}/{interval}/{name}"
             frames.append(download_archive(url))
@@ -101,19 +106,18 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
             print("FETCHED", name, flush=True)
         candles = pd.concat(frames, ignore_index=True)
         candles = candles.drop_duplicates("timestamp").sort_values("timestamp")
-        candles = candles[(candles.timestamp >= WARM) & (candles.timestamp < END)]
+        candles = candles[(candles.timestamp >= warm_start) & (candles.timestamp < END)]
     candles = candles.sort_values("timestamp").reset_index(drop=True)
     # Cached CSVs are not trusted: validate again before accepting coverage.
     validate_ohlcv(candles)
-    step = pd.Timedelta(minutes=INTERVALS[interval])
     in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
     if in_window.empty or in_window.timestamp.iloc[0] > START or in_window.timestamp.iloc[-1] < END - step:
         raise RuntimeError("Five-year historical coverage incomplete; no qualified ranking")
     # Indicator signals depend on pre-window candles (EMA200, ATR, ADX).
     # A truncated cache can otherwise pass the five-year in-window test while
     # silently changing strategy entries and the reported performance.
-    warmup = candles[(candles.timestamp >= WARM) & (candles.timestamp < START)]
-    if (warmup.empty or warmup.timestamp.iloc[0] != WARM
+    warmup = candles[(candles.timestamp >= warm_start) & (candles.timestamp < START)]
+    if (warmup.empty or warmup.timestamp.iloc[0] != warm_start
             or warmup.timestamp.iloc[-1] != START - step
             or (warmup.timestamp.diff().dropna() != step).any()):
         raise RuntimeError("Indicator warm-up history incomplete; no qualified ranking")
@@ -135,6 +139,9 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         pd.util.hash_pandas_object(candles, index=False).values.tobytes()).hexdigest()
     coverage = {
         "source": SOURCE, "symbol": symbol, "timeframe": interval,
+        "warmup_start_utc": warm_start.isoformat(),
+        "warmup_bar_count": int(len(warmup)),
+        "min_warmup_bars": MIN_WARMUP_BARS,
         "start_utc": START.isoformat(), "end_exclusive_utc": END.isoformat(),
         "actual_first_utc": in_window.timestamp.iloc[0].isoformat(),
         "actual_last_utc": in_window.timestamp.iloc[-1].isoformat(),
