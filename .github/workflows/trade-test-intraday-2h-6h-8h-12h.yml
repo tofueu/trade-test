@@ -1,0 +1,44 @@
+name: Trade Test real BTCUSDT 2h 6h 8h 12h five-year batches
+
+on:
+  push:
+    branches:
+      - audit/trade-test-equity-dd-floor-20261027
+    paths:
+      - '.github/workflows/trade-test-intraday-2h-6h-8h-12h.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trade-test-real-btc-2h-6h-8h-12h
+  cancel-in-progress: false
+
+jobs:
+  btcusdt-multi-hour-five-years:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install research dependencies
+        run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Verify intraday data and ranking regression tests
+        run: python -m unittest discover -s research/multi-market-strategy-ranking/tests -p 'test_intraday.py' -v
+      - name: Run real five-year batches and persist each verified timeframe
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          for timeframe in 2h 6h 8h 12h; do
+            python research/multi-market-strategy-ranking/src/run_intraday.py --symbol BTCUSDT --timeframe "$timeframe"
+            git add research/multi-market-strategy-ranking/results/intraday/
+            if ! git diff --cached --quiet; then
+              git commit -m "data: real BTCUSDT ${timeframe} five-year ranking [skip ci]"
+              git push origin "HEAD:${GITHUB_REF_NAME}"
+            fi
+          done
