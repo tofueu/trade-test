@@ -49,8 +49,17 @@ def parse_klines_zip(payload: bytes) -> pd.DataFrame:
     raw = raw.iloc[:, :6].copy()
     raw.columns = ["open_time", "open", "high", "low", "close", "volume"]
     timestamps = pd.to_numeric(raw["open_time"], errors="raise")
-    # Some Binance historical archives switched timestamp precision.
-    unit = "us" if timestamps.max() >= 10**14 else "ms"
+    # Binance archives use either millisecond or microsecond integer epochs.
+    # Never infer the unit from the maximum alone: a mixed-unit archive would
+    # silently move its millisecond rows to 1970 when interpreted as "us".
+    if not np.isfinite(timestamps.to_numpy(dtype=float)).all():
+        raise ValueError("Non-finite Binance candle timestamp")
+    if not (timestamps % 1 == 0).all():
+        raise ValueError("Fractional Binance candle timestamp")
+    microseconds = timestamps >= 10**14
+    if microseconds.any() and not microseconds.all():
+        raise ValueError("Mixed Binance timestamp units in archive")
+    unit = "us" if microseconds.all() else "ms"
     raw["timestamp"] = pd.to_datetime(timestamps, unit=unit, utc=True)
     for column in ("open", "high", "low", "close", "volume"):
         raw[column] = pd.to_numeric(raw[column], errors="raise")
