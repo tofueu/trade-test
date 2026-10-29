@@ -47,6 +47,30 @@ class IntradayTests(unittest.TestCase):
                 z.writestr("not-a-csv.txt", "ignored")
             intraday.parse_klines_zip(buffer.getvalue())
 
+    def test_archive_overlap_must_not_silently_choose_conflicting_ohlcv(self):
+        timestamp = pd.Timestamp("2021-10-10T00:00:00Z")
+        first = {"timestamp": timestamp, "open": 100, "high": 110,
+                 "low": 90, "close": 105, "volume": 1}
+        identical = pd.DataFrame([first, first.copy()])
+        conflicting = pd.DataFrame([first, {**first, "close": 106}])
+        self.assertEqual(len(intraday.deduplicate_verified_candles(identical)), 1)
+        with self.assertRaisesRegex(ValueError, "Conflicting Binance OHLCV"):
+            intraday.deduplicate_verified_candles(conflicting)
+
+        # Exercise the real archive-aggregation path, not only the helper.
+        # A conflict must fail before any partially validated CSV is cached.
+        with tempfile.TemporaryDirectory() as folder:
+            cache = Path(folder)
+            with (patch.object(intraday, "CACHE", cache),
+                  patch.object(intraday, "START", timestamp),
+                  patch.object(intraday, "END", timestamp + pd.Timedelta(hours=2)),
+                  patch.object(intraday, "WARM", timestamp - pd.Timedelta(hours=2)),
+                  patch.object(intraday, "MIN_WARMUP_BARS", 1),
+                  patch.object(intraday, "download_archive", return_value=conflicting)):
+                with self.assertRaisesRegex(ValueError, "Conflicting Binance OHLCV"):
+                    intraday.load_real_ohlcv("BTCUSDT", "1h")
+                self.assertFalse(any(cache.iterdir()))
+
     def test_invalid_exchange_ohlcv_rejected_before_ranking(self):
         invalid_rows = (
             "1633824000000,100,99,90,105,1\n",
