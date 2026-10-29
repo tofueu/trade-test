@@ -226,6 +226,21 @@ def _atomic_write(path: Path, writer, encoding: str = "utf-8") -> None:
             temporary.unlink(missing_ok=True)
 
 
+def verify_ranking_snapshot(stem: str) -> dict:
+    """Reject a torn multi-file checkpoint rather than trusting stale CSVs."""
+    prefix = OUTPUT / stem
+    manifest = json.loads(Path(str(prefix) + "_provenance.json").read_text(encoding="utf-8"))
+    for suffix, field in (("_ranking.csv", "ranking_csv_sha256"),
+                          ("_top50.csv", "top50_csv_sha256")):
+        expected = manifest.get(field)
+        if not isinstance(expected, str) or len(expected) != 64:
+            raise ValueError(f"Missing verified ranking digest: {field}")
+        actual = hashlib.sha256(Path(str(prefix) + suffix).read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(f"Ranking checkpoint digest mismatch: {field}")
+    return manifest
+
+
 def write_rankings(rows: list[dict], coverage: dict) -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     stem = f"new_{coverage['symbol']}_{coverage['timeframe']}_five_year"
@@ -260,6 +275,7 @@ def write_rankings(rows: list[dict], coverage: dict) -> None:
     }
     _atomic_write(provenance_path, lambda handle: json.dump(
         provenance, handle, ensure_ascii=False, indent=2))
+    verify_ranking_snapshot(stem)
     print("RANKING", len(frame), "EXECUTED", int(frame["有實際成交"].sum()),
           "QUALIFIED", int(frame["符合門檻"].sum()), flush=True)
 
