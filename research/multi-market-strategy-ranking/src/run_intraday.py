@@ -74,6 +74,22 @@ def validate_ohlcv(frame: pd.DataFrame) -> None:
         raise ValueError("Missing Binance candle timestamp")
 
 
+def deduplicate_verified_candles(candles: pd.DataFrame) -> pd.DataFrame:
+    """Accept identical archive overlap but reject conflicting market candles.
+
+    Monthly/daily ZIP overlap can repeat a timestamp. Silently keeping the
+    first row when OHLCV differs would make five-year results depend on the
+    order of downloaded archives, so treat conflicts as invalid source data.
+    """
+    duplicates = candles[candles.duplicated("timestamp", keep=False)]
+    if not duplicates.empty:
+        fields = ["open", "high", "low", "close", "volume"]
+        distinct = duplicates.groupby("timestamp", sort=False)[fields].nunique(dropna=False)
+        if distinct.gt(1).any().any():
+            raise ValueError("Conflicting Binance OHLCV at duplicate timestamp")
+    return candles.drop_duplicates("timestamp")
+
+
 def download_archive(url: str) -> pd.DataFrame:
     request = urllib.request.Request(url, headers={"User-Agent": "TradeTest-RealIntraday/1.0"})
     with urllib.request.urlopen(request, timeout=60) as response:
@@ -105,7 +121,7 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
             frames.append(download_archive(url))
             print("FETCHED", name, flush=True)
         candles = pd.concat(frames, ignore_index=True)
-        candles = candles.drop_duplicates("timestamp").sort_values("timestamp")
+        candles = deduplicate_verified_candles(candles).sort_values("timestamp")
         candles = candles[(candles.timestamp >= warm_start) & (candles.timestamp < END)]
     candles = candles.sort_values("timestamp").reset_index(drop=True)
     # Cached CSVs are not trusted: validate again before accepting coverage.
