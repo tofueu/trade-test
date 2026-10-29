@@ -242,6 +242,7 @@ class IntradayTests(unittest.TestCase):
                 baseline = {path: path.read_bytes() for path in
                             (ranking, top50, provenance)}
                 manifest = json.loads(provenance.read_text(encoding="utf-8"))
+                self.assertEqual(intraday.verify_ranking_snapshot(prefix.name), manifest)
                 self.assertEqual(manifest["ranking_csv_sha256"],
                                  hashlib.sha256(ranking.read_bytes()).hexdigest())
                 self.assertEqual(manifest["top50_csv_sha256"],
@@ -286,6 +287,8 @@ class IntradayTests(unittest.TestCase):
                             [{**first[0], "五年收益_pct": -20.0}], coverage)
                 self.assertNotEqual(old_digest,
                                     hashlib.sha256(ranking.read_bytes()).hexdigest())
+                with self.assertRaisesRegex(ValueError, "digest mismatch"):
+                    intraday.verify_ranking_snapshot(prefix.name)
                 self.assertEqual(list(output.glob(".*.tmp")), [])
 
     def test_capital_stop_excludes_unexecuted_signal_exit_counts(self):
