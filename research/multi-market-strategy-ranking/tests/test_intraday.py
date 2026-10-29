@@ -41,14 +41,14 @@ class IntradayTests(unittest.TestCase):
     def test_mixed_and_fractional_binance_timestamps_rejected(self):
         ms = 1633824000000
         us = 1633827600000000
-        mixed = (f"{ms},100,110,90,105,1\\n"
-                 f"{us},105,112,101,108,2\\n").replace("\\\\n", "\\n")
+        mixed = (f"{ms},100,110,90,105,1\n"
+                 f"{us},105,112,101,108,2\n")
         with self.assertRaisesRegex(ValueError, "Mixed Binance timestamp units"):
             intraday.parse_klines_zip(zip_csv(mixed))
-        fractional = f"{ms}.5,100,110,90,105,1\\n".replace("\\\\n", "\\n")
+        fractional = f"{ms}.5,100,110,90,105,1\n"
         with self.assertRaisesRegex(ValueError, "Fractional Binance candle timestamp"):
             intraday.parse_klines_zip(zip_csv(fractional))
-        nonfinite = "NaN,100,110,90,105,1\\n".replace("\\\\n", "\\n")
+        nonfinite = "NaN,100,110,90,105,1\n"
         with self.assertRaisesRegex(ValueError, "Non-finite Binance candle timestamp"):
             intraday.parse_klines_zip(zip_csv(nonfinite))
 
