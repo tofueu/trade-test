@@ -38,6 +38,20 @@ class IntradayTests(unittest.TestCase):
             self.assertEqual(data.timestamp.iloc[0], pd.Timestamp("2021-10-10", tz="UTC"))
             self.assertEqual(float(data.close.iloc[1]), 108)
 
+    def test_mixed_and_fractional_binance_timestamps_rejected(self):
+        ms = 1633824000000
+        us = 1633827600000000
+        mixed = (f"{ms},100,110,90,105,1\\n"
+                 f"{us},105,112,101,108,2\\n").replace("\\\\n", "\\n")
+        with self.assertRaisesRegex(ValueError, "Mixed Binance timestamp units"):
+            intraday.parse_klines_zip(zip_csv(mixed))
+        fractional = f"{ms}.5,100,110,90,105,1\\n".replace("\\\\n", "\\n")
+        with self.assertRaisesRegex(ValueError, "Fractional Binance candle timestamp"):
+            intraday.parse_klines_zip(zip_csv(fractional))
+        nonfinite = "NaN,100,110,90,105,1\\n".replace("\\\\n", "\\n")
+        with self.assertRaisesRegex(ValueError, "Non-finite Binance candle timestamp"):
+            intraday.parse_klines_zip(zip_csv(nonfinite))
+
     def test_malformed_zip_rejected(self):
         with self.assertRaises(ValueError):
             intraday.parse_klines_zip(zip_csv("open_time,open\n123,5\n"))
