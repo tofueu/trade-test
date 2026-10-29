@@ -11,6 +11,7 @@ import io
 import json
 import math
 import os
+import tempfile
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -207,6 +208,24 @@ def summarize_execution(trades: list[dict], fraction: float):
     return full, executed, is_executed, oos_executed, reasons, oos_return_pct
 
 
+def _atomic_write(path: Path, writer, encoding: str = "utf-8") -> None:
+    """Preserve the previous ranking if serialization or replacement fails."""
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding=encoding, newline="", dir=path.parent,
+            prefix=f".{path.name}.", suffix=".tmp", delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+            writer(handle)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
+
+
 def write_rankings(rows: list[dict], coverage: dict) -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     stem = f"new_{coverage['symbol']}_{coverage['timeframe']}_five_year"
@@ -218,19 +237,31 @@ def write_rankings(rows: list[dict], coverage: dict) -> None:
     frame = frame.sort_values(["符合門檻", "有實際成交", "五年收益_pct"],
                               ascending=[False, False, False]).reset_index(drop=True)
     frame.insert(0, "新策略排名", np.arange(1, len(frame) + 1))
-    frame.to_csv(OUTPUT / f"{stem}_ranking.csv", index=False, encoding="utf-8-sig")
-    frame[frame["有實際成交"]].head(50).to_csv(
-        OUTPUT / f"{stem}_top50.csv", index=False, encoding="utf-8-sig")
-    with (OUTPUT / f"{stem}_provenance.json").open("w", encoding="utf-8") as f:
-        json.dump({**coverage, "completed_strategy_names": sorted(set(frame["策略"])),
-                   "ranking_rows": len(frame), "qualified_rows": int(frame["符合門檻"].sum()),
-                   "executed_ranking_rows": int(frame["有實際成交"].sum()),
-                   "zero_execution_rows": int((~frame["有實際成交"]).sum()),
-                   "oos_return_definition": "Executed OOS R times initial stake, divided by initial capital; no capital reset"},
-                  f, ensure_ascii=False, indent=2)
+    ranking_path = OUTPUT / f"{stem}_ranking.csv"
+    top50_path = OUTPUT / f"{stem}_top50.csv"
+    provenance_path = OUTPUT / f"{stem}_provenance.json"
+    # The runner can be interrupted between strategies. Replace each file
+    # atomically; never truncate a previous good leaderboard in place.
+    _atomic_write(ranking_path, lambda handle: frame.to_csv(handle, index=False),
+                  encoding="utf-8-sig")
+    executed_frame = frame[frame["有實際成交"]].head(50)
+    _atomic_write(top50_path, lambda handle: executed_frame.to_csv(handle, index=False),
+                  encoding="utf-8-sig")
+    # JSON is the last commit marker. Its digests make a crash between the two
+    # CSV replacements detectable instead of silently mixing generations.
+    provenance = {
+        **coverage, "completed_strategy_names": sorted(set(frame["策略"])),
+        "ranking_rows": len(frame), "qualified_rows": int(frame["符合門檻"].sum()),
+        "executed_ranking_rows": int(frame["有實際成交"].sum()),
+        "zero_execution_rows": int((~frame["有實際成交"]).sum()),
+        "ranking_csv_sha256": hashlib.sha256(ranking_path.read_bytes()).hexdigest(),
+        "top50_csv_sha256": hashlib.sha256(top50_path.read_bytes()).hexdigest(),
+        "oos_return_definition": "Executed OOS R times initial stake, divided by initial capital; no capital reset",
+    }
+    _atomic_write(provenance_path, lambda handle: json.dump(
+        provenance, handle, ensure_ascii=False, indent=2))
     print("RANKING", len(frame), "EXECUTED", int(frame["有實際成交"].sum()),
           "QUALIFIED", int(frame["符合門檻"].sum()), flush=True)
-
 
 def main() -> None:
     parser = argparse.ArgumentParser()
