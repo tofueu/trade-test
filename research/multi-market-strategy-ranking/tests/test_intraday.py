@@ -1,4 +1,5 @@
 """Offline tests for real intraday loader and strict qualification (no network)."""
+import hashlib
 import importlib.util
 import io
 import json
@@ -224,6 +225,68 @@ class IntradayTests(unittest.TestCase):
                 metadata = json.loads(Path(str(prefix) + "_provenance.json").read_text())
                 self.assertEqual(metadata["qualified_rows"], 1)
 
+
+    def test_intraday_rankings_are_atomic_and_provenance_hashes_match(self):
+        coverage = {"symbol": "BTCUSDT", "timeframe": "1h",
+                    "missing_or_irregular_intervals": 0}
+        rows = [{"策略": "EMA20_50_ADX20", "五年交易數": 70,
+                 "五年收益_pct": 110.0}]
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder)
+            with patch.object(intraday, "OUTPUT", output):
+                intraday.write_rankings(rows, coverage)
+                prefix = output / "new_BTCUSDT_1h_five_year"
+                ranking = Path(str(prefix) + "_ranking.csv")
+                top50 = Path(str(prefix) + "_top50.csv")
+                provenance = Path(str(prefix) + "_provenance.json")
+                baseline = {path: path.read_bytes() for path in
+                            (ranking, top50, provenance)}
+                manifest = json.loads(provenance.read_text(encoding="utf-8"))
+                self.assertEqual(manifest["ranking_csv_sha256"],
+                                 hashlib.sha256(ranking.read_bytes()).hexdigest())
+                self.assertEqual(manifest["top50_csv_sha256"],
+                                 hashlib.sha256(top50.read_bytes()).hexdigest())
+                # A failed atomic replacement must not truncate a prior result.
+                with patch.object(intraday.os, "replace",
+                                  side_effect=OSError("simulated replace failure")):
+                    with self.assertRaisesRegex(OSError, "simulated replace failure"):
+                        intraday.write_rankings(
+                            [{**rows[0], "五年收益_pct": -20.0}], coverage)
+                for path, expected in baseline.items():
+                    self.assertEqual(path.read_bytes(), expected)
+                self.assertEqual(list(output.glob(".*.tmp")), [])
+
+    def test_interrupted_multi_file_checkpoint_is_detectable_by_digest(self):
+        coverage = {"symbol": "BTCUSDT", "timeframe": "1h",
+                    "missing_or_irregular_intervals": 0}
+        first = [{"策略": "EMA20_50_ADX20", "五年交易數": 70,
+                  "五年收益_pct": 110.0}]
+        with tempfile.TemporaryDirectory() as folder:
+            output = Path(folder)
+            with patch.object(intraday, "OUTPUT", output):
+                intraday.write_rankings(first, coverage)
+                prefix = output / "new_BTCUSDT_1h_five_year"
+                ranking = Path(str(prefix) + "_ranking.csv")
+                provenance = Path(str(prefix) + "_provenance.json")
+                old_digest = json.loads(provenance.read_text())["ranking_csv_sha256"]
+                original_replace = intraday.os.replace
+                replacements = 0
+
+                def fail_on_second_replace(source, destination):
+                    nonlocal replacements
+                    replacements += 1
+                    if replacements == 2:
+                        raise OSError("second file replacement interrupted")
+                    return original_replace(source, destination)
+
+                with patch.object(intraday.os, "replace",
+                                  side_effect=fail_on_second_replace):
+                    with self.assertRaisesRegex(OSError, "second file"):
+                        intraday.write_rankings(
+                            [{**first[0], "五年收益_pct": -20.0}], coverage)
+                self.assertNotEqual(old_digest,
+                                    hashlib.sha256(ranking.read_bytes()).hexdigest())
+                self.assertEqual(list(output.glob(".*.tmp")), [])
 
     def test_capital_stop_excludes_unexecuted_signal_exit_counts(self):
         trades = [
