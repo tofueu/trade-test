@@ -33,7 +33,11 @@ import run_intraday as intraday
 
 OUT = ROOT / "results" / "all_timeframes"
 FAMILIES = ("original", "compound", "fixed", "new")
-PERIODS = tuple(intraday.INTERVALS)
+DERIVED = {
+    "2m": ("1m", 2), "10m": ("5m", 2),
+    "45m": ("15m", 3), "3h": ("1h", 3),
+}
+PERIODS = tuple(intraday.INTERVALS) + tuple(DERIVED)
 SYMBOL_MARKET = {
     "BTCUSDT": "Crypto futures", "ETHUSDT": "Crypto futures",
     "SOLUSDT": "Crypto futures",
@@ -45,7 +49,46 @@ SYMBOL_MARKET = {
 def load_market_ohlcv(symbol, timeframe):
     market = SYMBOL_MARKET[symbol]
     if market == "Crypto futures":
-        frame, coverage = intraday.load_real_ohlcv(symbol, timeframe)
+        base_tf, ratio = DERIVED.get(timeframe, (timeframe, 1))
+        frame, coverage = intraday.load_real_ohlcv(symbol, base_tf)
+        if ratio > 1:
+            # Each derived bar consists exclusively of the expected number of
+            # consecutive, exchange-recorded OHLCV source bars, never of
+            # invented interpolated K-lines. UTC origin matches crypto candles.
+            mins = intraday.INTERVALS[base_tf] * ratio
+            buckets = frame["timestamp"].dt.floor(f"{mins}min")
+            group = frame.groupby(buckets, sort=True)
+            counts = group.size()
+            agg = group.agg({
+                "open": "first", "high": "max", "low": "min",
+                "close": "last", "volume": "sum"
+            }).reset_index()
+            target_step = pd.Timedelta(minutes=mins)
+            inside = (agg["timestamp"] >= base.START) & (agg["timestamp"] < base.END)
+            warm = agg["timestamp"] < base.START
+            if (not inside.any() or (counts.loc[agg.loc[inside, "timestamp"]] != ratio).any()
+                    or int(warm.sum()) < 250):
+                raise ValueError(
+                    f"UNAVAILABLE_INCOMPLETE_DERIVED_BARS: {symbol}/{timeframe}")
+            frame = agg.loc[~((warm) & (counts.to_numpy() != ratio))].reset_index(drop=True)
+            live = frame[(frame["timestamp"] >= base.START) & (frame["timestamp"] < base.END)]
+            if (live["timestamp"].iloc[0] != base.START
+                    or live["timestamp"].iloc[-1] != base.END-target_step
+                    or not (live["timestamp"].diff().dropna() == target_step).all()):
+                raise ValueError(f"UNAVAILABLE_DERIVED_FIVE_YEAR_GAPS: {symbol}/{timeframe}")
+            digest = hashlib.sha256(pd.util.hash_pandas_object(
+                frame, index=False).values.tobytes()).hexdigest()
+            coverage.update({
+                "timeframe": timeframe, "source_timeframe": base_tf,
+                "resample_factor": ratio, "resampled_from_only_verified_ohlcv": True,
+                "start_utc": base.START.isoformat(),
+                "end_exclusive_utc": base.END.isoformat(),
+                "bar_count": len(live),
+                "warmup_bar_count": int((frame["timestamp"] < base.START).sum()),
+                "ohlcv_sha256": digest,
+                "actual_first_utc": live["timestamp"].iloc[0].isoformat(),
+                "actual_last_utc": live["timestamp"].iloc[-1].isoformat(),
+            })
         coverage["tradable_proxy"] = True
         return frame, coverage, market
     if timeframe != "1d":
