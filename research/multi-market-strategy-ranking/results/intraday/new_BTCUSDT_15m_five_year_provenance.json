@@ -1,0 +1,30 @@
+{
+  "source": "https://data.binance.vision/data/futures/um",
+  "symbol": "BTCUSDT",
+  "timeframe": "15m",
+  "start_utc": "2021-10-10T00:00:00+00:00",
+  "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+  "actual_first_utc": "2021-10-10T00:00:00+00:00",
+  "actual_last_utc": "2026-10-09T23:45:00+00:00",
+  "bar_count": 175296,
+  "missing_or_irregular_intervals": 0,
+  "ohlcv_sha256": "005e9ae45c60e896d95f56591d232c83ea3c3038a8cc6527141f17f3ffde17d1",
+  "historical_data": true,
+  "tradingview_run_verified": false,
+  "pine_v6_parity_verified": false,
+  "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+  "completed_strategy_names": [
+    "BB_Reentry_RSI_ADX25",
+    "Donchian20_Volume_EMA200",
+    "EMA20_50_ADX20",
+    "Keltner20_1.5ATR_EMA200",
+    "MACD_EMA200_ADX20",
+    "Supertrend_ADX20",
+    "Turtle55_20_EMA200"
+  ],
+  "ranking_rows": 28,
+  "qualified_rows": 0,
+  "executed_ranking_rows": 7,
+  "zero_execution_rows": 21,
+  "oos_return_definition": "Executed OOS R times initial stake, divided by initial capital; no capital reset"
+}
