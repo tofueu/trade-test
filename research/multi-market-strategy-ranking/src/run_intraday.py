@@ -176,6 +176,7 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         raise ValueError("Only confirmed Binance USD-M futures symbols and kline intervals are supported")
     CACHE.mkdir(parents=True, exist_ok=True)
     cache_file = CACHE / f"{symbol}_{interval}_{START:%Y%m%d}_{END:%Y%m%d}.csv"
+    repair_manifest = cache_file.with_name(cache_file.name + ".verified_daily_zip_sources.json")
     step = pd.Timedelta(minutes=INTERVALS[interval])
     warm_start = min(WARM, START - MIN_WARMUP_BARS * step)
     cache_hit = cache_file.exists()
@@ -215,6 +216,14 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
     diffs = in_window.timestamp.diff().dropna()
     gaps = int((diffs != step).sum())
     gap_repair_receipts = []
+    if cache_hit and repair_manifest.exists():
+        verified = json.loads(repair_manifest.read_text(encoding="utf-8"))
+        # A file in the local cache is not evidence unless its provenance
+        # receipt matches these exact bytes.
+        if (hashlib.sha256(cache_file.read_bytes()).hexdigest()
+                != verified.get("cache_csv_sha256")):
+            raise RuntimeError("Cached exchange-gap restoration receipt hash mismatch")
+        gap_repair_receipts = verified["verified_daily_zip_sources"]
     if gaps and not cache_hit:
         candles, gap_repair_receipts = restore_gap_klines_from_binance_daily_archive(
             candles, symbol, interval, step)
@@ -237,6 +246,14 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         try:
             candles.to_csv(temporary, index=False)
             os.replace(temporary, cache_file)
+            if gap_repair_receipts:
+                receipt_tmp = repair_manifest.with_name(
+                    repair_manifest.name + f".{os.getpid()}.tmp")
+                receipt_tmp.write_text(json.dumps({
+                    "cache_csv_sha256": hashlib.sha256(cache_file.read_bytes()).hexdigest(),
+                    "verified_daily_zip_sources": gap_repair_receipts,
+                }, ensure_ascii=False, indent=2), encoding="utf-8")
+                os.replace(receipt_tmp, repair_manifest)
         finally:
             if temporary.exists():
                 temporary.unlink()
