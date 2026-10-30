@@ -229,13 +229,19 @@ def main() -> None:
         signal_fn = comp["custom_signals"]
         backtest_fn = exits.backtest
         modes = exits.MODES
-    else:
+    elif args.family == "fixed":
         fixed = load_legacy_definitions("five_year_low_drawdown_fixed_rr.py",
                                         ("RULES", "TP_RS"), ("signals", "run_bracket"))
         tasks = [(s, s, v, "") for s, v in fixed["RULES"].items()]
         signal_fn = None
         backtest_fn = fixed["run_bracket"]
         modes = [(f"固定止盈{tp:g}R", tp, None) for tp in fixed["TP_RS"]]
+    else:
+        new_rules = intraday.old
+        tasks = [(s, s, v, "") for s, v in new_rules.RULES.items()]
+        signal_fn = None
+        backtest_fn = new_rules.run
+        modes = [(f"固定止盈{tp:g}R", tp, None) for tp in new_rules.TP_RS]
 
     # Preserve the source's exact signals but compute each once per OHLCV
     # batch. Exit variants change stops/TP only; recomputing the same millions
@@ -247,7 +253,7 @@ def main() -> None:
                 signal_cache[name] = signal_fn(d, name)
             return signal_cache[name]
         base.make_signals = cached_signals
-    else:
+    elif args.family == "fixed":
         fixed_scope = fixed["run_bracket"].__globals__
         source_fixed_signals = fixed_scope["signals"]
         def cached_fixed_signals(d, name):
@@ -255,19 +261,33 @@ def main() -> None:
                 signal_cache[name] = source_fixed_signals(d, name)
             return signal_cache[name]
         fixed_scope["signals"] = cached_fixed_signals
+    else:
+        new_scope = new_rules.run.__globals__
+        source_new_signals = new_scope["make_state"]
+        def cached_new_signals(d, name):
+            if name not in signal_cache:
+                signal_cache[name] = source_new_signals(d, name)
+            return signal_cache[name]
+        new_scope["make_state"] = cached_new_signals
 
     trades_out = []
     rows = []
     statuses = []
     try:
         for display_name, input_name, rule, _ in tasks:
+            if not coverage.get("volume_available", True) and (
+                    "Volume" in display_name or "volume" in display_name):
+                statuses.append({"strategy": display_name, "status": "unavailable_volume",
+                                 "reason": "provider lacks historical volume"})
+                print("UNAVAILABLE_VOLUME", args.symbol, display_name, flush=True)
+                continue
             options = []
             for mode, tp, trail in modes:
-                if args.family == "fixed":
-                    trades = backtest_fn(raw, "Crypto futures", args.symbol,
+                if args.family in ("fixed", "new"):
+                    trades = backtest_fn(raw, execution_market, args.symbol,
                                          input_name, tp)
                 else:
-                    trades = backtest_fn(raw, "Crypto futures", args.symbol,
+                    trades = backtest_fn(raw, execution_market, args.symbol,
                                          input_name, tp, trail)
                 is_t = [t for t in trades
                         if pd.Timestamp(t["entry_time"]) < base.OOS
@@ -300,7 +320,7 @@ def main() -> None:
                 trades_out.extend(tdf.to_dict("records"))
                 rows.extend(stats(trades, args.symbol, args.timeframe,
                                   args.family, display_name, mode, rule,
-                                  digest, coverage))
+                                  digest, coverage, market))
             statuses.append({"strategy": display_name, "status": "completed",
                              "tested_exit_count": len(options),
                              "saved_exit_count": len(chosen)})
