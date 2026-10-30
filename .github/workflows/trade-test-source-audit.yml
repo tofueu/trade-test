@@ -64,4 +64,5 @@ jobs:
                   print('SOLUSDT_SOURCE_VALID',tf,prov)
               except Exception as e:
                   print('SOLUSDT_FULL_FIVE_YEAR_UNAVAILABLE',tf,str(e))
+                  raise
           PY
