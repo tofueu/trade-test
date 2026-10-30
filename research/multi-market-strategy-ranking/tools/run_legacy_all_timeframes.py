@@ -53,7 +53,11 @@ def load_market_ohlcv(symbol, timeframe):
     # Fetch enough daily pre-window bars for 200-period indicators.
     # Exchange holidays are genuine gaps; do not manufacture fake candles.
     base.WARM = pd.Timestamp("2020-01-01", tz="UTC")
-    frame = base.yahoo_daily(symbol)
+    # Yahoo lists the canonical USD/JPY feed as JPY=X. The alternate
+    # USDJPY=X feed has inconsistent daily high/low in the sampled period;
+    # prefer canonical JPY=X, never alter or synthesize source prices.
+    source_symbol = "JPY=X" if symbol == "USDJPY=X" else symbol
+    frame = base.yahoo_daily(source_symbol)
     frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
     frame = frame.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
     fields = ["open", "high", "low", "close"]
@@ -74,13 +78,27 @@ def load_market_ohlcv(symbol, timeframe):
             or window["timestamp"].iloc[0] > base.START + pd.Timedelta(days=5)
             or window["timestamp"].iloc[-1] < base.END - pd.Timedelta(days=8)):
         raise ValueError(f"UNAVAILABLE_YAHOO_5Y_COVERAGE: {symbol} {len(window)} bars, {len(warm)} warm")
-    max_gap = window["timestamp"].diff().max()
+    dates = window["timestamp"]
+    gaps = dates.diff()
+    max_gap = gaps.max()
     if max_gap > pd.Timedelta(days=10):
-        raise ValueError(f"UNAVAILABLE_YAHOO_LONG_GAP: {symbol} {max_gap}")
+        previous = dates.shift(1)
+        long_indices = window.index[gaps > pd.Timedelta(days=10)]
+        allowed_taiwan_lunar_holiday = (symbol == "^TWII" and all(
+            1 <= dates.loc[i].month <= 3
+            and 1 <= previous.loc[i].month <= 3
+            and gaps.loc[i] <= pd.Timedelta(days=16)
+            for i in long_indices))
+        if not allowed_taiwan_lunar_holiday:
+            raise ValueError(f"UNAVAILABLE_YAHOO_LONG_GAP: {symbol} {max_gap}")
+        print("TAIWAN_LUNAR_NEW_YEAR_MARKET_CLOSURES", [
+            {"from": str(previous.loc[i]), "to": str(dates.loc[i]),
+             "days": str(gaps.loc[i])} for i in long_indices], flush=True)
     digest = hashlib.sha256(pd.util.hash_pandas_object(
         frame, index=False).values.tobytes()).hexdigest()
     coverage = {
-        "source": "Yahoo Finance chart historical daily OHLC", "symbol": symbol,
+        "source": "Yahoo Finance chart historical daily OHLC",
+        "source_symbol": source_symbol, "symbol": symbol,
         "timeframe": timeframe, "start_utc": base.START.isoformat(),
         "end_exclusive_utc": base.END.isoformat(),
         "warmup_bar_count": len(warm), "bar_count": len(window),
