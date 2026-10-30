@@ -1,3 +1,4 @@
 __pycache__/
 *.py[cod]
 *$py.class
+research/multi-market-strategy-ranking/src/five_year_market_data/*.csv
