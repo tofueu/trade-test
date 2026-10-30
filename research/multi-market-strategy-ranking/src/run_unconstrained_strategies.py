@@ -192,7 +192,7 @@ def run_all():
                         "Strategy": name,
                         "Market": market,
                         "Symbol": symbol,
-                        "Timeframe": "1d",
+                        "Timeframe": "1d", "Start Date": str(raw.timestamp.min().date()), "End Date": str(raw.timestamp.max().date()), "Data Source": "Yahoo/Binance", "Costs": "5bps Crypto / 1 tick Trad / 0.4pip FX",
                         "5y Net Return %": f"{ret:.2f}",
                         "CAGR %": f"{((1 + ret/100)**(1/5) - 1)*100:.2f}" if ret > 0 else "0.00",
                         "Trades": len(trades),
