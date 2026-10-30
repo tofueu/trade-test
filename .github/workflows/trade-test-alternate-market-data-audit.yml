@@ -1,0 +1,70 @@
+name: Trade Test validate missing SOL and USDJPY alternative real candles
+
+on:
+  push:
+    branches: [report/trade-test-multi-market-20261030]
+    paths: ['.github/workflows/trade-test-alternate-market-data-audit.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sol-real-exchange-archive-and-api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check authentic Binance missing-day daily archives and live API
+        run: |
+          python - <<'PY'
+          import urllib.request,urllib.error,json
+          d=['2022-02-26','2022-02-27','2022-02-28',
+             '2022-04-01','2022-04-02']
+          for tf in ['1d','4h']:
+              for day in d:
+                  u=f'https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/{tf}/SOLUSDT-{tf}-{day}.zip'
+                  try:
+                      req=urllib.request.Request(u,method='HEAD')
+                      with urllib.request.urlopen(req,timeout=15) as resp:
+                          print('DAILY_ARCHIVE_STATUS',tf,day,resp.status,
+                                'bytes',resp.headers.get('Content-Length'),flush=True)
+                  except Exception as e:
+                      print('DAILY_ARCHIVE_NOT_CONFIRMED',tf,day,str(e)[:200],flush=True)
+              ms=1645833600000
+              url=f'https://fapi.binance.com/fapi/v1/klines?symbol=SOLUSDT&interval={tf}&startTime={ms}&endTime=1646092800000&limit=100'
+              try:
+                  with urllib.request.urlopen(url,timeout=20) as resp:
+                      o=json.loads(resp.read())
+                      print('BINANCE_FUTURES_API',tf,'status',resp.status,
+                            'bars',len(o) if isinstance(o,list) else o,flush=True)
+              except Exception as e:
+                  print('BINANCE_FUTURES_API_UNAVAILABLE',tf,str(e)[:200],flush=True)
+          PY
+
+  fx-independent-daily-provider-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'pandas>=2.0,<3'
+      - name: Verify real five-year Stooq USDJPY OHLC or record unavailability
+        run: |
+          python - <<'PY'
+          import urllib.request,urllib.error,io,pandas as pd
+          u='https://stooq.com/q/d/l/?s=usdjpy&d1=20200101&d2=20261010&i=d'
+          try:
+              req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0 TradeTest research'})
+              with urllib.request.urlopen(req,timeout=20) as resp: content=resp.read()
+              print('STOOQ_RESPONSE_BYTES',len(content),'PREFIX',repr(content[:200]),flush=True)
+              f=pd.read_csv(io.BytesIO(content))
+              assert {'Date','Open','High','Low','Close'}.issubset(f.columns),f.columns
+              for c in ['Open','High','Low','Close']: f[c]=pd.to_numeric(f[c])
+              invalid=((f.High<f[['Open','Close','Low']].max(axis=1))|
+                      (f.Low>f[['Open','Close','High']].min(axis=1))).sum()
+              print('STOOQ_USDJPY_COVERAGE',str(f.Date.min()),str(f.Date.max()),
+                    'bars',len(f),'invalid_ohlc',int(invalid),flush=True)
+          except Exception as e:
+              print('STOOQ_USDJPY_UNAVAILABLE',type(e).__name__,str(e),flush=True)
+          PY
