@@ -21,9 +21,9 @@ jobs:
     timeout-minutes: 350
     strategy:
       fail-fast: false
-      max-parallel: 3
+      max-parallel: 4
       matrix:
-        timeframe: [1d, 4h]
+        timeframe: [1d, 4h, 12h, 8h, 6h, 2h, 1h, 30m, 15m, 5m, 3m, 1m]
         family: [original, compound, fixed]
     steps:
       - uses: actions/checkout@v4
@@ -110,5 +110,7 @@ jobs:
           git add research/multi-market-strategy-ranking/results/combined_top100/
           if ! git diff --cached --quiet; then
             git commit -m 'results: real 5y old Python timeframes, fills, SHA256, refreshed old+new top100 [skip ci]'
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
             git push origin "HEAD:$GITHUB_REF_NAME"
           fi
