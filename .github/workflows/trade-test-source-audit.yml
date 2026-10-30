@@ -29,6 +29,16 @@ jobs:
           import sys
           sys.path.insert(0,'research/multi-market-strategy-ranking/tools')
           import run_legacy_all_timeframes as x
+          if '${{ matrix.symbol }}' == 'USDJPY=X':
+              raw=x.base.yahoo_daily('JPY=X')
+              cols=['open','high','low','close']
+              raw[cols]=raw[cols].apply(__import__('pandas').to_numeric,errors='coerce')
+              issues=raw[(raw.high<raw[['open','low','close']].max(axis=1))|
+                         (raw.low>raw[['open','high','close']].min(axis=1))]
+              print('USDJPY_BAD_OHLC',len(issues),'of',len(raw),
+                    issues.head(15).to_json(orient='records'),
+                    'max_high_violation',float((raw[['open','close']].max(axis=1)-raw.high).clip(lower=0).max()),
+                    'max_low_violation',float((raw.low-raw[['open','close']].min(axis=1)).clip(lower=0).max()),flush=True)
           f,m,market=x.load_market_ohlcv('${{ matrix.symbol }}','1d')
           assert m['bar_count']>900 and m['warmup_bar_count']>=200, m
           print('YAHOO_SOURCE_VERIFIED',m)
