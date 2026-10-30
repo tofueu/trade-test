@@ -1,0 +1,79 @@
+name: Trade Test old and new Python backtest evidence recheck
+
+on:
+  push:
+    branches:
+      - report/trade-test-old-new-top100-20261030
+    paths:
+      - '.github/workflows/trade-test-old-new-recheck.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: trade-test-old-new-recheck-20261030
+  cancel-in-progress: false
+
+jobs:
+  legacy-daily-five-year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Recompute old daily strategy families against historical data
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd research/multi-market-strategy-ranking/src
+          python five_year_exit_method_sweep.py
+          python five_year_compound_strategy_sweep.py
+          python five_year_low_drawdown_fixed_rr.py
+          python combine_all_backtest_rankings.py
+          python run_strategies.py
+          python merge_additional_rankings.py
+      - name: Upload old sweep evidence (even if incomplete)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-daily-five-year-recheck
+          path: |
+            research/multi-market-strategy-ranking/src/*ranked.csv
+            research/multi-market-strategy-ranking/src/*top50.csv
+            research/multi-market-strategy-ranking/src/*results*.csv
+            research/multi-market-strategy-ranking/src/*ledger.csv
+          if-no-files-found: warn
+          retention-days: 14
+
+  new-btc-strong-periods-five-year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        timeframe: [4h, 6h, 8h, 12h]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Verify OHLCV parsing and checkpoint tests
+        run: python -m unittest discover -s research/multi-market-strategy-ranking/tests -p 'test_intraday.py' -v
+      - name: Recompute BTCUSDT real five-year timeframe
+        run: python research/multi-market-strategy-ranking/src/run_intraday.py --symbol BTCUSDT --timeframe "${{ matrix.timeframe }}"
+      - name: Upload new timeframe evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: new-btc-${{ matrix.timeframe }}-five-year-recheck
+          path: research/multi-market-strategy-ranking/results/intraday/new_BTCUSDT_${{ matrix.timeframe }}_five_year_*
+          if-no-files-found: warn
+          retention-days: 14
