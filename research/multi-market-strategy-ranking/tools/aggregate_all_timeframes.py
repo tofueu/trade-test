@@ -256,6 +256,62 @@ def main():
     f.to_csv(OUT / "top100_by_strategy.csv", index=False, encoding="utf-8-sig")
     f.to_csv(OUT / "all_strategy_families_ranked.csv",
              index=False, encoding="utf-8-sig")
+    # Unlike the family-best headline (38 rows), preserve the complete
+    # strategy-by-market-by-timeframe standings, including losers/low sample
+    # configs and their distinct old/new research provenance.
+    detail = (df.sort_values(["五年收益_pct", "最大回撤_pct"],
+                             ascending=[False, True])
+                .drop_duplicates(["原始策略族群", "策略", "商品", "週期"])
+                .reset_index(drop=True))
+    detail.insert(0, "市場週期策略名次", range(1, len(detail) + 1))
+    detail_cols = ["市場週期策略名次", "原始策略族群", "來源", "原始狀態",
+                   "策略", "商品", "週期", "出場方式", "倉位法",
+                   "五年交易數", "五年收益_pct", "最大回撤_pct",
+                   "OOS收益_pct", "IS_Kelly_pct", "實際風險_pct",
+                   "Kelly倉位數值合格", "數值收益門檻", "原始證據", "逐筆證據"]
+    detail[detail_cols].to_csv(
+        OUT / "all_strategies_by_market_timeframe.csv",
+        index=False, encoding="utf-8-sig")
+    market_symbols = ("BTCUSDT", "ETHUSDT", "SOLUSDT", "GC=F", "SI=F",
+                      "ES=F", "NQ=F", "^TWII", "USDJPY=X")
+    crypto_symbols = {"BTCUSDT", "ETHUSDT", "SOLUSDT"}
+    derived_frames = ("2m", "10m", "45m", "3h")
+    reported_frames = ("1s", "5s", "10s", "15s", "30s", "45s",
+                       "1m", "2m", "3m", "5m", "10m", "15m",
+                       "30m", "45m", "1h", "2h", "3h", "4h",
+                       "6h", "8h", "12h", "1d", "3d", "1w", "1mo")
+    coverage_rows = []
+    for sym in market_symbols:
+        for tf in reported_frames:
+            if sym in crypto_symbols and tf in (*FRAMES, *derived_frames):
+                completed_families = [
+                    f for f in ("original", "compound", "fixed", "new")
+                    if (f == "new" and sym == "BTCUSDT" and tf in FRAMES
+                        and tf in new_provenance)
+                    or (sym == "BTCUSDT" and f in ("original", "compound", "fixed")
+                        and f"legacy_BTCUSDT_{tf}_{f}" in audited)
+                    or (f"multi_{sym}_{tf}_{f}" in multi_counts)]
+                label = ("all_four_families_verified" if len(completed_families)==4
+                         else "partial_or_not_run")
+            elif sym not in crypto_symbols and tf == "1d":
+                completed_families = [
+                    f for f in ("original", "compound", "fixed", "new")
+                    if f"multi_{sym}_1d_{f}" in multi_counts]
+                label = ("all_four_families_verified" if len(completed_families)==4
+                         else "FX_source_invalid" if sym == "USDJPY=X"
+                         else "partial_or_not_run")
+            else:
+                completed_families = []
+                label = ("five_year_seconds_or_high_interval_not_verified"
+                         if sym in crypto_symbols
+                         else "no_verified_five_year_intraday_source")
+            coverage_rows.append({
+                "市場": sym, "週期": tf, "可執行策略分類完成數": len(completed_families),
+                "四類策略": ",".join(completed_families), "資料及實測狀態": label,
+                "完整五年": label == "all_four_families_verified"})
+    pd.DataFrame(coverage_rows).to_csv(
+        OUT / "market_timeframe_coverage.csv", index=False, encoding="utf-8-sig")
+
     matrix = pd.DataFrame(coverage)
     matrix.to_csv(OUT / "old_strategy_coverage_matrix.csv",
                   index=False, encoding="utf-8-sig")
@@ -319,7 +375,9 @@ def main():
         "每個已完成舊策略批次保留交易與排名 CSV、checkpoint 和 SHA256 manifest，"
         "批次狀態請見 old_strategy_coverage_matrix.csv。"
         "舊日線歷史快照未逐列獨立驗證，未完成週期不可假裝完成。"
-        "勝敗的伯努利 iid 假設以及 TradingView 逐筆比對尚未驗證。\n",
+        "勝敗的伯努利 iid 假設以及 TradingView 逐筆比對尚未驗證。\n"
+        "另見 all_strategies_by_market_timeframe.csv：每種策略逐商品逐週期排名；"
+        "market_timeframe_coverage.csv：每市場每週期完成數與未驗證原因。\n",
         encoding="utf-8")
     print("AGGREGATION", json.dumps({
         "completed_old_batches": completed,
