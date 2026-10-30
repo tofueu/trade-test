@@ -46,8 +46,8 @@ SOLUSDT,1h,4,0,0,False,沒有完整逐筆證據或行情未可用
 SOLUSDT,2h,4,0,0,False,沒有完整逐筆證據或行情未可用
 SOLUSDT,3h,4,0,0,False,沒有完整逐筆證據或行情未可用
 SOLUSDT,4h,4,4,384,True,本機真實交易R已重新驗算
-SOLUSDT,6h,4,0,0,False,沒有完整逐筆證據或行情未可用
-SOLUSDT,8h,4,0,0,False,沒有完整逐筆證據或行情未可用
+SOLUSDT,6h,4,4,384,True,本機真實交易R已重新驗算
+SOLUSDT,8h,4,4,384,True,本機真實交易R已重新驗算
 SOLUSDT,12h,4,4,384,True,本機真實交易R已重新驗算
 SOLUSDT,1d,4,4,384,True,本機真實交易R已重新驗算
 GC=F,1m,4,0,0,False,沒有完整逐筆證據或行情未可用
