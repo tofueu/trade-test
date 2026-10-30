@@ -47,6 +47,18 @@ jobs:
           - {symbol: SOLUSDT, timeframe: 5m}
           - {symbol: SOLUSDT, timeframe: 3m}
           - {symbol: SOLUSDT, timeframe: 1m}
+          - {symbol: BTCUSDT, timeframe: 2m}
+          - {symbol: BTCUSDT, timeframe: 10m}
+          - {symbol: BTCUSDT, timeframe: 45m}
+          - {symbol: BTCUSDT, timeframe: 3h}
+          - {symbol: ETHUSDT, timeframe: 2m}
+          - {symbol: ETHUSDT, timeframe: 10m}
+          - {symbol: ETHUSDT, timeframe: 45m}
+          - {symbol: ETHUSDT, timeframe: 3h}
+          - {symbol: SOLUSDT, timeframe: 2m}
+          - {symbol: SOLUSDT, timeframe: 10m}
+          - {symbol: SOLUSDT, timeframe: 45m}
+          - {symbol: SOLUSDT, timeframe: 3h}
           - {symbol: 'GC=F', timeframe: 1d}
           - {symbol: 'SI=F', timeframe: 1d}
           - {symbol: 'ES=F', timeframe: 1d}
