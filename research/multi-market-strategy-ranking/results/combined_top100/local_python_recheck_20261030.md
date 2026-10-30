@@ -35,3 +35,15 @@
 ## 尚未完成
 
 既有 Python run [41068912974](https://github.com/tofueu/trade-test/actions/runs/41068912974) 的 SOL 其他分鐘／小時週期及 BTC 衍生 2m、10m、45m、3h 等仍要逐件取得完整五年工件與 SHA 驗證。當前對話 Python 工作環境無完整五年 OHLCV 且無對外直接行情網路；只能對可取回的已跑五年成交工件作獨立重算與排名，**不能聲稱全部策略的原始五年訊號重跑已完成**。每六小時檢查剩餘真實成果並更新 Git 與自動任務對話。
+
+
+## 2026-10-31 04:13 臺灣時間：本輪 GitHub API 與失敗日誌實際複核
+
+- **本輪新增已驗證批次 0**；已確認基準仍為 **124/612 批 SHA256 + 成交 R 回放**，12,720 個已驗算配置，數值不一致 0。這是前次已保存驗證結果，不是本輪重新跑五年 OHLCV 訊號。五年範圍仍為 2021-10-10 至 2026-10-09 UTC；9 市場、17 週期，絕不回測已完成的舊 1d。
+- [BTC 舊策略 Run #41064675326](https://github.com/tofueu/trade-test/actions/runs/41064675326)：整體 GitHub 結論 `failure`，但 API 已列出 **37 個未過期 artifact（36 個舊策略 market×timeframe×family + 1 個彙總）**；首 30 個 jobs 都為 success。**不能因整體 run 失敗而整批重跑**。先前已 SHA/交易 R 驗算 36 個 BTC 批次，後續只檢查缺漏。
+- [ETH/SOL/傳統市場 Run #41066783962](https://github.com/tofueu/trade-test/actions/runs/41066783962)：整體 `failure`；首 30 jobs 16 success、14 failure，31 個未過期 artifact。已保存的 ETH 1m、3m、5m 完整分類已納入既有 124 批驗算；不可重跑。**SOL 失敗工件僅 293 bytes 的錯誤報告，不是完成交易資料**。實際失敗 job 124100613731：`RuntimeError: Irregular or missing five-year candles; no qualified ranking`。修復須從 Binance 同標的同週期真實 daily archive 補回缺口並重新驗 SHA、時間戳；不得補造 K 線。
+- 台灣 ^TWII 1d 失敗 job 124100616387：`UNAVAILABLE_YAHOO_LONG_GAP: ^TWII 13 days 00:00:00`，須依交易所休市曆確認春節長假，而非合成 K 線；**保留先前舊日線基準不重測**。USDJPY=X 1d 失敗 job 124100616569：`UNAVAILABLE_INVALID_YAHOO_RANGES: USDJPY=X`，須換用可稽核的真實 OHLCV 來源並保留錯誤紀錄，不得修改異常價造出績效。
+- [續跑 Run #41068912974](https://github.com/tofueu/trade-test/actions/runs/41068912974)：GitHub run API 顯示 `queued`，但 job API 首 30 項已見 **26 success、3 in_progress（SOL 1m、BTC 2m、ETH 2m）、1 queued（SOL 2m）**，且已有 **27 個 artifact**。**這 27 個只有存在性證據，尚未逐一下載驗 SHA / trades / manifest，不計新增已完成**；不得覆蓋 checkpoint 或對在跑批次重複派工。
+- 原分支 [latest_verification_manifest.json](latest_verification_manifest.json) 仍 `status=partial`、`completed_legacy_timeframe_family_batches=6/36`（舊報告欄位，未同步已收取 36 個 artifact），`verified_multi_asset_batch_count=24`；另有 124 批更完整的獨立逐筆回放去重帳本 [five_year_deduplicated_worklist_17timeframes.csv](five_year_deduplicated_worklist_17timeframes.csv)。**三者證據層級不同，不得混稱 612 已完成。**
+- [收益 Top100 CSV](local_python_kelly_top100_20261030.csv) 及 [38 家族榜 CSV](local_python_38_families_20261030.csv) 本輪確認均存在；**未新增可驗算成交，因此不改寫兩榜數值**。Top100 中 98 筆可追溯已驗算成交、2 筆為歷史快照待證；五年 ≥70 筆、收益 >100%、實際風險 ≤ 前四年 IS Kelly 是排名門檻。伯努利 iid 與 TradingView/Pine parity **未驗證**。
+- **本輪處置：**已實際取回 SOL、^TWII、USDJPY 三種失敗 job logs 並定位根因。避免重跑已完成日線及已驗批次，也避免對仍進行中的 run 再啟動同批次。本輪無新增 Python 五年行情訊號回測；沒有足夠完整原始 OHLCV 供本地重跑。下一步收取續跑中真正完成的缺口 artifact，逐件核對 `manifest.status=complete`、`ranking.csv`、`trades.csv`、OHLCV SHA 與成交 SHA，再增量併榜；若 job 真正失敗才考慮單 job 重試。
