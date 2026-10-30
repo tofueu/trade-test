@@ -1,0 +1,136 @@
+name: Trade Test real Python five-year multi-market old and new
+
+on:
+  push:
+    branches: [report/trade-test-multi-market-20261030]
+    paths: ['.github/workflows/trade-test-multi-market-python.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trade-test-multi-market-matrix
+  cancel-in-progress: false
+
+jobs:
+  five-year-python:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - {symbol: ETHUSDT, timeframe: 1d}
+          - {symbol: ETHUSDT, timeframe: 4h}
+          - {symbol: SOLUSDT, timeframe: 1d}
+          - {symbol: SOLUSDT, timeframe: 4h}
+          - {symbol: 'GC=F', timeframe: 1d}
+          - {symbol: 'SI=F', timeframe: 1d}
+          - {symbol: 'ES=F', timeframe: 1d}
+          - {symbol: 'NQ=F', timeframe: 1d}
+          - {symbol: '^TWII', timeframe: 1d}
+          - {symbol: 'USDJPY=X', timeframe: 1d}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install Python dependencies
+        run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Syntax-check real five-year runner and aggregator
+        run: |
+          python -m py_compile research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py
+          python -m py_compile research/multi-market-strategy-ranking/tools/aggregate_all_timeframes.py
+      - name: Execute four actual strategy families with genuine candles
+        shell: bash
+        run: |
+          set -euo pipefail
+          for family in original compound fixed new; do
+            python -u research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py \
+              --symbol '${{ matrix.symbol }}' --timeframe '${{ matrix.timeframe }}' --family "$family"
+          done
+      - name: Preserve completed CSVs, checkpoint, fills and SHA256
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=research/multi-market-strategy-ranking/results/all_timeframes
+          if compgen -G "$dir/multi_${{ matrix.symbol }}_${{ matrix.timeframe }}_*" > /dev/null; then
+            tar -czf "market-${{ matrix.symbol }}-${{ matrix.timeframe }}.tar.gz" \
+              -C "$dir" $(cd "$dir" && printf '%s\n' multi_${{ matrix.symbol }}_${{ matrix.timeframe }}_*)
+          fi
+      - name: Publish recoverable job artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: market-${{ matrix.symbol }}-${{ matrix.timeframe }}
+          path: market-*.tar.gz
+          retention-days: 30
+          if-no-files-found: warn
+
+  combine-and-publish:
+    needs: [five-year-python]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Collect actual Python OHLCV and trade evidence
+        uses: actions/download-artifact@v4
+        with:
+          pattern: market-*
+          path: market-artifacts
+          merge-multiple: true
+      - name: Rebuild audited all-strategy and return Top100 lists
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/multi-market-strategy-ranking/results/all_timeframes
+          for f in market-artifacts/*.tar.gz; do
+            tar -xzf "$f" -C research/multi-market-strategy-ranking/results/all_timeframes
+          done
+          python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+          python -u research/multi-market-strategy-ranking/tools/aggregate_all_timeframes.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          import pandas as pd
+          root=Path("research/multi-market-strategy-ranking/results/combined_top100")
+          info=json.loads((root/"latest_verification_manifest.json").read_text())
+          ret=pd.read_csv(root/"top100_by_return.csv")
+          fam=pd.read_csv(root/"top100_by_strategy.csv")
+          assert info["verified_multi_asset_batch_count"]>=1
+          assert len(fam)==38 and len(ret)<=100
+          assert ret["五年交易數"].ge(70).all() and ret["五年收益_pct"].gt(100).all()
+          assert ret["實際風險_pct"].le(ret["IS_Kelly_pct"]+1e-7).all()
+          assert not ret.duplicated(["商品","週期","策略","出場方式"]).any()
+          print("VERIFIED_MULTI_MARKET_BATCHES",info["verified_multi_asset_batch_count"])
+          PY
+      - name: Upload audited CSV and manifest bundle even if push fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verified-multi-market-python-rankings
+          path: |
+            research/multi-market-strategy-ranking/results/all_timeframes/
+            research/multi-market-strategy-ranking/results/combined_top100/
+          retention-days: 30
+      - name: Commit verified market results to Git without changing main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/multi-market-strategy-ranking/results/all_timeframes/
+          git add research/multi-market-strategy-ranking/results/combined_top100/
+          if ! git diff --cached --quiet; then
+            git commit -m 'results: real 5y multi-market Python trades and old+new Kelly rankings [skip ci]'
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
