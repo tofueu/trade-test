@@ -1,29 +1,36 @@
-# Trade Test — Python 五年回測與六小時驗收進度
-更新日期：2026-10-30（臺灣時間）。**任務未完成，禁止把驗算或排隊作為全策略通過。**
+# Trade Test 五年 Python 增量驗證進度（臺灣時間 2026-10-31）
 
-## 執行規則
-- **Trade Test 舊31＋新7策略不得交給 Jules 1、Jules 2 或 AI Orchestrator 的 Jules 派工**；七專案自動化的原舊派工規則已修正。
-- **不新增 GitHub workflow、不修改 main、不重新跑已有完整並通過 SHA256 的昂貴批次**。使用既有 Python 程式及真實已完成 Python artifacts。
-- 每六小時在現有 Git 分支此報告更新進度，並由 ChatGPT 自動任務提供繁體中文回報；每輪即使進度為 0 也列出實際故障和未完工項目。
+## 必守規則
 
-## 本輪真正執行的本機 Python
-- 用完整 `manifest.json`、`ranking.csv`、`trades.csv` 驗證批次 SHA256，逐筆重算風險、前四年 IS Kelly、交易數、五年收益與權益回撤。
-- 已驗證 **90 個已完成批次、9,328 種策略／倉位／出場配置**；收益／Kelly／回撤／交易數不一致 **0**。
-- 自前次 85 批、8,908 配置增加：**BTCUSDT 1m 固定出場 1 批＋36 配置**（[來源工件](https://github.com/tofueu/trade-test/actions/runs/41064675326)）；**ETHUSDT 5m original、compound、fixed、new 四批＋384 配置**（[來源工件](https://github.com/tofueu/trade-test/actions/runs/41066783962)），皆實際用 Python 重新驗算，未重算完整 OHLCV 進出場訊號。
-- 全部 **38 種策略家族**仍在榜，包括未達最低筆數者；其中 **20** 家族最佳配置仍來自無法在此本機逐筆核對的歷史快照。
-- **收益 Top100**：≥70 筆真實成交、總收益 >100%、風險 ≤前四年 IS Kelly 且不超過 100% 回撤，依 商品＋週期＋策略＋出場去重；**72** 筆本機逐筆重新驗算、**28** 筆歷史快照（必須標記來源）。本輪新增五批沒有改變 Top100。
-- **九市場×25 週期＝225 對**；可供本機使用真實逐筆交易驗算的 **26** 對、其中 **14** 對具備四類（original、compound、fixed、new）回測紀錄。未驗證的週期／市場不算完成。
-- Bernoulli IID 假設**未獲證明**；未作 TradingView／Pine 逐筆對照。
+- **完整五年**：交易回測窗口 `2021-10-10 00:00 UTC` 至 `2026-10-10 00:00 UTC`（結束時間不含），2026-10-09 為最後交易日。不是一年樣本。
+- **僅指定市場**：BTCUSDT、ETHUSDT、SOLUSDT、黃金 GC=F、白銀 SI=F、美國指數 ES=F 與 NQ=F、臺灣指數 ^TWII、USDJPY=X。
+- **僅指定時區**：1m、2m、3m、5m、10m、15m、20m、30m、45m、1h、2h、3h、4h、6h、8h、12h、1d。**排除**之前誤列的秒線、週線、月線；153 個商品×週期組合，612 個（×original/compound/fixed/new）分類狀態欄位。這是待驗證矩陣，非已完成數。
+- **不可重跑**：先查 Git `results/all_timeframes/*/manifest.json`、已保存歷史日線基準、既有 GH Actions artifacts，再比對 `ranking.csv`、`trades.csv` SHA256、行情 SHA256 與交易配置。舊策略 1d 已跑過，無論何時都不應再重跑；沒有單項 SHA 的舊日線快照先標記待核實，不能當作已全面驗證。
+- **不得交 Jules、不新增 GitHub workflows、不修改 main**。所有更新只在既有隔離分支。
 
-## 遠端既有 Python 執行、資料限制
-- BTC 五年 12 週期×三種舊分類，GitHub run [41064675326](https://github.com/tofueu/trade-test/actions/runs/41064675326)：本輪查到 **34/36 成功、2 個 1m（original、compound）仍在執行**。不要把進行中算完成。
-- 多市場 run [41066783962](https://github.com/tofueu/trade-test/actions/runs/41066783962)：本輪查到 **14 成功、14 失敗、2 執行中**；後續修復版本待確認是真正跑過，而非只提交程式。
-- SOL 2022 年少 K 線，已確認能從 Binance 同一商品的原始 daily ZIP 取得實際歷史 bar，保留 ZIP SHA256；**資料補齊≠策略回測完成**。
-- USDJPY Yahoo 有 75 根不合高低價關係 K 線，其他來源尚未完成相同五年資料驗證；台灣指數的農曆春節非交易日不能補成假價格。
-- 目前聊天 Python 容器無法直接連線取得整套五年 OHLCV，所以本地的真正工作是**逐筆交易管理重演**；不是所有市場與週期的信號產生器全量重回測。未取得原始行情的列都應標記 `unavailable`。
+## 此次已真正用本機 Python 新驗的成交資料
 
-## 同步檔案
-- `local_python_kelly_top100_20261030.csv`：含歷史來源註記的原有 Top100（本輪榜單未變）。
-- `local_python_38_families_20261030.csv`：全部 38 家族（本輪家族最佳未變）。
-- `local_python_full_market_timeframe_coverage_20261030.csv`：本輪 BTC 1m 與 ETH 5m 的**本機逐筆驗算覆蓋**已更新。
-- `latest_verification_manifest.json` 是 GitHub CI 曾提交的較舊快照，**不能因本機回放 90 批就冒稱此 manifest 已涵蓋全部**。需持續收集實際成功 artifacts 並重建。
+- 原累計：90 批、9,328 配置；此次新增 BTCUSDT `1m compound`（32配置，924,586逐筆成交），ETHUSDT `3m` 的 `original`（288配置，1,954,098逐筆成交）、`compound`（32配置，298,410成交）、`fixed`（36配置，228,550成交）、`new`（28配置，107,844成交）。
+- **目前總計 95 批、9,744 個配置，收益、交易數、前四年 IS Kelly、五年最大回撤重算不一致數 0**；本次新增 5 批、416 配置。已以 300 組隨機序列對照原始參考算法驗證高速逐筆權益計算函式；所有新增批次的 `manifest` 完整且 `ranking.csv` 與 `trades.csv` SHA256 正確。
+- **38 個策略家族**保留。收益 Top100 仍有 72 筆本機逐筆驗算、28 筆僅原 Git 歷史快照（已標註，不能混淆）；本次新增未改變榜首。
+- 從先前誤算 225 對修正為 **153 對**；其中 **27 對**有本機實際逐筆交易紀錄，**15 對**涵蓋四分類；不能認定其餘為已完成。
+- **重要分別**：上述本機 Python 重算的是既有完整五年實際成交紀錄與 Kelly/回撤，**不是**在當前容器中重新取得完整原始五年 OHLCV 後重新生成所有策略訊號。原始行情不在此聊天工作環境、直接連接下載源受阻。
+
+## Git 已完成／已產出而不要重跑的部分
+
+- 已檢查 Git tree，至少 **30 個原有 `results/all_timeframes` manifest** 已在此分支保存（含 BTC 1d 舊三分類、BTC 4h 舊三分類，ETH 1d/4h 四分類，以及黃金、白銀、美國 ES/NQ 1d 四分類）。其中各個資料須維持原 `sha256`。
+- 已檢查舊 BTC run `41064675326`：**36 個** 1m~1d 舊分類結果工件存在，原 run 的整體 `failure` 不等於工件都失敗。新近到達的 BTC 1m original/compound 必須先驗 SHA，不可重跑。
+- 已檢查多市場 run `41066783962`：ETH 1m/3m/5m 有大容量結果工件；SOL、^TWII、USDJPY部分只有約 300-byte 的失敗工件，**不能當作回測完成**。新跑中的 job 若只是已存在結果，不可再重複派工。
+- 舊日線 9,556 行的既有基準保留；不得為了補其他小時區重新執行舊策略日線。
+- 已修補 `run_legacy_all_timeframes.py` 漏列 `20m`：以四根**連續且原始驗證**的 5m K 線聚合，沿用原有嚴格 OHLCV gap 檢查（commit `5e87bbbf164cc1ffa17a9eaab6076a0539d44a75`）。
+
+## 本輪 Git 成果與後續待查
+
+- [指定17週期去重清單](five_year_deduplicated_worklist_17timeframes.csv)：每格列出已提交 Git、已有工件待驗 SHA、既有歷史日線免跑、正在既有 run 排隊、原始資料缺失、尚未執行等，不把 612 類別視為已測。
+- `local_python_kelly_top100_20261030.csv`、`local_python_38_families_20261030.csv` 是既有兩份正式 Git 榜單；此輪不改變合格 Top100 排序，新增配置明細另以本機驗算檔保存。
+- **待處理**：驗 BTC 1m original（大容量工件）、ETH 1m 及其餘已到達工件；檢查 SOL 僅用真實 Binance 每日 ZIP 修補月檔缺漏；^TWII 交易所休市不補假 K、USDJPY 異常高低價不篡改；其餘非加密商品五年分鐘資料在現有 Python 來源程式中尚無可驗證來源，不能捏造策略結果。
+- 每六小時在既有 Git 分支與 ChatGPT 自動任務對話回報進度。六小時自動驗收只能在觸發時執行，不能誤稱聊天中的 Python 會在訊息結束後不間斷常駐。
+
+## 未驗證與交付邊界
+
+**全部測試仍未完成。** 不能把已保存成交紀錄的資金管理驗算當作所有 38 策略在所有市場、全部指定 17 時區重新跑完五年 OHLCV 訊號。缺五年真實資料標 `unavailable`；勝敗 Bernoulli iid 不能因 runs-test 未拒絕而聲稱證明；尚未完成 Pine/TradingView 逐筆 parity。
