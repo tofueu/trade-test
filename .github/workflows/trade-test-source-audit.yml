@@ -1,0 +1,57 @@
+name: Trade Test verify USDJPY Taiwan and SOL OHLCV sources
+
+on:
+  push:
+    branches: [report/trade-test-multi-market-20261030]
+    paths: ['.github/workflows/trade-test-source-audit.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  yahoo-daily-source-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        symbol: ['USDJPY=X', '^TWII']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Validate real five-year OHLCV without filling missing trading days
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'research/multi-market-strategy-ranking/tools')
+          import run_legacy_all_timeframes as x
+          f,m,market=x.load_market_ohlcv('${{ matrix.symbol }}','1d')
+          assert m['bar_count']>900 and m['warmup_bar_count']>=200, m
+          print('YAHOO_SOURCE_VERIFIED',m)
+          PY
+  sol-exchange-gap-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Record exact real SOLUSDT gaps without inserting fabricated bars
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'research/multi-market-strategy-ranking/src')
+          import run_intraday as engine
+          for tf in ['1d','4h']:
+              try:
+                  candles,prov=engine.load_real_ohlcv('SOLUSDT',tf)
+                  print('SOLUSDT_SOURCE_VALID',tf,prov)
+              except Exception as e:
+                  print('SOLUSDT_FULL_FIVE_YEAR_UNAVAILABLE',tf,str(e))
+          PY
