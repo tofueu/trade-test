@@ -1,8 +1,39 @@
-﻿排序,來源,策略,最佳收益週期,商品,五年最高收益_pct,交易數,最大回撤_pct,OOS收益_pct,倉位法,收益與交易數門檻,策略配置數,五年收益>100%配置列數
-1,新：BTC多週期,Donchian20_Volume_EMA200,1d,BTCUSDT,471.41,29,29.87,36.01,全凱利,否,48,
-2,新：BTC多週期,Turtle55_20_EMA200,1d,BTCUSDT,256.96,24,57.08,29.69,全凱利,否,48,
-3,新：BTC多週期,MACD_EMA200_ADX20,1d,BTCUSDT,220.83,42,42.45,53.55,全凱利,否,48,
-4,新：BTC多週期,Keltner20_1.5ATR_EMA200,12h,BTCUSDT,220.71,90,33.7,44.39,全凱利,是,48,
-5,新：BTC多週期,Supertrend_ADX20,8h,BTCUSDT,208.47,76,34.71,-1.08,全凱利,是,48,
-6,新：BTC多週期,EMA20_50_ADX20,4h,BTCUSDT,179.88,93,37.14,14.57,全凱利,是,48,
-7,新：BTC多週期,BB_Reentry_RSI_ADX25,1d,BTCUSDT,72.48,31,61.47,-19.15,全凱利,否,48,
+﻿排名,來源,策略,最佳收益週期,最佳收益商品／市場,五年最高收益_pct,交易數,最大回撤_pct,OOS收益_pct,倉位法,數值門檻,既有測試配置列數,五年收益>100%配置列數
+1,舊：多市場日線,MACD12_26_9,1D,Crypto futures／XRPUSDT (XRPUSDT),1480.77,122,49.6,77.78,全凱利,符合,936,130
+2,舊：多市場日線,Supertrend+RSI50,1D,Crypto futures／SOLUSDT (SOLUSDT),1217.89,117,28.93,183.08,全凱利,符合,104,35
+3,舊：多市場日線,Supertrend10_3,1D,Crypto futures／SOLUSDT (SOLUSDT),1028.2,39,22.77,-8.89,全凱利,不符合,936,100
+4,舊：多市場日線,Supertrend+EMA200,1D,Crypto futures／SOLUSDT (SOLUSDT),1018.14,44,19.77,54.98,全凱利,不符合,104,29
+5,舊：多市場日線,Stoch14+EMA200,1D,Traditional futures／Gold (GC=F),994.66,35,54.74,39.79,全凱利,不符合,104,9
+6,舊：多市場日線,Supertrend+EMA200_flip,1D,Traditional futures／E-mini Nasdaq-100 (NQ=F),807.33,16,26.69,-88.92,全凱利,不符合,104,27
+7,舊：多市場日線,WEMA20_50+Donchian20,1D,Traditional futures／E-mini Nasdaq-100 (NQ=F),757.76,18,46.06,-92.12,全凱利,不符合,104,19
+8,舊：多市場日線,WEMA20_50+MACD,1D,Traditional futures／Silver (SI=F),710.57,45,66.58,171.27,全凱利,不符合,104,25
+9,舊：多市場日線,EMA20_50_ADX20,1D,Crypto futures／DOGEUSDT (DOGEUSDT),680.29,13,14.19,149.38,全凱利,不符合,104,14
+10,舊：多市場日線,Donchian20_10,1D,Crypto futures／SOLUSDT (SOLUSDT),647.79,54,50.45,-83.98,全凱利,不符合,936,110
+11,舊：多市場日線,EMA50_200,1D,Crypto futures／BTCUSDT (BTCUSDT),601.84,7,41.07,39.01,固定1R,不符合,936,44
+12,舊：多市場日線,WEMA20_50+DailyDonchian20,1D,Traditional futures／Gold (GC=F),588.37,28,29.91,98.23,全凱利,不符合,104,24
+13,舊：多市場日線,MACD+RSI50,1D,Crypto futures／XRPUSDT (XRPUSDT),577.02,168,85.95,49.4,全凱利,符合,104,39
+14,舊：多市場日線,Donchian20_Volume_EMA200,1D,Traditional futures／Gold (GC=F),569.57,13,39.05,126.95,全凱利,不符合,104,14
+15,舊：多市場日線,Keltner20_1.5ATR_EMA200,1D,Traditional futures／E-mini Dow (YM=F),552.47,44,27.74,-94.6,全凱利,不符合,104,18
+16,舊：多市場日線,Donchian20+ADX14,1D,Crypto futures／SOLUSDT (SOLUSDT),485.28,65,36.53,149.15,全凱利,不符合,104,21
+17,新：BTC多週期,Donchian20_Volume_EMA200,1d,BTCUSDT,471.41,29,29.87,36.01,全凱利,不符合,48,
+18,舊：多市場日線,EMA200+MACD_cross,1D,Traditional futures／Gold (GC=F),449.52,38,41.42,41.18,全凱利,不符合,104,18
+19,舊：多市場日線,Donchian20+MACD,1D,Crypto futures／DOGEUSDT (DOGEUSDT),434.99,60,61.36,-56.32,全凱利,不符合,104,31
+20,舊：多市場日線,Turtle55_20_EMA200,1D,Crypto futures／ETHUSDT (ETHUSDT),430.22,22,31.86,117.06,全凱利,不符合,104,12
+21,舊：多市場日線,Bollinger20+RSI14_reentry,1D,Crypto futures／DOGEUSDT (DOGEUSDT),427.6,57,52.79,-90.95,全凱利,不符合,104,21
+22,舊：多市場日線,Supertrend_ADX20,1D,Crypto futures／DOGEUSDT (DOGEUSDT),390.49,25,31.51,147.66,全凱利,不符合,104,13
+23,舊：多市場日線,Volume_Donchian20,1D,Traditional futures／Gold (GC=F),377.13,15,66.02,55.29,全凱利,不符合,684,41
+24,舊：多市場日線,EMA200+RSI2_mean_reversion,1D,Traditional futures／E-mini S&P 500 (ES=F),313.68,52,50.97,64.08,全凱利,不符合,104,7
+25,舊：多市場日線,RSI2_EMA200,1D,Traditional futures／E-mini S&P 500 (ES=F),313.68,52,50.97,64.08,全凱利,不符合,936,36
+26,舊：多市場日線,EMA200+RSI2_extreme,1D,Crypto futures／BTCUSDT (BTCUSDT),276.45,51,27.54,47.62,全凱利,不符合,104,16
+27,舊：多市場日線,EMA200+RSI14_pullback,1D,Crypto futures／ETHUSDT (ETHUSDT),273.39,3,21.3,0,全凱利,不符合,176,2
+28,舊：多市場日線,WEMA20_50+DailyMACD,1D,Crypto futures／SOLUSDT (SOLUSDT),268.21,36,59.55,-0.21,全凱利,不符合,104,18
+29,新：BTC多週期,Turtle55_20_EMA200,1d,BTCUSDT,256.96,24,57.08,29.69,全凱利,不符合,48,
+30,舊：多市場日線,Bollinger20_2,1D,Traditional futures／Silver (SI=F),254.68,48,30.17,-1.14,全凱利,不符合,936,23
+31,新：BTC多週期,MACD_EMA200_ADX20,1d,BTCUSDT,220.83,42,42.45,53.55,全凱利,不符合,48,
+32,舊：多市場日線,MACD_EMA200_ADX20,1D,Crypto futures／BTCUSDT (BTCUSDT),220.83,42,42.45,53.55,全凱利,不符合,104,5
+33,新：BTC多週期,Keltner20_1.5ATR_EMA200,12h,BTCUSDT,220.71,90,33.7,44.39,全凱利,符合,48,
+34,新：BTC多週期,Supertrend_ADX20,8h,BTCUSDT,208.47,76,34.71,-1.08,全凱利,符合,48,
+35,新：BTC多週期,EMA20_50_ADX20,4h,BTCUSDT,179.88,93,37.14,14.57,全凱利,符合,48,
+36,舊：多市場日線,BB_Reentry_RSI_ADX25,1D,FX／AUD/USD (AUDUSD=X),126.21,36,58,13.73,半凱利,不符合,104,3
+37,新：BTC多週期,BB_Reentry_RSI_ADX25,1d,BTCUSDT,72.48,31,61.47,-19.15,全凱利,不符合,48,
+38,舊：多市場日線,RSI14_EMA200,1D,Crypto futures／XRPUSDT (XRPUSDT),72.44,4,9.18,38.62,全凱利,不符合,792,0
