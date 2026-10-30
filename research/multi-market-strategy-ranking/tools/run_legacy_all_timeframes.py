@@ -35,7 +35,7 @@ OUT = ROOT / "results" / "all_timeframes"
 FAMILIES = ("original", "compound", "fixed", "new")
 DERIVED = {
     "2m": ("1m", 2), "10m": ("5m", 2),
-    "45m": ("15m", 3), "3h": ("1h", 3),
+    "20m": ("5m", 4), "45m": ("15m", 3), "3h": ("1h", 3),
 }
 PERIODS = tuple(intraday.INTERVALS) + tuple(DERIVED)
 SYMBOL_MARKET = {
