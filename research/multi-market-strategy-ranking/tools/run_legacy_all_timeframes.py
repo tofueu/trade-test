@@ -32,8 +32,69 @@ import five_year_exit_method_sweep as exits
 import run_intraday as intraday
 
 OUT = ROOT / "results" / "all_timeframes"
-FAMILIES = ("original", "compound", "fixed")
+FAMILIES = ("original", "compound", "fixed", "new")
 PERIODS = tuple(intraday.INTERVALS)
+SYMBOL_MARKET = {
+    "BTCUSDT": "Crypto futures", "ETHUSDT": "Crypto futures",
+    "SOLUSDT": "Crypto futures",
+    "GC=F": "Traditional futures", "SI=F": "Traditional futures",
+    "ES=F": "Traditional futures", "NQ=F": "Traditional futures",
+    "USDJPY=X": "FX", "^TWII": "Index benchmark (nontradable)",
+}
+
+def load_market_ohlcv(symbol, timeframe):
+    market = SYMBOL_MARKET[symbol]
+    if market == "Crypto futures":
+        frame, coverage = intraday.load_real_ohlcv(symbol, timeframe)
+        coverage["tradable_proxy"] = True
+        return frame, coverage, market
+    if timeframe != "1d":
+        raise ValueError(f"UNAVAILABLE_5Y_INTRADAY: {symbol} {timeframe}; no verified source")
+    # Fetch enough daily pre-window bars for 200-period indicators.
+    # Exchange holidays are genuine gaps; do not manufacture fake candles.
+    base.WARM = pd.Timestamp("2020-01-01", tz="UTC")
+    frame = base.yahoo_daily(symbol)
+    frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True)
+    frame = frame.sort_values("timestamp").drop_duplicates("timestamp").reset_index(drop=True)
+    fields = ["open", "high", "low", "close"]
+    for col in fields:
+        frame[col] = pd.to_numeric(frame[col], errors="coerce")
+    if frame[fields].isna().any().any() or (frame[fields] <= 0).any().any():
+        raise ValueError(f"UNAVAILABLE_INVALID_YAHOO_OHLC: {symbol}")
+    if (frame["high"] < frame[["open", "close", "low"]].max(axis=1)).any() or (
+            frame["low"] > frame[["open", "close", "high"]].min(axis=1)).any():
+        raise ValueError(f"UNAVAILABLE_INVALID_YAHOO_RANGES: {symbol}")
+    if "volume" not in frame:
+        frame["volume"] = float("nan")
+    else:
+        frame["volume"] = pd.to_numeric(frame["volume"], errors="coerce")
+    window = frame[(frame["timestamp"] >= base.START) & (frame["timestamp"] < base.END)]
+    warm = frame[frame["timestamp"] < base.START]
+    if (len(window) < 900 or len(warm) < 200
+            or window["timestamp"].iloc[0] > base.START + pd.Timedelta(days=5)
+            or window["timestamp"].iloc[-1] < base.END - pd.Timedelta(days=8)):
+        raise ValueError(f"UNAVAILABLE_YAHOO_5Y_COVERAGE: {symbol} {len(window)} bars, {len(warm)} warm")
+    max_gap = window["timestamp"].diff().max()
+    if max_gap > pd.Timedelta(days=10):
+        raise ValueError(f"UNAVAILABLE_YAHOO_LONG_GAP: {symbol} {max_gap}")
+    digest = hashlib.sha256(pd.util.hash_pandas_object(
+        frame, index=False).values.tobytes()).hexdigest()
+    coverage = {
+        "source": "Yahoo Finance chart historical daily OHLC", "symbol": symbol,
+        "timeframe": timeframe, "start_utc": base.START.isoformat(),
+        "end_exclusive_utc": base.END.isoformat(),
+        "warmup_bar_count": len(warm), "bar_count": len(window),
+        "actual_first_utc": window["timestamp"].iloc[0].isoformat(),
+        "actual_last_utc": window["timestamp"].iloc[-1].isoformat(),
+        "missing_or_irregular_intervals": None,
+        "exchange_holidays_not_invented": True, "largest_calendar_gap": str(max_gap),
+        "ohlcv_sha256": digest, "historical_data": True,
+        "volume_available": bool(frame["volume"].fillna(0).gt(0).any()),
+        "cost_model": "legacy Yahoo futures/FX model or explicitly hypothetical 10bps/index",
+        "tradable_proxy": not market.startswith("Index"),
+        "tradingview_run_verified": False, "pine_v6_parity_verified": False,
+    }
+    return frame, coverage, market
 
 
 def load_legacy_definitions(filename: str, variables: tuple[str, ...],
@@ -63,7 +124,7 @@ def load_legacy_definitions(filename: str, variables: tuple[str, ...],
 
 def stats(trades: list[dict], symbol: str, timeframe: str,
           family: str, strategy: str, exit_name: str, rule: str,
-          digest: str, coverage: dict) -> list[dict]:
+          digest: str, coverage: dict, market: str) -> list[dict]:
     # IS: only positions fully closed before the final OOS year.
     is_trades = [t for t in trades if pd.Timestamp(t["entry_time"]) < base.OOS
                  and pd.Timestamp(t["exit_time"]) < base.OOS]
@@ -88,7 +149,8 @@ def stats(trades: list[dict], symbol: str, timeframe: str,
         ratio = ((sum(win)/len(win))/(sum(lose)/len(lose))
                  if win and lose and sum(lose) > 0 else math.nan)
         rows.append({
-            "來源": "舊策略重新實測", "市場": "Crypto futures", "商品": symbol,
+            "來源": "新策略實測" if family == "new" else "舊策略重新實測",
+            "市場": market, "商品": symbol, "可交易": coverage["tradable_proxy"],
             "策略分類": family, "策略": strategy, "策略規則": rule,
             "時區": timeframe, "出場方式": exit_name, "倉位法": label,
             "實際風險_pct": frac*100, "IS_Kelly_pct": k*100,
@@ -124,11 +186,13 @@ def atomic_write_csv(df: pd.DataFrame, path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--symbol", default="BTCUSDT", choices=["BTCUSDT"])
+    parser.add_argument("--symbol", default="BTCUSDT", choices=list(SYMBOL_MARKET))
     parser.add_argument("--timeframe", required=True, choices=PERIODS)
     parser.add_argument("--family", required=True, choices=FAMILIES)
     args = parser.parse_args()
-    name = f"legacy_{args.symbol}_{args.timeframe}_{args.family}"
+    name = (f"legacy_{args.symbol}_{args.timeframe}_{args.family}"
+            if args.symbol == "BTCUSDT" and args.family != "new"
+            else f"multi_{args.symbol}_{args.timeframe}_{args.family}")
     output = OUT / name
     output.mkdir(parents=True, exist_ok=True)
     manifest = output / "manifest.json"
@@ -143,7 +207,8 @@ def main() -> None:
                 print("ALREADY_COMPLETE", name, flush=True)
                 return
 
-    raw, coverage = intraday.load_real_ohlcv(args.symbol, args.timeframe)
+    raw, coverage, market = load_market_ohlcv(args.symbol, args.timeframe)
+    execution_market = "Crypto futures" if market.startswith("Index") else market
     print("VALIDATED_FIVE_YEAR_SOURCE", json.dumps(coverage), flush=True)
 
     # Compute heavy OHLCV indicators exactly once per job; legacy simulators
