@@ -340,7 +340,11 @@ def main():
         family_text, encoding="utf-8")
     completed = len(audited)
     report = {
-        "status": "complete" if completed == len(FRAMES)*len(FAMILIES) else "partial",
+        # All 12 Binance standard bars plus four verified TV resamples for
+        # ETH and SOL; four derived BTC timeframes; and six Yahoo daily assets.
+        # An unavailable five-year FX source must not be mislabeled completed.
+        "status": ("complete" if completed == len(FRAMES)*len(FAMILIES)
+                   and len(multi_counts) >= 168 else "partial"),
         "legacy_daily_archive_rows": len(old),
         "new_strategy_timeframes": len(FRAMES),
         "new_strategy_configurations": 336,
@@ -348,6 +352,7 @@ def main():
         "required_legacy_timeframe_family_batches": len(FRAMES)*len(FAMILIES),
         "verified_new_legacy_configuration_rows": len(reruns),
         "verified_multi_asset_batch_count": len(multi_counts),
+        "required_multi_asset_batch_count": 168,
         "verified_multi_asset_batches": multi_counts,
         "unavailable_assets_timeframes": "Yahoo sources provide audited daily only; 5-year intraday unverified",
         "all_strategy_families": len(families),
