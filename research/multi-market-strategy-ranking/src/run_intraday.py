@@ -150,7 +150,14 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
     diffs = in_window.timestamp.diff().dropna()
     gaps = int((diffs != step).sum())
     if gaps:
-        raise RuntimeError("Irregular or missing five-year candles; no qualified ranking")
+        bad = in_window.loc[diffs[diffs != step].index, "timestamp"].head(16)
+        prior = in_window["timestamp"].shift(1).loc[bad.index]
+        details = [{"previous": p.isoformat(), "next": n.isoformat(),
+                    "delta": str(n-p)} for p, n in zip(prior, bad)]
+        raise RuntimeError(
+            f"Irregular or missing five-year candles; {symbol}/{interval} "
+            f"gaps={gaps} first_gaps={json.dumps(details)}; "
+            "do not qualify or fill nonexistent bars")
     # Never poison the cache with a partial download. Commit only fully
     # validated history, atomically, so a later run can retry from the source.
     if not cache_hit:
