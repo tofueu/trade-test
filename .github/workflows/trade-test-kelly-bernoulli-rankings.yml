@@ -1,0 +1,71 @@
+name: Trade Test old+new Kelly/Bernoulli rankings
+
+on:
+  push:
+    branches:
+      - report/trade-test-old-new-top100-20261030
+    paths:
+      - '.github/workflows/trade-test-kelly-bernoulli-rankings.yml'
+      - 'research/multi-market-strategy-ranking/tools/rank_kelly_bernoulli.py'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trade-test-kelly-bernoulli-rankings
+  cancel-in-progress: false
+
+jobs:
+  rank-old-new-five-year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pandas for verified CSV reconstruction
+        run: python -m pip install 'pandas>=2.0,<3'
+      - name: Regenerate both rankings using source snapshots
+        run: python research/multi-market-strategy-ranking/tools/rank_kelly_bernoulli.py
+      - name: Assert strict 100 rows and non-inflated Kelly risk
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+          root=Path('research/multi-market-strategy-ranking/results/combined_top100')
+          ranked=pd.read_csv(root/'top100_by_return.csv')
+          families=pd.read_csv(root/'all_strategy_families_ranked.csv')
+          assert len(ranked)==100, f'Not 100: {len(ranked)}'
+          assert len(families)==38, f'Not all old+new families: {len(families)}'
+          assert ranked['五年交易數'].ge(70).all()
+          assert ranked['五年收益_pct'].gt(100).all()
+          assert ranked['IS_Kelly_pct'].gt(0).all()
+          assert ranked['實際風險_pct'].gt(0).all()
+          assert ranked['實際風險_pct'].le(ranked['IS_Kelly_pct'] + 1e-7).all()
+          assert ranked['最大回撤_pct'].between(0,100).all()
+          assert not ranked.duplicated(['商品','週期','策略','出場方式']).any()
+          assert not families.duplicated(['來源','策略']).any()
+          print('CHECKS_PASSED: 100 Kelly-capped profitability rows and 38 strategy-family rows')
+          PY
+      - name: Upload separately auditable ranking CSVs
+        uses: actions/upload-artifact@v4
+        with:
+          name: trade-test-kelly-bernoulli-old-new-top100
+          path: |
+            research/multi-market-strategy-ranking/results/combined_top100/*.csv
+            research/multi-market-strategy-ranking/results/combined_top100/*.md
+          retention-days: 30
+      - name: Commit ranking outputs only on report branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/multi-market-strategy-ranking/results/combined_top100/
+          if ! git diff --cached --quiet; then
+            git commit -m 'report: regenerate Kelly capped rankings from real old and new snapshots [skip ci]'
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
