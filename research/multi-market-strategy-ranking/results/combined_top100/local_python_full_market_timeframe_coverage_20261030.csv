@@ -5,7 +5,7 @@ BTCUSDT,10s,4,0,0,False,沒有完整逐筆證據或行情未可用
 BTCUSDT,15s,4,0,0,False,沒有完整逐筆證據或行情未可用
 BTCUSDT,30s,4,0,0,False,沒有完整逐筆證據或行情未可用
 BTCUSDT,45s,4,0,0,False,沒有完整逐筆證據或行情未可用
-BTCUSDT,1m,4,0,0,False,沒有完整逐筆證據或行情未可用
+BTCUSDT,1m,4,1,36,False,本機真實交易R已重新驗算
 BTCUSDT,2m,4,0,0,False,沒有完整逐筆證據或行情未可用
 BTCUSDT,3m,4,1,36,False,本機真實交易R已重新驗算
 BTCUSDT,5m,4,3,356,False,本機真實交易R已重新驗算
