@@ -1,0 +1,57 @@
+{
+  "status": "partial",
+  "family": "original",
+  "timeframe": "4h",
+  "strategies": [
+    {
+      "strategy": "Donchian20_10",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "MACD12_26_9",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "RSI14_EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "EMA50_200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Supertrend10_3",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Bollinger20_2",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "RSI2_EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Volume_Donchian20",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    }
+  ],
+  "ranked_configs": 288,
+  "saved_trades": 22788
+}

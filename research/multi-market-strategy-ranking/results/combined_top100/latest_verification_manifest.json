@@ -1,0 +1,75 @@
+{
+  "status": "partial",
+  "legacy_daily_archive_rows": 9556,
+  "new_strategy_timeframes": 12,
+  "new_strategy_configurations": 336,
+  "completed_legacy_timeframe_family_batches": 6,
+  "required_legacy_timeframe_family_batches": 36,
+  "verified_new_legacy_configuration_rows": 712,
+  "all_strategy_families": 38,
+  "qualifying_unique_return_candidates": 109,
+  "published_top_return_rows": 100,
+  "top100_legacy": 91,
+  "top100_new": 9,
+  "new_provenance": {
+    "1m": "ohlcv_plus_ranking_sha256_verified",
+    "3m": "ohlcv_plus_ranking_sha256_verified",
+    "5m": "ohlcv_plus_ranking_sha256_verified",
+    "15m": "ohlcv_provenance_csv_unhashed",
+    "30m": "ohlcv_provenance_csv_unhashed",
+    "1h": "ohlcv_provenance_csv_unhashed",
+    "2h": "ohlcv_plus_ranking_sha256_verified",
+    "4h": "ohlcv_plus_ranking_sha256_verified",
+    "6h": "ohlcv_plus_ranking_sha256_verified",
+    "8h": "ohlcv_plus_ranking_sha256_verified",
+    "12h": "ohlcv_plus_ranking_sha256_verified",
+    "1d": "ohlcv_plus_ranking_sha256_verified"
+  },
+  "legacy_batch_checksums": {
+    "legacy_BTCUSDT_4h_original": {
+      "OHLCV_SHA256": "04ae039db69bd30ed6eddc2c864b4f8bd6c03202ab6755663311e0d9d6375ab6",
+      "ranking_SHA256": "daadff6d05f26b65eefe6c1ad5238f8e3fb3c6b1f269a2331eb34b3d64d9d88e",
+      "trades_SHA256": "6ae14ad2cd781f09e8b410c10e79e8714378d95aa0bf8bb5c4a3d68a8793bc1a",
+      "strategies": 8,
+      "configurations": 288
+    },
+    "legacy_BTCUSDT_4h_compound": {
+      "OHLCV_SHA256": "04ae039db69bd30ed6eddc2c864b4f8bd6c03202ab6755663311e0d9d6375ab6",
+      "ranking_SHA256": "259b35e98d0e515800b20f107ec88197812cba32b719503df52d740b00757b65",
+      "trades_SHA256": "a287141cc79c3e77c9a03a6c9ccb71d646223b814618e75cdf2a393a848ac149",
+      "strategies": 8,
+      "configurations": 32
+    },
+    "legacy_BTCUSDT_4h_fixed": {
+      "OHLCV_SHA256": "04ae039db69bd30ed6eddc2c864b4f8bd6c03202ab6755663311e0d9d6375ab6",
+      "ranking_SHA256": "633924e3a0f1f1536f583dd7d3ffa38e0228e039b502c5149c5c41df21739df0",
+      "trades_SHA256": "b4c4c03c31486d318eea047c9861ab4e674685ceb8f800f5513a7a6d5584ff12",
+      "strategies": 9,
+      "configurations": 36
+    },
+    "legacy_BTCUSDT_1d_original": {
+      "OHLCV_SHA256": "09576fed01ead45e01657241d714a31ac8905a723f10a1fb7fc7910d84b021b4",
+      "ranking_SHA256": "e056abea744b7f6b14a8689e369fff59957e26652c8e91e453631ff12d839fb6",
+      "trades_SHA256": "835303e3208976c78759a0d8b7b42bc4e2def738ac8f7ccb5d328e625b9a3ca2",
+      "strategies": 8,
+      "configurations": 288
+    },
+    "legacy_BTCUSDT_1d_compound": {
+      "OHLCV_SHA256": "09576fed01ead45e01657241d714a31ac8905a723f10a1fb7fc7910d84b021b4",
+      "ranking_SHA256": "d5e51e2afa731e8f29b179a73eaca1373de9dfb16e6698ccdae29f4b3aa4ef8a",
+      "trades_SHA256": "28c12c5f9ea66a06dd7160b4a387abcaa8840afccdebfece153c164e8f29708d",
+      "strategies": 8,
+      "configurations": 32
+    },
+    "legacy_BTCUSDT_1d_fixed": {
+      "OHLCV_SHA256": "09576fed01ead45e01657241d714a31ac8905a723f10a1fb7fc7910d84b021b4",
+      "ranking_SHA256": "61b74c049472f134ba1cab7b2b6a74b6ad704822f6bcbdb0b5b2a9e026b6cd27",
+      "trades_SHA256": "ba00d8cb42e72d09208d28e4545015d9eb40027d1da587142f7df8d2b2792933",
+      "strategies": 9,
+      "configurations": 36
+    }
+  },
+  "bernoulli_iid_verified": false,
+  "tradingview_parity_verified": false,
+  "all_TV_timeframes_and_markets_complete": false
+}

@@ -1,0 +1,76 @@
+{
+  "source": "https://data.binance.vision/data/futures/um",
+  "symbol": "BTCUSDT",
+  "timeframe": "4h",
+  "warmup_start_utc": "2021-08-29T08:00:00+00:00",
+  "warmup_bar_count": 250,
+  "min_warmup_bars": 250,
+  "start_utc": "2021-10-10T00:00:00+00:00",
+  "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+  "actual_first_utc": "2021-10-10T00:00:00+00:00",
+  "actual_last_utc": "2026-10-09T20:00:00+00:00",
+  "bar_count": 10956,
+  "missing_or_irregular_intervals": 0,
+  "ohlcv_sha256": "04ae039db69bd30ed6eddc2c864b4f8bd6c03202ab6755663311e0d9d6375ab6",
+  "historical_data": true,
+  "tradingview_run_verified": false,
+  "pine_v6_parity_verified": false,
+  "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+  "family": "original",
+  "status": "complete",
+  "strategy_count": 8,
+  "completed": [
+    {
+      "strategy": "Donchian20_10",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "MACD12_26_9",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "RSI14_EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "EMA50_200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Supertrend10_3",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Bollinger20_2",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "RSI2_EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Volume_Donchian20",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    }
+  ],
+  "ranking_rows": 288,
+  "saved_trade_rows": 22788,
+  "ranking_sha256": "daadff6d05f26b65eefe6c1ad5238f8e3fb3c6b1f269a2331eb34b3d64d9d88e",
+  "trades_sha256": "6ae14ad2cd781f09e8b410c10e79e8714378d95aa0bf8bb5c4a3d68a8793bc1a"
+}

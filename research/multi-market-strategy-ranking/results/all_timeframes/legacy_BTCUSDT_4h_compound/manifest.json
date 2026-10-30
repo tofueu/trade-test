@@ -1,0 +1,76 @@
+{
+  "source": "https://data.binance.vision/data/futures/um",
+  "symbol": "BTCUSDT",
+  "timeframe": "4h",
+  "warmup_start_utc": "2021-08-29T08:00:00+00:00",
+  "warmup_bar_count": 250,
+  "min_warmup_bars": 250,
+  "start_utc": "2021-10-10T00:00:00+00:00",
+  "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+  "actual_first_utc": "2021-10-10T00:00:00+00:00",
+  "actual_last_utc": "2026-10-09T20:00:00+00:00",
+  "bar_count": 10956,
+  "missing_or_irregular_intervals": 0,
+  "ohlcv_sha256": "04ae039db69bd30ed6eddc2c864b4f8bd6c03202ab6755663311e0d9d6375ab6",
+  "historical_data": true,
+  "tradingview_run_verified": false,
+  "pine_v6_parity_verified": false,
+  "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+  "family": "compound",
+  "status": "complete",
+  "strategy_count": 8,
+  "completed": [
+    {
+      "strategy": "EMA200+RSI14_pullback",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA200+RSI2_mean_reversion",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Donchian20+MACD",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "MACD+RSI50",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+RSI50",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+Donchian20",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+MACD",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    }
+  ],
+  "ranking_rows": 32,
+  "saved_trade_rows": 3258,
+  "ranking_sha256": "259b35e98d0e515800b20f107ec88197812cba32b719503df52d740b00757b65",
+  "trades_sha256": "a287141cc79c3e77c9a03a6c9ccb71d646223b814618e75cdf2a393a848ac149"
+}
