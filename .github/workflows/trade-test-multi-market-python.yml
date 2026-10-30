@@ -1,5 +1,6 @@
 name: Trade Test real Python five-year multi-market old and new
 # Includes verified daily ZIP restoration for SOL monthly archive gaps; never synthetic candles.
+# Ranked output: per-asset/timeframe full strategy standings plus complete status matrix.
 
 on:
   push:
