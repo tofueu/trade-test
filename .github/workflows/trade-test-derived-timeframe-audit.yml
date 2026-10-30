@@ -1,0 +1,41 @@
+name: Trade Test derived TradingView 5y OHLCV validation
+
+on:
+  push:
+    branches: [report/trade-test-multi-market-20261030]
+    paths: ['.github/workflows/trade-test-derived-timeframe-audit.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  real-candle-derivation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        timeframe: ['2m','10m','45m','3h']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Assert five-year candles were derived solely from complete real exchange OHLCV
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'research/multi-market-strategy-ranking/tools')
+          import run_legacy_all_timeframes as runner
+          frame, evidence, market=runner.load_market_ohlcv('BTCUSDT','${{ matrix.timeframe }}')
+          assert evidence['historical_data']
+          assert evidence['missing_or_irregular_intervals']==0
+          assert evidence['resampled_from_only_verified_ohlcv']
+          assert evidence['resample_factor'] in (2,3)
+          assert evidence['warmup_bar_count']>=250
+          assert evidence['bar_count']>1800
+          print('DERIVED_REAL_5Y_VERIFIED',evidence,flush=True)
+          PY
