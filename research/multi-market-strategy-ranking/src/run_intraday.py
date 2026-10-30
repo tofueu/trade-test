@@ -107,8 +107,8 @@ def download_archive(url: str) -> pd.DataFrame:
 
 
 def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
-    if symbol != "BTCUSDT" or interval not in INTERVALS:
-        raise ValueError("First verified batch supports BTCUSDT and known intraday intervals only")
+    if symbol not in ("BTCUSDT", "ETHUSDT", "SOLUSDT") or interval not in INTERVALS:
+        raise ValueError("Only confirmed Binance USD-M futures symbols and kline intervals are supported")
     CACHE.mkdir(parents=True, exist_ok=True)
     cache_file = CACHE / f"{symbol}_{interval}_{START:%Y%m%d}_{END:%Y%m%d}.csv"
     step = pd.Timedelta(minutes=INTERVALS[interval])
