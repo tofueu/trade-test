@@ -1,0 +1,114 @@
+name: Trade Test real 5y Python legacy across all timeframes
+
+on:
+  push:
+    branches:
+      - report/trade-test-old-new-top100-20261030
+    paths:
+      - '.github/workflows/trade-test-legacy-all-timeframes-python.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: trade-test-legacy-python-matrix
+  cancel-in-progress: false
+
+jobs:
+  python-old-family-per-timeframe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        timeframe: [1d, 4h]
+        family: [original, compound, fixed]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install historical-data and backtest dependencies
+        run: python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+      - name: Check Python syntax for both ranking and old multi-timeframe engine
+        run: |
+          python -m py_compile research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py
+          python -m py_compile research/multi-market-strategy-ranking/tools/aggregate_all_timeframes.py
+      - name: Run actual five-year old-strategy Python backtest
+        run: |
+          python -u research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py \
+            --symbol BTCUSDT --timeframe "${{ matrix.timeframe }}" --family "${{ matrix.family }}"
+      - name: Keep per-strategy checkpoint, actual fills and provenances even after failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy_BTCUSDT_${{ matrix.timeframe }}_${{ matrix.family }}
+          path: research/multi-market-strategy-ranking/results/all_timeframes/legacy_BTCUSDT_${{ matrix.timeframe }}_${{ matrix.family }}/
+          if-no-files-found: warn
+          retention-days: 30
+
+  publish-verified-results:
+    if: always()
+    needs: [python-old-family-per-timeframe]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install pandas for source verification and ranking
+        run: python -m pip install 'pandas>=2.0,<3'
+      - name: Retrieve every completed Python family job, not cached leaderboards
+        uses: actions/download-artifact@v4
+        with:
+          pattern: legacy_BTCUSDT_*
+          path: research/multi-market-strategy-ranking/results/all_timeframes
+          merge-multiple: false
+      - name: Reject incomplete/invalid manifests and regenerate strategy and return rankings
+        run: python -u research/multi-market-strategy-ranking/tools/aggregate_all_timeframes.py
+      - name: Validate report and non-inflated Kelly risk
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import pandas as pd
+          import json
+          p=Path('research/multi-market-strategy-ranking/results/combined_top100')
+          r=pd.read_csv(p/'top100_by_return.csv')
+          f=pd.read_csv(p/'top100_by_strategy.csv')
+          m=json.loads((p/'latest_verification_manifest.json').read_text())
+          assert len(f)==38
+          assert 0<len(r)<=100
+          assert r['五年交易數'].ge(70).all()
+          assert r['五年收益_pct'].gt(100).all()
+          assert r['IS_Kelly_pct'].gt(0).all()
+          assert r['實際風險_pct'].gt(0).all()
+          assert r['實際風險_pct'].le(r['IS_Kelly_pct']+1e-7).all()
+          assert not r.duplicated(['商品','週期','策略','出場方式']).any()
+          assert m['completed_legacy_timeframe_family_batches']>=1, 'No actual legacy batch finished'
+          print('VERIFIED_PYTHON_BENCHMARK',m['completed_legacy_timeframe_family_batches'])
+          PY
+      - name: Publish independently verifiable source and report archive
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: old-new-python-five-year-audit-and-top100
+          path: |
+            research/multi-market-strategy-ranking/results/all_timeframes/
+            research/multi-market-strategy-ranking/results/combined_top100/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Upload completed real backtest results and Top100 to Git branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/multi-market-strategy-ranking/results/all_timeframes/
+          git add research/multi-market-strategy-ranking/results/combined_top100/
+          if ! git diff --cached --quiet; then
+            git commit -m 'results: real 5y old Python timeframes, fills, SHA256, refreshed old+new top100 [skip ci]'
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
