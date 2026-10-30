@@ -33,7 +33,7 @@ ETHUSDT,45s,4,0,0,False,沒有完整逐筆證據或行情未可用
 ETHUSDT,1m,4,0,0,False,沒有完整逐筆證據或行情未可用
 ETHUSDT,2m,4,0,0,False,沒有完整逐筆證據或行情未可用
 ETHUSDT,3m,4,0,0,False,沒有完整逐筆證據或行情未可用
-ETHUSDT,5m,4,0,0,False,沒有完整逐筆證據或行情未可用
+ETHUSDT,5m,4,4,384,True,本機真實交易R已重新驗算
 ETHUSDT,10m,4,0,0,False,沒有完整逐筆證據或行情未可用
 ETHUSDT,15m,4,4,384,True,本機真實交易R已重新驗算
 ETHUSDT,30m,4,4,384,True,本機真實交易R已重新驗算
