@@ -106,6 +106,71 @@ def download_archive(url: str) -> pd.DataFrame:
         return parse_klines_zip(response.read())
 
 
+
+def restore_gap_klines_from_binance_daily_archive(
+        candles: pd.DataFrame, symbol: str, interval: str,
+        step: pd.Timedelta) -> tuple[pd.DataFrame, list[dict]]:
+    """Repair *archive omissions* only with independently downloadable Binance
+    historical daily ZIP candle rows (never forward-fill or interpolation).
+
+    Each expected missing timestamp must be supplied as a real, structurally
+    validated kline by the same venue/symbol/interval. Fail closed otherwise.
+    """
+    ordered = candles.sort_values("timestamp").reset_index(drop=True)
+    tested = ordered[(ordered.timestamp >= START) & (ordered.timestamp < END)]
+    delta = tested.timestamp.diff()
+    missing = []
+    for idx in delta[delta > step].index:
+        current = tested.loc[idx, "timestamp"]
+        previous = tested.loc[idx-1, "timestamp"]
+        if (current - previous) % step != pd.Timedelta(0):
+            raise RuntimeError("Non-aligned exchange candle gap cannot be repaired")
+        n = int((current-previous)//step) - 1
+        if n <= 0:
+            continue
+        if n > 18000 or len(missing) + n > 24000:
+            raise RuntimeError("Exchange archive gap exceeds safe repair audit limit")
+        missing.extend(pd.date_range(previous+step, periods=n, freq=step))
+    if not missing:
+        return ordered, []
+    wanted = set(missing)
+    days = sorted({t.strftime("%Y-%m-%d") for t in missing})
+    if len(days) > 20:
+        raise RuntimeError("Too many missing days for explicit daily archive audit")
+    print("BINANCE_ARCHIVE_GAP_DAYS", symbol, interval, days, flush=True)
+    restored, receipts = [], []
+    for day in days:
+        filename = f"{symbol}-{interval}-{day}.zip"
+        url = f"{SOURCE}/daily/klines/{symbol}/{interval}/{filename}"
+        request = urllib.request.Request(
+            url, headers={"User-Agent": "TradeTest-Audit-GapRepair/1.0"})
+        with urllib.request.urlopen(request, timeout=60) as response:
+            payload = response.read()
+        daily = parse_klines_zip(payload)
+        daily = daily[daily.timestamp.isin(wanted)].copy()
+        if daily.empty:
+            raise RuntimeError(f"Binance daily archive lacks missing rows: {url}")
+        if daily.timestamp.duplicated().any():
+            raise RuntimeError(f"Conflicting duplicate Binance daily timestamps: {url}")
+        receipts.append({
+            "archive_url": url, "zip_sha256": hashlib.sha256(payload).hexdigest(),
+            "restored_bar_count": int(len(daily))})
+        restored.append(daily)
+        print("VERIFIED_EXCHANGE_DAILY_ARCHIVE", day, len(daily), flush=True)
+    candidate = pd.concat([ordered, *restored], ignore_index=True)
+    candidate = deduplicate_verified_candles(candidate)
+    candidate = candidate.sort_values("timestamp").reset_index(drop=True)
+    restored_times = set(pd.concat(restored).timestamp)
+    if restored_times != wanted:
+        raise RuntimeError(
+            f"Binance daily audit incomplete: wanted={len(wanted)}, "
+            f"verified={len(restored_times)}, missing={len(wanted-restored_times)}")
+    validate_ohlcv(candidate)
+    print("REAL_EXCHANGE_GAP_REPAIR_COMPLETE", symbol, interval,
+          "restored_bars", len(wanted), flush=True)
+    return candidate, receipts
+
+
 def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
     if symbol not in ("BTCUSDT", "ETHUSDT", "SOLUSDT") or interval not in INTERVALS:
         raise ValueError("Only confirmed Binance USD-M futures symbols and kline intervals are supported")
@@ -149,6 +214,13 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         raise RuntimeError("Indicator warm-up history incomplete; no qualified ranking")
     diffs = in_window.timestamp.diff().dropna()
     gaps = int((diffs != step).sum())
+    gap_repair_receipts = []
+    if gaps and not cache_hit:
+        candles, gap_repair_receipts = restore_gap_klines_from_binance_daily_archive(
+            candles, symbol, interval, step)
+        in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
+        diffs = in_window.timestamp.diff().dropna()
+        gaps = int((diffs != step).sum())
     if gaps:
         bad = in_window.loc[diffs[diffs != step].index, "timestamp"].head(16)
         prior = in_window["timestamp"].shift(1).loc[bad.index]
@@ -180,6 +252,8 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         "actual_last_utc": in_window.timestamp.iloc[-1].isoformat(),
         "bar_count": int(len(in_window)), "missing_or_irregular_intervals": gaps,
         "ohlcv_sha256": digest, "historical_data": True,
+        "verified_daily_archive_gap_repair": gap_repair_receipts,
+        "daily_archives_added": len(gap_repair_receipts),
         "tradingview_run_verified": False, "pine_v6_parity_verified": False,
         "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
     }
