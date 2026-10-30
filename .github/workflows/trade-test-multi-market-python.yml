@@ -24,8 +24,28 @@ jobs:
         include:
           - {symbol: ETHUSDT, timeframe: 1d}
           - {symbol: ETHUSDT, timeframe: 4h}
+          - {symbol: ETHUSDT, timeframe: 12h}
+          - {symbol: ETHUSDT, timeframe: 8h}
+          - {symbol: ETHUSDT, timeframe: 6h}
+          - {symbol: ETHUSDT, timeframe: 2h}
+          - {symbol: ETHUSDT, timeframe: 1h}
+          - {symbol: ETHUSDT, timeframe: 30m}
+          - {symbol: ETHUSDT, timeframe: 15m}
+          - {symbol: ETHUSDT, timeframe: 5m}
+          - {symbol: ETHUSDT, timeframe: 3m}
+          - {symbol: ETHUSDT, timeframe: 1m}
           - {symbol: SOLUSDT, timeframe: 1d}
           - {symbol: SOLUSDT, timeframe: 4h}
+          - {symbol: SOLUSDT, timeframe: 12h}
+          - {symbol: SOLUSDT, timeframe: 8h}
+          - {symbol: SOLUSDT, timeframe: 6h}
+          - {symbol: SOLUSDT, timeframe: 2h}
+          - {symbol: SOLUSDT, timeframe: 1h}
+          - {symbol: SOLUSDT, timeframe: 30m}
+          - {symbol: SOLUSDT, timeframe: 15m}
+          - {symbol: SOLUSDT, timeframe: 5m}
+          - {symbol: SOLUSDT, timeframe: 3m}
+          - {symbol: SOLUSDT, timeframe: 1m}
           - {symbol: 'GC=F', timeframe: 1d}
           - {symbol: 'SI=F', timeframe: 1d}
           - {symbol: 'ES=F', timeframe: 1d}
