@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: write
+  actions: read
 
 concurrency:
   group: trade-test-multi-market-matrix
@@ -106,6 +107,15 @@ jobs:
           pattern: market-*
           path: market-artifacts
           merge-multiple: true
+      - name: Reuse real BTCUSDT 12-timeframe Python work already completed in other workflow
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          dir=research/multi-market-strategy-ranking/results/all_timeframes
+          mkdir -p "$dir"
+          gh run download 41064675326 -R tofueu/trade-test             --pattern 'legacy_BTCUSDT_*' --dir "$dir" ||
+            echo "BTC files not yet available from in-progress run; retained verified prior data"
       - name: Rebuild audited all-strategy and return Top100 lists
         shell: bash
         run: |
