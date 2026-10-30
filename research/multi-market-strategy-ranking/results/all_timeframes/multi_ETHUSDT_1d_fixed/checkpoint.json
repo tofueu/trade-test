@@ -1,0 +1,63 @@
+{
+  "status": "partial",
+  "family": "fixed",
+  "timeframe": "1d",
+  "strategies": [
+    {
+      "strategy": "EMA200+RSI14_pullback",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA200+RSI2_extreme",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA200+MACD_cross",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Donchian20+ADX14",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Bollinger20+RSI14_reentry",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+EMA200_flip",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+DailyMACD",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+DailyDonchian20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Stoch14+EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    }
+  ],
+  "ranked_configs": 36,
+  "saved_trades": 416
+}

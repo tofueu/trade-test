@@ -5,12 +5,256 @@
   "new_strategy_configurations": 336,
   "completed_legacy_timeframe_family_batches": 6,
   "required_legacy_timeframe_family_batches": 36,
-  "verified_new_legacy_configuration_rows": 712,
+  "verified_new_legacy_configuration_rows": 3016,
+  "verified_multi_asset_batch_count": 24,
+  "verified_multi_asset_batches": {
+    "multi_ES=F_1d_compound": {
+      "symbol": "ES=F",
+      "timeframe": "1d",
+      "family": "compound",
+      "configurations": 32,
+      "OHLCV_SHA256": "7360f6970f91bce2534d83ac7e9980f4978aff072565c7491cec18e7320f35a9",
+      "ranking_SHA256": "e082a0eee9c61b9f4b277ce6362d4b29cb7ac27f7bef8d97ad896f049ca2d8f2",
+      "trades_SHA256": "db57e828317f59e8cef7e34e1bc67686a668526d293e97e7e1c1809871361752",
+      "tradable_proxy": true
+    },
+    "multi_ES=F_1d_fixed": {
+      "symbol": "ES=F",
+      "timeframe": "1d",
+      "family": "fixed",
+      "configurations": 36,
+      "OHLCV_SHA256": "7360f6970f91bce2534d83ac7e9980f4978aff072565c7491cec18e7320f35a9",
+      "ranking_SHA256": "74e31502ee0e34db6bc5f26f855605b255d82c368ad6b380b49718395021c405",
+      "trades_SHA256": "e73fdaaa4f693bdbeffa9ae0f60eb0b006fda89a4f5fe2463d6a46b1fd4ad2d6",
+      "tradable_proxy": true
+    },
+    "multi_ES=F_1d_new": {
+      "symbol": "ES=F",
+      "timeframe": "1d",
+      "family": "new",
+      "configurations": 28,
+      "OHLCV_SHA256": "7360f6970f91bce2534d83ac7e9980f4978aff072565c7491cec18e7320f35a9",
+      "ranking_SHA256": "72743fa82311f06413832d8696a95259a698305b4acbcafc4aec8b5b5c154aac",
+      "trades_SHA256": "ac587ab57e40c418a5ea6c0cd3a2be17b951b61c2563cc1f4852cf441a0a9f83",
+      "tradable_proxy": true
+    },
+    "multi_ES=F_1d_original": {
+      "symbol": "ES=F",
+      "timeframe": "1d",
+      "family": "original",
+      "configurations": 288,
+      "OHLCV_SHA256": "7360f6970f91bce2534d83ac7e9980f4978aff072565c7491cec18e7320f35a9",
+      "ranking_SHA256": "22384ccf324c5d5c637b32c0d8935858e16efa5549990cb50c6cbf18e2745deb",
+      "trades_SHA256": "048925fa242cfa1de01a9c4d13b6dfd29aaed9e030db86c1b526b5b1a3be0381",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_1d_compound": {
+      "symbol": "ETHUSDT",
+      "timeframe": "1d",
+      "family": "compound",
+      "configurations": 32,
+      "OHLCV_SHA256": "1bda04871f1d547da535bcca9d73ab4e3d4ad3bbfb39dc1edf2bbd84e67b4e44",
+      "ranking_SHA256": "84733fe637b1b4141d65048487b10b88e4512cabccd55e11e6d7999c762d3db8",
+      "trades_SHA256": "e06c2851191f44530e18e2619e5811d563ee1545946e18ae7e1ac4538f6f45b2",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_1d_fixed": {
+      "symbol": "ETHUSDT",
+      "timeframe": "1d",
+      "family": "fixed",
+      "configurations": 36,
+      "OHLCV_SHA256": "1bda04871f1d547da535bcca9d73ab4e3d4ad3bbfb39dc1edf2bbd84e67b4e44",
+      "ranking_SHA256": "dd903199d2acf3425fcc1d1cfa1e6562bd83cbd24acf746bfbbbbfbd51c44099",
+      "trades_SHA256": "394bd172677ddcd995303b681c2706291b3128eff5dcec6960190dd35deb28a4",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_1d_new": {
+      "symbol": "ETHUSDT",
+      "timeframe": "1d",
+      "family": "new",
+      "configurations": 28,
+      "OHLCV_SHA256": "1bda04871f1d547da535bcca9d73ab4e3d4ad3bbfb39dc1edf2bbd84e67b4e44",
+      "ranking_SHA256": "96740666c4c07f7b86ec43852fa995ca6feda51fcdb17048a484094b8b2ea595",
+      "trades_SHA256": "f383ce34a8bf27c4509ae9fb59e41b47a886b173a52a5ecbb8829367bc849071",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_1d_original": {
+      "symbol": "ETHUSDT",
+      "timeframe": "1d",
+      "family": "original",
+      "configurations": 288,
+      "OHLCV_SHA256": "1bda04871f1d547da535bcca9d73ab4e3d4ad3bbfb39dc1edf2bbd84e67b4e44",
+      "ranking_SHA256": "ac6a091da6c86d54695514313396c97854f3203c5ffdda25bc26d3f6b3e42d6e",
+      "trades_SHA256": "9ea45b8180b9727ba8aa44702fff26d03a31e3b78e58e6e820471aea55dbb93f",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_4h_compound": {
+      "symbol": "ETHUSDT",
+      "timeframe": "4h",
+      "family": "compound",
+      "configurations": 32,
+      "OHLCV_SHA256": "b141efad84b18a902154c8810a7aadc79b8022497b4d3c1146adf40beee122af",
+      "ranking_SHA256": "8671f8f83ab994b003ce9fddbb76dcf3811751ebf364a792481c864c4fcc4614",
+      "trades_SHA256": "0436c6db546538e27185132e42bed3c0f208358617afed06e8ab94e49aa6d2d9",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_4h_fixed": {
+      "symbol": "ETHUSDT",
+      "timeframe": "4h",
+      "family": "fixed",
+      "configurations": 36,
+      "OHLCV_SHA256": "b141efad84b18a902154c8810a7aadc79b8022497b4d3c1146adf40beee122af",
+      "ranking_SHA256": "0a32e133f3b88c554c41bb8af4314efd8007eb43daeb4cbf1e2821a08c33b195",
+      "trades_SHA256": "4dd9cad9986f7e4e0adf09bf53385176436dae7c70cfa87f15c92f310d31640f",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_4h_new": {
+      "symbol": "ETHUSDT",
+      "timeframe": "4h",
+      "family": "new",
+      "configurations": 28,
+      "OHLCV_SHA256": "b141efad84b18a902154c8810a7aadc79b8022497b4d3c1146adf40beee122af",
+      "ranking_SHA256": "c1cd82b86a7c51d6b128e6034e2140ee97d695b69caaf7dffa38edf62777dfe5",
+      "trades_SHA256": "f106a0650526bba21da3273123509b2aab8d899782585e00195763ce27f4d54e",
+      "tradable_proxy": true
+    },
+    "multi_ETHUSDT_4h_original": {
+      "symbol": "ETHUSDT",
+      "timeframe": "4h",
+      "family": "original",
+      "configurations": 288,
+      "OHLCV_SHA256": "b141efad84b18a902154c8810a7aadc79b8022497b4d3c1146adf40beee122af",
+      "ranking_SHA256": "dc0b5e33cfe667e7168ab3094947f4aeb31c56a65dfd78f4d9c8d45b2bf6dbcd",
+      "trades_SHA256": "0ff5eb1c77fbeb0696ba324d4f86a7573450a6c50d29c97f16416d87e1c263dd",
+      "tradable_proxy": true
+    },
+    "multi_GC=F_1d_compound": {
+      "symbol": "GC=F",
+      "timeframe": "1d",
+      "family": "compound",
+      "configurations": 32,
+      "OHLCV_SHA256": "1b7f40b30f0800de73742369bfcd3ff3c57b860114b3473bbae0d514cda50f09",
+      "ranking_SHA256": "526a4139fe12416b86bae32f174cd1710d78c2a1cceb2cb2d4b0546bcbce027d",
+      "trades_SHA256": "8e3ad00d3f86f205547c5a7a7d81f4fcd64d412c9cda66f9e0e265048f8dcc77",
+      "tradable_proxy": true
+    },
+    "multi_GC=F_1d_fixed": {
+      "symbol": "GC=F",
+      "timeframe": "1d",
+      "family": "fixed",
+      "configurations": 36,
+      "OHLCV_SHA256": "1b7f40b30f0800de73742369bfcd3ff3c57b860114b3473bbae0d514cda50f09",
+      "ranking_SHA256": "78562a04b66a1e6b583f917972e78d16e4dd9f8484f5a1a926eadf179dc7f798",
+      "trades_SHA256": "c8d743e2442baf5970463191c6cbfd3669b0bbc976f982e58e9033a3bb80506f",
+      "tradable_proxy": true
+    },
+    "multi_GC=F_1d_new": {
+      "symbol": "GC=F",
+      "timeframe": "1d",
+      "family": "new",
+      "configurations": 28,
+      "OHLCV_SHA256": "1b7f40b30f0800de73742369bfcd3ff3c57b860114b3473bbae0d514cda50f09",
+      "ranking_SHA256": "af189984ba884fede1196e32374313bcf93df2da53a327eab4736378a6628146",
+      "trades_SHA256": "c0404d08f9c5a0b5e1b3ed0aae2ef815c59311b56054965bdff42db73bc4e71f",
+      "tradable_proxy": true
+    },
+    "multi_GC=F_1d_original": {
+      "symbol": "GC=F",
+      "timeframe": "1d",
+      "family": "original",
+      "configurations": 288,
+      "OHLCV_SHA256": "1b7f40b30f0800de73742369bfcd3ff3c57b860114b3473bbae0d514cda50f09",
+      "ranking_SHA256": "ec3cb16f8c051168670efb5203486544e083ea8b8904c0d5d111edcda728e467",
+      "trades_SHA256": "30b93296259d7b8e98d3bdbadb93ab31fc61fbcb37981968d7a734af74b0918a",
+      "tradable_proxy": true
+    },
+    "multi_NQ=F_1d_compound": {
+      "symbol": "NQ=F",
+      "timeframe": "1d",
+      "family": "compound",
+      "configurations": 32,
+      "OHLCV_SHA256": "7931c3e3ba487da72da70c43dd407a8fa7a3ed36c97f502092021c17c86857d9",
+      "ranking_SHA256": "0d63404627c000da1a4e36ba4f018c8f979ee2b82e2ef7fdf1e3aa54fd8b83bb",
+      "trades_SHA256": "527eb28024a7de5d84c834fd9d8fbc2f78fcc02bbda9286cefe24046699eb532",
+      "tradable_proxy": true
+    },
+    "multi_NQ=F_1d_fixed": {
+      "symbol": "NQ=F",
+      "timeframe": "1d",
+      "family": "fixed",
+      "configurations": 36,
+      "OHLCV_SHA256": "7931c3e3ba487da72da70c43dd407a8fa7a3ed36c97f502092021c17c86857d9",
+      "ranking_SHA256": "028450ede738f20d83092459568bb2c5ddc140997ef295cb0f63256c81d00fd4",
+      "trades_SHA256": "5ef011a0d9bdce37fb77bd3c5127721c631014df64d4a413134225b549e2b55a",
+      "tradable_proxy": true
+    },
+    "multi_NQ=F_1d_new": {
+      "symbol": "NQ=F",
+      "timeframe": "1d",
+      "family": "new",
+      "configurations": 28,
+      "OHLCV_SHA256": "7931c3e3ba487da72da70c43dd407a8fa7a3ed36c97f502092021c17c86857d9",
+      "ranking_SHA256": "e6ab38b571c0fae3e48ddbc166e88d2ccf09cd05c8a4ee7d6f0df6511f4f6c40",
+      "trades_SHA256": "61fe9c5d82c8d7ef0972cf47309d38fb625399453d5c4dc7831d0156dc5aa4ee",
+      "tradable_proxy": true
+    },
+    "multi_NQ=F_1d_original": {
+      "symbol": "NQ=F",
+      "timeframe": "1d",
+      "family": "original",
+      "configurations": 288,
+      "OHLCV_SHA256": "7931c3e3ba487da72da70c43dd407a8fa7a3ed36c97f502092021c17c86857d9",
+      "ranking_SHA256": "8eccf0c50be3a181b9b14c3709d1417edbdaaf831e852b0a8de88b001b02610a",
+      "trades_SHA256": "e08c0c3d4c917aadb86096b82eb857eaf94ee7fe1b10d640aa64a75f5d0f858d",
+      "tradable_proxy": true
+    },
+    "multi_SI=F_1d_compound": {
+      "symbol": "SI=F",
+      "timeframe": "1d",
+      "family": "compound",
+      "configurations": 32,
+      "OHLCV_SHA256": "846af3cedc0688f9fa77cfcf4eba93312cb950bf2c33d56d186080dac27576f4",
+      "ranking_SHA256": "61cee27ae3046d83bfc2a5a580f7268526bf049cb1976e528767982b3b753439",
+      "trades_SHA256": "405e442e6e58cd92bc753ce91a157ba05947c34b640dc9ceae10e89f41ae73cf",
+      "tradable_proxy": true
+    },
+    "multi_SI=F_1d_fixed": {
+      "symbol": "SI=F",
+      "timeframe": "1d",
+      "family": "fixed",
+      "configurations": 36,
+      "OHLCV_SHA256": "846af3cedc0688f9fa77cfcf4eba93312cb950bf2c33d56d186080dac27576f4",
+      "ranking_SHA256": "46c120d4045c79378cacb3fc42419cfafb26779296dd8171afcf159898a2e4ef",
+      "trades_SHA256": "1a8511708ab4400b0775b6d4b9146e2b568d0967b288417aaaf8849aa8788d4b",
+      "tradable_proxy": true
+    },
+    "multi_SI=F_1d_new": {
+      "symbol": "SI=F",
+      "timeframe": "1d",
+      "family": "new",
+      "configurations": 28,
+      "OHLCV_SHA256": "846af3cedc0688f9fa77cfcf4eba93312cb950bf2c33d56d186080dac27576f4",
+      "ranking_SHA256": "8425eef49026e48e7725fa639c25645a90698a5d1b44a5c2cec8d614a86758f2",
+      "trades_SHA256": "131354317f24f35bd3180be5c09ed8177b656aaab08a3c439d63a6d27a7e5aed",
+      "tradable_proxy": true
+    },
+    "multi_SI=F_1d_original": {
+      "symbol": "SI=F",
+      "timeframe": "1d",
+      "family": "original",
+      "configurations": 288,
+      "OHLCV_SHA256": "846af3cedc0688f9fa77cfcf4eba93312cb950bf2c33d56d186080dac27576f4",
+      "ranking_SHA256": "7a7db107d709027e926340a7e3ce198cc5357bb2a77170b0ccb81523d9b22acd",
+      "trades_SHA256": "446ebd2c11014cbb3b4f97d21afa6e8710762b05d542930d281a0022a04e74ac",
+      "tradable_proxy": true
+    }
+  },
+  "unavailable_assets_timeframes": "Yahoo sources provide audited daily only; 5-year intraday unverified",
   "all_strategy_families": 38,
-  "qualifying_unique_return_candidates": 109,
+  "qualifying_unique_return_candidates": 119,
   "published_top_return_rows": 100,
-  "top100_legacy": 91,
-  "top100_new": 9,
+  "top100_legacy": 88,
+  "top100_new": 12,
   "new_provenance": {
     "1m": "ohlcv_plus_ranking_sha256_verified",
     "3m": "ohlcv_plus_ranking_sha256_verified",

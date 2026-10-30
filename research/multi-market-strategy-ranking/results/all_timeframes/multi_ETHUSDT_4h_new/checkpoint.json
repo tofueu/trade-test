@@ -1,0 +1,51 @@
+{
+  "status": "partial",
+  "family": "new",
+  "timeframe": "4h",
+  "strategies": [
+    {
+      "strategy": "Turtle55_20_EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend_ADX20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA20_50_ADX20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Keltner20_1.5ATR_EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "BB_Reentry_RSI_ADX25",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Donchian20_Volume_EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "MACD_EMA200_ADX20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    }
+  ],
+  "ranked_configs": 28,
+  "saved_trades": 1232
+}

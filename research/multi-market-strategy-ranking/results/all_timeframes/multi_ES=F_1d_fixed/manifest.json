@@ -1,0 +1,84 @@
+{
+  "source": "Yahoo Finance chart historical daily OHLC",
+  "symbol": "ES=F",
+  "timeframe": "1d",
+  "start_utc": "2021-10-10T00:00:00+00:00",
+  "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+  "warmup_bar_count": 447,
+  "bar_count": 1258,
+  "actual_first_utc": "2021-10-11T04:00:00+00:00",
+  "actual_last_utc": "2026-10-09T04:00:00+00:00",
+  "missing_or_irregular_intervals": null,
+  "exchange_holidays_not_invented": true,
+  "largest_calendar_gap": "4 days 00:00:00",
+  "ohlcv_sha256": "7360f6970f91bce2534d83ac7e9980f4978aff072565c7491cec18e7320f35a9",
+  "historical_data": true,
+  "volume_available": true,
+  "cost_model": "legacy Yahoo futures/FX model or explicitly hypothetical 10bps/index",
+  "tradable_proxy": true,
+  "tradingview_run_verified": false,
+  "pine_v6_parity_verified": false,
+  "family": "fixed",
+  "status": "complete",
+  "strategy_count": 9,
+  "completed": [
+    {
+      "strategy": "EMA200+RSI14_pullback",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA200+RSI2_extreme",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA200+MACD_cross",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Donchian20+ADX14",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Bollinger20+RSI14_reentry",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+EMA200_flip",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+DailyMACD",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+DailyDonchian20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Stoch14+EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    }
+  ],
+  "ranking_rows": 36,
+  "saved_trade_rows": 426,
+  "ranking_sha256": "74e31502ee0e34db6bc5f26f855605b255d82c368ad6b380b49718395021c405",
+  "trades_sha256": "e73fdaaa4f693bdbeffa9ae0f60eb0b006fda89a4f5fe2463d6a46b1fd4ad2d6"
+}

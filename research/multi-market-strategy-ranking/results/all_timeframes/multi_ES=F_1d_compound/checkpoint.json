@@ -1,0 +1,57 @@
+{
+  "status": "partial",
+  "family": "compound",
+  "timeframe": "1d",
+  "strategies": [
+    {
+      "strategy": "EMA200+RSI14_pullback",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA200+RSI2_mean_reversion",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Donchian20+MACD",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "MACD+RSI50",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+RSI50",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+Donchian20",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+MACD",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    }
+  ],
+  "ranked_configs": 32,
+  "saved_trades": 422
+}

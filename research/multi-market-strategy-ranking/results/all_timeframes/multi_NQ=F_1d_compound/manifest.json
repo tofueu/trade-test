@@ -1,0 +1,78 @@
+{
+  "source": "Yahoo Finance chart historical daily OHLC",
+  "symbol": "NQ=F",
+  "timeframe": "1d",
+  "start_utc": "2021-10-10T00:00:00+00:00",
+  "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+  "warmup_bar_count": 447,
+  "bar_count": 1258,
+  "actual_first_utc": "2021-10-11T04:00:00+00:00",
+  "actual_last_utc": "2026-10-09T04:00:00+00:00",
+  "missing_or_irregular_intervals": null,
+  "exchange_holidays_not_invented": true,
+  "largest_calendar_gap": "4 days 00:00:00",
+  "ohlcv_sha256": "7931c3e3ba487da72da70c43dd407a8fa7a3ed36c97f502092021c17c86857d9",
+  "historical_data": true,
+  "volume_available": true,
+  "cost_model": "legacy Yahoo futures/FX model or explicitly hypothetical 10bps/index",
+  "tradable_proxy": true,
+  "tradingview_run_verified": false,
+  "pine_v6_parity_verified": false,
+  "family": "compound",
+  "status": "complete",
+  "strategy_count": 8,
+  "completed": [
+    {
+      "strategy": "EMA200+RSI14_pullback",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA200+RSI2_mean_reversion",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Donchian20+MACD",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "MACD+RSI50",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend+RSI50",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+Donchian20",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "WEMA20_50+MACD",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 1
+    }
+  ],
+  "ranking_rows": 32,
+  "saved_trade_rows": 416,
+  "ranking_sha256": "0d63404627c000da1a4e36ba4f018c8f979ee2b82e2ef7fdf1e3aa54fd8b83bb",
+  "trades_sha256": "527eb28024a7de5d84c834fd9d8fbc2f78fcc02bbda9286cefe24046699eb532"
+}

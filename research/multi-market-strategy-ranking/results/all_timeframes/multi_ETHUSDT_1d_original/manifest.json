@@ -1,0 +1,77 @@
+{
+  "source": "https://data.binance.vision/data/futures/um",
+  "symbol": "ETHUSDT",
+  "timeframe": "1d",
+  "warmup_start_utc": "2021-02-02T00:00:00+00:00",
+  "warmup_bar_count": 250,
+  "min_warmup_bars": 250,
+  "start_utc": "2021-10-10T00:00:00+00:00",
+  "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+  "actual_first_utc": "2021-10-10T00:00:00+00:00",
+  "actual_last_utc": "2026-10-09T00:00:00+00:00",
+  "bar_count": 1826,
+  "missing_or_irregular_intervals": 0,
+  "ohlcv_sha256": "1bda04871f1d547da535bcca9d73ab4e3d4ad3bbfb39dc1edf2bbd84e67b4e44",
+  "historical_data": true,
+  "tradingview_run_verified": false,
+  "pine_v6_parity_verified": false,
+  "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+  "tradable_proxy": true,
+  "family": "original",
+  "status": "complete",
+  "strategy_count": 8,
+  "completed": [
+    {
+      "strategy": "Donchian20_10",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "MACD12_26_9",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "RSI14_EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "EMA50_200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Supertrend10_3",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Bollinger20_2",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "RSI2_EMA200",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    },
+    {
+      "strategy": "Volume_Donchian20",
+      "status": "completed",
+      "tested_exit_count": 9,
+      "saved_exit_count": 9
+    }
+  ],
+  "ranking_rows": 288,
+  "saved_trade_rows": 3726,
+  "ranking_sha256": "ac6a091da6c86d54695514313396c97854f3203c5ffdda25bc26d3f6b3e42d6e",
+  "trades_sha256": "9ea45b8180b9727ba8aa44702fff26d03a31e3b78e58e6e820471aea55dbb93f"
+}

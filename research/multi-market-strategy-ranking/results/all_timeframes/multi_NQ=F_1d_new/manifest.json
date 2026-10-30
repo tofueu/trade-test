@@ -1,0 +1,72 @@
+{
+  "source": "Yahoo Finance chart historical daily OHLC",
+  "symbol": "NQ=F",
+  "timeframe": "1d",
+  "start_utc": "2021-10-10T00:00:00+00:00",
+  "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+  "warmup_bar_count": 447,
+  "bar_count": 1258,
+  "actual_first_utc": "2021-10-11T04:00:00+00:00",
+  "actual_last_utc": "2026-10-09T04:00:00+00:00",
+  "missing_or_irregular_intervals": null,
+  "exchange_holidays_not_invented": true,
+  "largest_calendar_gap": "4 days 00:00:00",
+  "ohlcv_sha256": "7931c3e3ba487da72da70c43dd407a8fa7a3ed36c97f502092021c17c86857d9",
+  "historical_data": true,
+  "volume_available": true,
+  "cost_model": "legacy Yahoo futures/FX model or explicitly hypothetical 10bps/index",
+  "tradable_proxy": true,
+  "tradingview_run_verified": false,
+  "pine_v6_parity_verified": false,
+  "family": "new",
+  "status": "complete",
+  "strategy_count": 7,
+  "completed": [
+    {
+      "strategy": "Turtle55_20_EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Supertrend_ADX20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "EMA20_50_ADX20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Keltner20_1.5ATR_EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "BB_Reentry_RSI_ADX25",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "Donchian20_Volume_EMA200",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    },
+    {
+      "strategy": "MACD_EMA200_ADX20",
+      "status": "completed",
+      "tested_exit_count": 5,
+      "saved_exit_count": 1
+    }
+  ],
+  "ranking_rows": 28,
+  "saved_trade_rows": 144,
+  "ranking_sha256": "e6ab38b571c0fae3e48ddbc166e88d2ccf09cd05c8a4ee7d6f0df6511f4f6c40",
+  "trades_sha256": "61fe9c5d82c8d7ef0972cf47309d38fb625399453d5c4dc7831d0156dc5aa4ee"
+}
