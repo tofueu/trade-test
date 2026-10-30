@@ -172,8 +172,24 @@ def main() -> None:
         backtest_fn = fixed["run_bracket"]
         modes = [(f"固定止盈{tp:g}R", tp, None) for tp in fixed["TP_RS"]]
 
-    # Avoid changing any original strategy logic. Keep its exact signal function.
-    base.make_signals = signal_fn if signal_fn is not None else base.make_signals
+    # Preserve the source's exact signals but compute each once per OHLCV
+    # batch. Exit variants change stops/TP only; recomputing the same millions
+    # of 1m signals nine times would waste hours without affecting results.
+    signal_cache = {}
+    if signal_fn is not None:
+        def cached_signals(d, name):
+            if name not in signal_cache:
+                signal_cache[name] = signal_fn(d, name)
+            return signal_cache[name]
+        base.make_signals = cached_signals
+    else:
+        fixed_scope = fixed["run_bracket"].__globals__
+        source_fixed_signals = fixed_scope["signals"]
+        def cached_fixed_signals(d, name):
+            if name not in signal_cache:
+                signal_cache[name] = source_fixed_signals(d, name)
+            return signal_cache[name]
+        fixed_scope["signals"] = cached_fixed_signals
 
     trades_out = []
     rows = []
