@@ -1,0 +1,67 @@
+name: Trade Test recover verified Python results without re-running
+
+on:
+  push:
+    branches:
+      - report/trade-test-old-new-top100-20261030
+    paths:
+      - '.github/workflows/trade-test-harvest-existing-python.yml'
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: write
+
+concurrency:
+  group: trade-test-recover-python-results
+  cancel-in-progress: false
+
+jobs:
+  publish-previously-executed-python-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch six completed actual Python 5y jobs from prior run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p research/multi-market-strategy-ranking/results/all_timeframes
+          gh run download 41064012929 -R tofueu/trade-test \
+            --pattern 'legacy_BTCUSDT_*' \
+            --dir research/multi-market-strategy-ranking/results/all_timeframes
+      - name: Rebuild verified old+new rank lists
+        run: |
+          python -m pip install -r research/multi-market-strategy-ranking/requirements.txt
+          python -u research/multi-market-strategy-ranking/tools/aggregate_all_timeframes.py
+      - name: Strict check all six verified completed families were preserved
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('research/multi-market-strategy-ranking/results/combined_top100/latest_verification_manifest.json')
+          o=json.loads(p.read_text(encoding='utf-8'))
+          assert o['completed_legacy_timeframe_family_batches']==6, o
+          assert o['verified_new_legacy_configuration_rows']==712, o
+          assert o['all_strategy_families']==38
+          print('HARVEST_SUCCESS',o['completed_legacy_timeframe_family_batches'])
+          PY
+      - name: Commit and push evidence after reconciling any newer branch commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add research/multi-market-strategy-ranking/results/all_timeframes/
+          git add research/multi-market-strategy-ranking/results/combined_top100/
+          if ! git diff --cached --quiet; then
+            git commit -m 'results: preserve verified 1D 4H Python old strategy fills and refresh rankings [skip ci]'
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
