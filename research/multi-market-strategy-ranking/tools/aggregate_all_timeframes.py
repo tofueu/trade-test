@@ -54,8 +54,12 @@ def view(df, cols):
 
 
 def rerun_row(r, d):
+    is_new = str(r["策略分類"]) == "new"
+    tradeable = str(r.get("可交易", True)).lower() in ("true", "1")
     return {
-        "來源": "舊（Python多週期重測）", "原始策略族群": "舊",
+        "來源": "新（Python跨市場實測）" if is_new else "舊（Python多市場重測）",
+        "原始策略族群": "新" if is_new else "舊",
+        "可交易": tradeable,
         "策略分類": str(r["策略分類"]), "策略": str(r["策略"]),
         "商品": str(r["商品"]), "商品名稱": str(r["商品"]),
         "市場": str(r["市場"]), "週期": str(r["時區"]),
@@ -166,6 +170,35 @@ def main():
             coverage.append({"週期": tf, "策略類型": family,
                              "狀態": state, "完成策略數": tests,
                              "配置數": configs})
+    # Append every independently executed multi-asset batch. Do not reuse
+    # historical daily values as if they were new timeframes.
+    multi_counts = {}
+    for d in sorted(BATCH_ROOT.glob("multi_*")):
+        mf = d / "manifest.json"
+        if not mf.is_file():
+            continue
+        meta = json.loads(mf.read_text(encoding="utf-8"))
+        ranking, trades = d / "ranking.csv", d / "trades.csv"
+        if (meta.get("status") != "complete"
+                or not ranking.is_file() or not trades.is_file()
+                or digest(ranking) != meta.get("ranking_sha256")
+                or digest(trades) != meta.get("trades_sha256")):
+            raise ValueError(f"Invalid multi-asset evidence: {d}")
+        actual = pd.read_csv(ranking, encoding="utf-8-sig")
+        expected = {"original": 8, "compound": 8, "fixed": 9, "new": 7}
+        family = meta.get("family")
+        if (family not in expected or len(meta.get("completed", [])) != expected[family]
+                or len(actual) != meta.get("ranking_rows") or len(actual) < 1
+                or not actual["資料完整"].map(truth).all()):
+            raise ValueError(f"Incomplete source multi-market family: {d}")
+        reruns.extend(rerun_row(r, d) for _, r in actual.iterrows())
+        multi_counts[d.name] = {
+            "symbol": meta.get("symbol"), "timeframe": meta.get("timeframe"),
+            "family": family, "configurations": len(actual),
+            "OHLCV_SHA256": meta.get("ohlcv_sha256"),
+            "ranking_SHA256": meta.get("ranking_sha256"),
+            "trades_SHA256": meta.get("trades_sha256"),
+            "tradable_proxy": meta.get("tradable_proxy", True)}
     # Once verified fresh daily tests exist, do not prefer old historical rows
     # for those same symbol / timeframe / strategy names.
     replaced = {(r["商品"], r["週期"], r["策略"]) for r in reruns}
@@ -179,8 +212,10 @@ def main():
     df["Kelly倉位數值合格"] = (
         df["IS_Kelly_pct"].gt(0) & df["實際風險_pct"].gt(0)
         & df["實際風險_pct"].le(df["IS_Kelly_pct"] + 1e-7))
+    df["可交易"] = df["可交易"].fillna(True).astype(bool)
     df["數值收益門檻"] = (
-        df["五年交易數"].ge(70) & df["五年收益_pct"].gt(100)
+        df["可交易"]
+        & df["五年交易數"].ge(70) & df["五年收益_pct"].gt(100)
         & df["最大回撤_pct"].between(0, 100)
         & df["資料完整標記"]
         & ~df["資金停止"].fillna(False).astype(bool))
@@ -256,6 +291,9 @@ def main():
         "completed_legacy_timeframe_family_batches": completed,
         "required_legacy_timeframe_family_batches": len(FRAMES)*len(FAMILIES),
         "verified_new_legacy_configuration_rows": len(reruns),
+        "verified_multi_asset_batch_count": len(multi_counts),
+        "verified_multi_asset_batches": multi_counts,
+        "unavailable_assets_timeframes": "Yahoo sources provide audited daily only; 5-year intraday unverified",
         "all_strategy_families": len(families),
         "qualifying_unique_return_candidates": len(good),
         "published_top_return_rows": len(top),
@@ -275,6 +313,9 @@ def main():
         f"最新完整策略家族榜 {len(families)} 列，"
         f"收益前 {len(top)} 列（舊{report['top100_legacy']}／"
         f"新{report['top100_new']}）。\n\n"
+        f"其他實測市場批次：{len(multi_counts)}，包括加密貨幣、貴金屬、"
+        "美國指數期貨、台股現貨指數基準、USDJPY；"
+        "台股現貨指數只能作訊號基準，不納入可交易收益榜。\n\n"
         "每個已完成舊策略批次保留交易與排名 CSV、checkpoint 和 SHA256 manifest，"
         "批次狀態請見 old_strategy_coverage_matrix.csv。"
         "舊日線歷史快照未逐列獨立驗證，未完成週期不可假裝完成。"
