@@ -1,0 +1,100 @@
+{
+  "title": "Trade Test 5-year Python verified result upload checkpoint",
+  "as_of_local": "2026-10-31 17:24 Asia/Taipei",
+  "scope": {
+    "from_utc": "2021-10-10T00:00:00Z",
+    "to_exclusive_utc": "2026-10-10T00:00:00Z",
+    "markets": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "SOLUSDT",
+      "GC=F",
+      "SI=F",
+      "ES=F",
+      "NQ=F",
+      "^TWII",
+      "USDJPY=X"
+    ],
+    "timeframes": [
+      "1m",
+      "2m",
+      "3m",
+      "5m",
+      "10m",
+      "15m",
+      "20m",
+      "30m",
+      "45m",
+      "1h",
+      "2h",
+      "3h",
+      "4h",
+      "6h",
+      "8h",
+      "12h",
+      "1d"
+    ],
+    "classification_families": [
+      "original",
+      "compound",
+      "fixed",
+      "new"
+    ]
+  },
+  "proof": {
+    "status": "PARTIAL",
+    "verified_batches": 124,
+    "verified_replayed_configuration_rows": 12720,
+    "incorrect_recomputed_statistics": 0,
+    "tracked_batches": 612,
+    "source_worklist_status_counts": {
+      "COMPLETE_5Y_GIT_SHA_AND_LOCAL_TRADE_REPLAY": 124,
+      "NEW_7_RESULTS_PRIOR_GIT_SUMMARY": 12,
+      "EXISTING_RUN_QUEUED_OR_ACTIVE": 24,
+      "PENDING_FULL_FIVE_YEAR_PYTHON": 36,
+      "FAILURE_ARTIFACT_NO_RESULTS": 26,
+      "NO_VERIFIED_FIVE_YEAR_INTRADAY_SOURCE": 384,
+      "LEGACY_DAILY_DONE_PRIOR_ARCHIVE": 6
+    },
+    "derived_from": "Prior locally replayed GitHub Actions trade-fill artifacts with SHA256. No new full OHLCV strategy signal runs in this snapshot.",
+    "disclaimer": "Verified recorded trades != replay of all original OHLCV strategy signals.",
+    "source_manifest_status": "partial"
+  },
+  "tracked_git_results": [
+    {
+      "path": "research/multi-market-strategy-ranking/results/combined_top100/five_year_deduplicated_worklist_17timeframes.csv",
+      "git_blob_sha": "4c40b097c1bc9a2ff6a2a101ef86c36f1a37bc62",
+      "rows": 612
+    },
+    {
+      "path": "research/multi-market-strategy-ranking/results/combined_top100/local_python_kelly_top100_20261030.csv",
+      "git_blob_sha": "ed2ee1cd40a9f4b6f3a17739f0ec66892998fc06",
+      "rows": 100,
+      "note": "Top100 includes historical snapshot flags"
+    },
+    {
+      "path": "research/multi-market-strategy-ranking/results/combined_top100/local_python_38_families_20261030.csv",
+      "git_blob_sha": "c91e0ed0e43520ba972b50b188b1db8443d97ee1",
+      "rows": 38,
+      "note": "38-family historical ranking; does not prove 38 independent implemented strategy signals"
+    },
+    {
+      "path": "research/multi-market-strategy-ranking/results/combined_top100/local_python_full_market_timeframe_coverage_20261030.csv",
+      "git_blob_sha": "fc5477b6caa262e749e59c389a5f3448b39030c9",
+      "rows": 153
+    },
+    {
+      "path": "research/multi-market-strategy-ranking/results/combined_top100/strategy_code_audit_20261031.md"
+    },
+    {
+      "path": "research/multi-market-strategy-ranking/results/combined_top100/local_python_recheck_20261030.md"
+    }
+  ],
+  "constraints": [
+    "Skip all fully SHA/individual-trade verified configurations",
+    "Do not repeat existing legacy 1d runs",
+    "No Jules, no new GitHub workflows, do not touch main",
+    "Traditional-intraday 5-year OHLCV absent => unavailable, no fabrication",
+    "Actions complete/error artifacts != verification until manifest/ranking/trades checksums replayed"
+  ]
+}
