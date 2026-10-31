@@ -60,3 +60,13 @@
 - 排名沿用既有 [全 38 策略家族 CSV](local_python_38_families_20261030.csv) 及 [Kelly 條件 Top100 CSV](local_python_kelly_top100_20261030.csv)，沒有新驗證交易可安全改動收益數字；Top100 98 筆成交回放＋2 筆歷史快照仍待分開標示。**伯努利 iid 與 TradingView parity 未驗證。**
 - 下一個可執行修復：下載未收取的成功 artifact，於獨立目錄驗 `manifest/ranking/trades` SHA；僅把新通過的批次增量併入排行榜和去重表；修復 artifact 解壓檔名衝突、發布改小批次提交。非加密市場五年分鐘 OHLCV 未證實仍標 unavailable；不碰 main、不交 Jules、不新增 workflow。
 - 本輪使用 GitHub connector 實際讀取三次 workflow 的 Job 列表、artifacts 清單及 4 份失敗 Job logs；**未在本輪取得可直接由 Python 載入的五年行情／成交 ZIP 位元組**，故沒有宣稱完成新的 Python 回測。
+
+
+## 2026-10-31 16:14 Asia/Taipei — 本輪 GitHub 實際查核（增量、無重測）
+
+- 直接讀取 GitHub 分支 HEAD `dbae46dcc054f2c99676a1f99cb0412fd0dc8f7e` 與 `latest_verification_manifest.json`：狀態仍為 `partial`，舊 BTC 12 時區 × 3 分類的 manifest 僅正式列出 **6/36**，整體 612 分類欄位中既有 **124** 批完成 SHA 與逐筆交易回放驗算；本輪 **0** 批新增可證明驗收。請勿把「已下載/存在 artifact」計為新驗證。
+- 已查核三個 run 的最新狀態：`41064675326`、`41066783962`、`41068912974` 全部 `completed/failure`，分別最後更新於 2026-10-30 15:34:41Z、16:23:46Z、22:11:50Z；沒有新的仍在執行 job 可直接視為持續測試。
+- 工件清單重新查得：第一個 run **37** 個（含 BTC `legacy_BTCUSDT_1m_original` artifact ID `12990135479`、`compound` ID `12989801317`），第二個 run **31** 個（ETH 1m `12993586056`、3m `12988929734`、5m `12986299665`），第三個 run **43** 個；以上指定優先工件均 `expired=false`。此輪僅能取得工件中繼資料，未能取回 ZIP 內原始 CSV bytes 重算 SHA256，**不能重複宣稱已完成新驗證**。
+- 目標仍嚴格限於 9 市場 × 17 週期 = **153** 市場週期對，4 分類共 **612** 工作欄位；缺五年真實分鐘 OHLCV 的非加密欄位維持 `unavailable`，舊 1d 只保留與稽核既有紀錄，不重新執行。
+- 待修復的實際阻礙：成功計算後的成果發布 HTTP 408／cherry-pick 衝突、同名 ZIP 解壓衝突、SOL 真實歷史檔缺口、^TWII 交易所休市稽核及 USDJPY Yahoo OHLC 異常。**下一個可執行動作**：取得以上 artifact ZIP 的實際 bytes，逐件驗 `manifest.json(status=complete)`、`ranking.csv`、`trades.csv` 及其 SHA256，對未登錄的完整批次只做交易回放/排行榜增量合併，不重算已完成訊號；先解決工件下載或發佈權限與衝突，再補真正缺少且有完整真實 OHLCV 的時區。
+- 兩榜維持前次已驗證版本：[`local_python_kelly_top100_20261030.csv`](local_python_kelly_top100_20261030.csv)（98 筆交易 R 回放、2 筆歷史快照尚未本機驗證）；[`local_python_38_families_20261030.csv`](local_python_38_families_20261030.csv)（含不合門檻及非指定市場歷史基準，不能視為本輪全部達標）。伯努利 iid、Pine/TradingView parity 仍未驗證。本輪未新增 Python OHLCV 回測，未更動任何 checkpoint、main、workflow 或 Jules 派工。
