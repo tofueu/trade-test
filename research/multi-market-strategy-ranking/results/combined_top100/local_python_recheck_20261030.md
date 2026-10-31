@@ -47,3 +47,16 @@
 - 原分支 [latest_verification_manifest.json](latest_verification_manifest.json) 仍 `status=partial`、`completed_legacy_timeframe_family_batches=6/36`（舊報告欄位，未同步已收取 36 個 artifact），`verified_multi_asset_batch_count=24`；另有 124 批更完整的獨立逐筆回放去重帳本 [five_year_deduplicated_worklist_17timeframes.csv](five_year_deduplicated_worklist_17timeframes.csv)。**三者證據層級不同，不得混稱 612 已完成。**
 - [收益 Top100 CSV](local_python_kelly_top100_20261030.csv) 及 [38 家族榜 CSV](local_python_38_families_20261030.csv) 本輪確認均存在；**未新增可驗算成交，因此不改寫兩榜數值**。Top100 中 98 筆可追溯已驗算成交、2 筆為歷史快照待證；五年 ≥70 筆、收益 >100%、實際風險 ≤ 前四年 IS Kelly 是排名門檻。伯努利 iid 與 TradingView/Pine parity **未驗證**。
 - **本輪處置：**已實際取回 SOL、^TWII、USDJPY 三種失敗 job logs 並定位根因。避免重跑已完成日線及已驗批次，也避免對仍進行中的 run 再啟動同批次。本輪無新增 Python 五年行情訊號回測；沒有足夠完整原始 OHLCV 供本地重跑。下一步收取續跑中真正完成的缺口 artifact，逐件核對 `manifest.status=complete`、`ranking.csv`、`trades.csv`、OHLCV SHA 與成交 SHA，再增量併榜；若 job 真正失敗才考慮單 job 重試。
+
+
+## 2026-10-31 09:26（臺灣時間）— 本輪實際 GitHub Job Logs 排錯與去重驗收
+
+- **進度不虛增：124 / 612 個市場×週期×分類批次已具 SHA256 + 逐筆交易 R 回放證據；12,720 個既有配置已驗算。新增本輪完整 SHA + 成交回放批次 0。** 本輪未取得原始五年 OHLCV 供 Python 訊號重算，不得把 Actions Job success 當作本輪已完成的 SHA 驗收。
+- 本輪重新查詢 GitHub Actions：#41064675326 = **36 個計算 Job success、1 個 publish failure、37 個 artifact 可取**。publish log 證明已下載 36 個 artifact、產生 commit `2eff31d`，但 push 發生 **HTTP 408 RPC timeout**，不能當作 Git 分支已成功收錄 36 批。這是發布失敗，**不是 36 批回測失敗**；禁止整批重跑，應只收取既有 artifacts 並逐個核對其內 `manifest.json(status=complete)`、`ranking.csv`、`trades.csv` 及 SHA256。
+- #41066783962 = **16 個 Job success、15 failure（包含 14 個市場計算失敗與 1 個發布失敗）、31 個 artifact**；其中 ETH 1m/3m/5m 有既有完整結果。發布 Job 下載 30 個 artifacts 後在 git cherry-pick commit `6c4199d` 失敗；不能重跑成功的 ETH 計算。
+- #41068912974 = **41 個 Job success、2 failure、43 個 artifact**。publish Job 下載 42 個 artifacts 時出現 `legacy_BTCUSDT_1d_compound` ZIP 解壓到同名 `checkpoint.json` 的碰撞；最後 git push 再發生 **HTTP 408 RPC timeout**。應分離每個 artifact 的解壓目錄、以 manifest/checksum 去重後，改用小型逐檔提交避免大型成果 push 超時；舊 1d 不重算。
+- USDJPY=X 1d 失敗 Job #124179330079 的確切例外：`ValueError: UNAVAILABLE_INVALID_YAHOO_RANGES: USDJPY=X`；其 298 bytes artifact 是錯誤證據，不是有效五年交易結果。不能用假價修補。
+- 目前隔離分支 `latest_verification_manifest.json` 仍是 `status=partial`、`completed_legacy_timeframe_family_batches=6`、`required_legacy_timeframe_family_batches=36`；**Git 已有 36 個計算成功 artifacts ≠ 此份總 manifest 已驗收 36/36**。已驗證的 BTC 1m original/compound、ETH 1m/3m/5m 在 124 批工作清單中保留 SKIP_RETEST。
+- 排名沿用既有 [全 38 策略家族 CSV](local_python_38_families_20261030.csv) 及 [Kelly 條件 Top100 CSV](local_python_kelly_top100_20261030.csv)，沒有新驗證交易可安全改動收益數字；Top100 98 筆成交回放＋2 筆歷史快照仍待分開標示。**伯努利 iid 與 TradingView parity 未驗證。**
+- 下一個可執行修復：下載未收取的成功 artifact，於獨立目錄驗 `manifest/ranking/trades` SHA；僅把新通過的批次增量併入排行榜和去重表；修復 artifact 解壓檔名衝突、發布改小批次提交。非加密市場五年分鐘 OHLCV 未證實仍標 unavailable；不碰 main、不交 Jules、不新增 workflow。
+- 本輪使用 GitHub connector 實際讀取三次 workflow 的 Job 列表、artifacts 清單及 4 份失敗 Job logs；**未在本輪取得可直接由 Python 載入的五年行情／成交 ZIP 位元組**，故沒有宣稱完成新的 Python 回測。
