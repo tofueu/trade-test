@@ -1,0 +1,20 @@
+{
+  "scope_start_utc": "2021-10-10T00:00:00Z",
+  "scope_end_exclusive_utc": "2026-10-10T00:00:00Z",
+  "markets": 9,
+  "timeframes": 17,
+  "families": 4,
+  "required_family_batches": 612,
+  "prior_saved_trade_replay_batched": 188,
+  "not_yet_verified_family_batches": 424,
+  "missing_20m_family_batches": 36,
+  "raw_five_year_ohlcv_files_in_current_python_runtime": 0,
+  "python_dns_checks": {
+    "data.binance.vision": "gaierror [Errno -3] Temporary failure in name resolution",
+    "query1.finance.yahoo.com": "gaierror [Errno -3] Temporary failure in name resolution"
+  },
+  "new_real_ohlcv_signal_backtests_this_execution": 0,
+  "verification": "Python ran against local 188 verified keys + 424 missing keys, asserted disjoint complete 612 classification coverage; attempted DNS lookup, scanned local OHLCV/parquet/CSV files.",
+  "limitations": "No real five-year OHLCV available; source DNS blocked. No new OHLCV strategy signal backtests completed, not eligible to close any missing rows. Do not confuse 188 replayed stored trade outcome batches with new raw OHLCV signal backtests.",
+  "branch_policy": "No Jules, no main modifications, no new workflow."
+}
