@@ -81,3 +81,12 @@
 - **異常待追查**：兩份 `ranking.csv` 的「五年收益_pct」欄位最大值都為 `0.0`；即使 manifest 和 CSV SHA 正確，也**不代表收益計算合理**。應對照 `實際風險_pct`、IS Kelly、`資金停止` 與 R 序列檢查為何收益全為 0；本輪不將這 320 列直接混入 Kelly Top100。
 - ETH 1m/3m/5m 仍是下個優先驗收對象，已存在的完整工件禁止重新回測。非加密 5 年分鐘 OHLCV 無可驗證來源者維持 unavailable，舊 1d 不重跑。
 - 兩榜未出現經重新確認可新增的合格策略，故保留既有 [Kelly Top100](local_python_kelly_top100_20261030.csv) 與 [38 家族榜](local_python_38_families_20261030.csv) 不覆蓋。伯努利 iid 與 TradingView parity 仍未驗證。不動 main、不交 Jules、不新增 workflow。
+
+
+## 2026-10-31 19:12（臺灣時間）— 在 ChatGPT Python 直接重新檢驗已存五年成交工件
+
+- 實際在 Python 容器中掃描本機已存 GitHub Actions 回測 ZIP：**46 個**候選 ZIP，其中 **36 個**具可讀取的 `manifest.json` + `ranking.csv` + `trades.csv`，其餘 10 個不是直接具備完整三件組的單一 ZIP；部分 ZIP 含多個子資料夾與多份 manifest。
+- 逐一列出每個 ZIP 內可配對的 manifest、ranking 與 trades，實際重新計算 `sha256(ranking.csv)`、`sha256(trades.csv)` 並與 manifest 宣告值比對：**65 個五年交易資料項目兩份檔案皆 MATCH，0 MISMATCH**。五年起迄 `2021-10-10T00:00:00Z` 至 `2026-10-10T00:00:00Z`（尾端不含）亦符合。
+- **本輪新增原始策略訊號回測 0**；65 個檢查項目來自已存在的工件，可能與前述 **124 已驗證批次**重疊，禁止直接相加或宣稱 189 批。現有總數仍以既有 124/612 批、12,720 已驗算配置為基準；排行榜不改寫收益。
+- 本地 Python 直接請求 `data.binance.vision` 與 `api.github.com` 皆因 DNS/網路阻擋失敗，無法從本容器取得完整五年原始 OHLCV；目前已有 ZIP 只含交易／排名／manifest 而非完整原始 K 線，故不能在本輪執行新的缺口策略進出場回測。**未完成維持 partial**，不能拿 SHA 重驗冒充新策略回測。
+- 已在對話產生本地逐份稽核 CSV `TradeTest_SHA256_recheck_20261031.csv` 和 `TradeTest_current_local_zip_inventory_20261031.csv`。Git 只記錄實際可驗證的進度，不交 Jules、不新增 workflow、不重跑既有舊 1d、不動 main。
