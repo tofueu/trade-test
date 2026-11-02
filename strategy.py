@@ -1,7 +1,7 @@
 """
-策略名稱: EMA20_50_ADX20
-最佳配置: SOLUSDT / 4h | 出場方式: 訊號出場
-五年收益: +1124.36% | 最大回撤: 53.96% | 交易筆數: 73
+策略名稱: Donchian20+MACD
+最佳配置: SOLUSDT / 8h | 出場方式: 訊號出場
+五年收益: +1054.51% | 最大回撤: 53.72% | 交易筆數: 205
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 EMA20_50_ADX20 載入成功")
+    print("策略 Donchian20+MACD 載入成功")
