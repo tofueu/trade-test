@@ -1,7 +1,7 @@
-# 第 21 名策略：Supertrend_ADX20
+# 第 22 名策略：Bollinger20+RSI14_reentry
 
-- **最佳單組配置**：`ETHUSDT` ｜ `6h` ｜ `固定止盈3R`
-- **五年實測績效**：最大收益 `+240.71%` ｜ 最大回撤 `33.65%` ｜ 交易次數 `81 筆`
+- **最佳單組配置**：`USDJPY=X` ｜ `1d` ｜ `純固定TP 0.5R／初始SL 1.5ATR`
+- **五年實測績效**：最大收益 `+239.96%` ｜ 最大回撤 `44.17%` ｜ 交易次數 `71 筆`
 - **返回總覽**：[Trade Test 主首頁](https://github.com/tofueu/trade-test/tree/main)
 
 ---
