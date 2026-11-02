@@ -1,3 +1,21 @@
 __pycache__/
 *.py[cod]
 *$py.class
+
+# 忽略回測巨型明細，防止 Git 傳輸中斷
+*.csv
+*.parquet
+results/**/trades*
+results/**/equity*
+results/**/orders*
+
+*.csv
+*.parquet
+*.zip
+*.tar.gz
+data/
+cache/
+results/
+src/five_year_market_data/
+checkpoints/
+*.csv.gz
