@@ -1,7 +1,7 @@
 """
-策略名稱: EMA200+RSI2_extreme
-最佳配置: ETHUSDT / 4h | 出場方式: 固定止盈3R
-五年收益: +121.47% | 最大回撤: 87.66% | 交易筆數: 273
+策略名稱: BB_Reentry_RSI_ADX25
+最佳配置: BTCUSDT / 6h | 出場方式: 固定止盈3R
+五年收益: +18.71% | 最大回撤: 47.09% | 交易筆數: 112
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 EMA200+RSI2_extreme 載入成功")
+    print("策略 BB_Reentry_RSI_ADX25 載入成功")
