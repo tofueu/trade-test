@@ -1,7 +1,7 @@
 """
-策略名稱: Supertrend10_3
-最佳配置: SOLUSDT / 3h | 出場方式: 訊號出場(無固定TP)
-五年收益: +1868.46% | 最大回撤: 32.17% | 交易筆數: 325
+策略名稱: Supertrend+EMA200
+最佳配置: SOLUSDT / 2h | 出場方式: 訊號出場
+五年收益: +1836.6% | 最大回撤: 42.15% | 交易筆數: 600
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Supertrend10_3 載入成功")
+    print("策略 Supertrend+EMA200 載入成功")
