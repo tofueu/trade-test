@@ -1,7 +1,7 @@
 """
-策略名稱: Bollinger20+RSI14_reentry
-最佳配置: USDJPY=X / 1d | 出場方式: 純固定TP 0.5R／初始SL 1.5ATR
-五年收益: +239.96% | 最大回撤: 44.17% | 交易筆數: 71
+策略名稱: Bollinger20_2
+最佳配置: BTCUSDT / 1d | 出場方式: 固定4R+訊號出場
+五年收益: +204.84% | 最大回撤: 57.25% | 交易筆數: 72
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Bollinger20+RSI14_reentry 載入成功")
+    print("策略 Bollinger20_2 載入成功")
