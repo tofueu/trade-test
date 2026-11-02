@@ -118,7 +118,7 @@ def restore_gap_klines_from_binance_daily_archive(
     validated kline by the same venue/symbol/interval. Fail closed otherwise.
     """
     ordered = candles.sort_values("timestamp").reset_index(drop=True)
-    tested = ordered[(ordered.timestamp >= START) & (ordered.timestamp < END)]
+    tested = ordered[(ordered.timestamp >= min(WARM, START - MIN_WARMUP_BARS * step)) & (ordered.timestamp < END)]
     delta = tested.timestamp.diff()
     missing = []
     for idx in delta[delta > step].index:
@@ -224,27 +224,21 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
             candles, symbol, interval, step, warm_start, END)
         in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
     if in_window.empty or in_window.timestamp.iloc[0] != START or in_window.timestamp.iloc[-1] != END - step:
-        raise RuntimeError("Five-year historical coverage incomplete; no qualified ranking")
-    # Indicator signals depend on pre-window candles (EMA200, ATR, ADX).
-    # A truncated cache can otherwise pass the five-year in-window test while
-    # silently changing strategy entries and the reported performance.
-    warmup = candles[(candles.timestamp >= warm_start) & (candles.timestamp < START)]
-    if (warmup.empty or warmup.timestamp.iloc[0] != warm_start
-            or warmup.timestamp.iloc[-1] != START - step
-            or (warmup.timestamp.diff().dropna() != step).any()):
-        raise RuntimeError("Indicator warm-up history incomplete; no qualified ranking")
-    diffs = in_window.timestamp.diff().dropna()
-    gaps = int((diffs != step).sum())
-    gap_repair_receipts = boundary_receipts
-    gaps_repaired_from_cache = bool((gaps or needs_boundary_repair) and cache_hit)
+        raise RuntimeError("Five-year historical coverage    # Check warm-up and five-year continuity together, then repair only with
+    # independently verified daily archives. Never accept a warm-up hole.
+    gap_repair_receipts = list(boundary_receipts)
+    gaps_repaired_from_cache = bool(needs_boundary_repair and cache_hit)
     if cache_hit and repair_manifest.exists():
         verified = json.loads(repair_manifest.read_text(encoding="utf-8"))
-        # A file in the local cache is not evidence unless its provenance
-        # receipt matches these exact bytes.
-        if (hashlib.sha256(cache_file.read_bytes()).hexdigest()
-                != verified.get("cache_csv_sha256")):
+        if hashlib.sha256(cache_file.read_bytes()).hexdigest() != verified.get("cache_csv_sha256"):
             raise RuntimeError("Cached exchange-gap restoration receipt hash mismatch")
-        gap_repair_receipts = verified["verified_daily_zip_sources"]
+        gap_repair_receipts = list(verified["verified_daily_zip_sources"])
+    audit = candles[(candles.timestamp >= warm_start) & (candles.timestamp < END)]
+    diffs = audit.timestamp.diff().dropna()
+    gaps = int((diffs != step).sum())
+    if gaps:
+        gaps_repaired_from_cache = gaps_repaired_from_cache or cache_hit
+ified["verified_daily_zip_sources"]
     # Cached data can contain real archive omissions; verify and repair them too.
     # Do not replace the existing cache until every missing timestamp is proven.
     if gaps:
@@ -252,7 +246,8 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
             candles, symbol, interval, step)
         gap_repair_receipts.extend(interior_receipts)
         in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
-        diffs = in_window.timestamp.diff().dropna()
+        audit = candles[(candles.timestamp >= warm_start) & (candles.timestamp < END)]
+        diffs = audit.timestamp.diff().dropna()
         gaps = int((diffs != step).sum())
     if gaps:
         bad = in_window.loc[diffs[diffs != step].index, "timestamp"].head(16)
@@ -263,6 +258,14 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
             f"Irregular or missing five-year candles; {symbol}/{interval} "
             f"gaps={gaps} first_gaps={json.dumps(details)}; "
             "do not qualify or fill nonexistent bars")
+    warmup = candles[(candles.timestamp >= warm_start) & (candles.timestamp < START)]
+    if (warmup.empty or warmup.timestamp.iloc[0] != warm_start
+            or warmup.timestamp.iloc[-1] != START - step
+            or (warmup.timestamp.diff().dropna() != step).any()):
+        raise RuntimeError("Indicator warm-up history incomplete; no qualified ranking")
+    if (in_window.empty or in_window.timestamp.iloc[0] != START
+            or in_window.timestamp.iloc[-1] != END - step):
+        raise RuntimeError("Five-year historical coverage incomplete; no qualified ranking")
     # Never poison the cache with a partial download. Commit only fully
     # validated history, atomically, so a later run can retry from the source.
     if not cache_hit or gaps_repaired_from_cache:
