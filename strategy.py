@@ -1,7 +1,7 @@
 """
-策略名稱: Supertrend+EMA200
-最佳配置: SOLUSDT / 2h | 出場方式: 訊號出場
-五年收益: +1836.6% | 最大回撤: 42.15% | 交易筆數: 600
+策略名稱: Donchian20_10
+最佳配置: SOLUSDT / 6h | 出場方式: 訊號出場(無固定TP)
+五年收益: +1421.65% | 最大回撤: 52.92% | 交易筆數: 203
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Supertrend+EMA200 載入成功")
+    print("策略 Donchian20_10 載入成功")
