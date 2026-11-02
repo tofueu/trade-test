@@ -1,7 +1,7 @@
 """
-策略名稱: EMA50_200
-最佳配置: SOLUSDT / 3h | 出場方式: 訊號出場(無固定TP)
-五年收益: +2264.16% | 最大回撤: 84.69% | 交易筆數: 85
+策略名稱: Volume_Donchian20
+最佳配置: BTCUSDT / 8h | 出場方式: 訊號出場(無固定TP)
+五年收益: +1879.65% | 最大回撤: 35.64% | 交易筆數: 117
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 EMA50_200 載入成功")
+    print("策略 Volume_Donchian20 載入成功")
