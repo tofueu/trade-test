@@ -1,7 +1,7 @@
 """
-策略名稱: WEMA20_50+DailyDonchian20
-最佳配置: SOLUSDT / 8h | 出場方式: 固定止盈1R
-五年收益: +333.67% | 最大回撤: 34.65% | 交易筆數: 150
+策略名稱: Supertrend_ADX20
+最佳配置: ETHUSDT / 6h | 出場方式: 固定止盈3R
+五年收益: +240.71% | 最大回撤: 33.65% | 交易筆數: 81
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 WEMA20_50+DailyDonchian20 載入成功")
+    print("策略 Supertrend_ADX20 載入成功")
