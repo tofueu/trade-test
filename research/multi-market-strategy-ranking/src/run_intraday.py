@@ -216,6 +216,7 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
     diffs = in_window.timestamp.diff().dropna()
     gaps = int((diffs != step).sum())
     gap_repair_receipts = []
+    gaps_repaired_from_cache = bool(gaps and cache_hit)
     if cache_hit and repair_manifest.exists():
         verified = json.loads(repair_manifest.read_text(encoding="utf-8"))
         # A file in the local cache is not evidence unless its provenance
@@ -224,7 +225,9 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
                 != verified.get("cache_csv_sha256")):
             raise RuntimeError("Cached exchange-gap restoration receipt hash mismatch")
         gap_repair_receipts = verified["verified_daily_zip_sources"]
-    if gaps and not cache_hit:
+    # Cached data can contain real archive omissions; verify and repair them too.
+    # Do not replace the existing cache until every missing timestamp is proven.
+    if gaps:
         candles, gap_repair_receipts = restore_gap_klines_from_binance_daily_archive(
             candles, symbol, interval, step)
         in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
@@ -241,7 +244,7 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
             "do not qualify or fill nonexistent bars")
     # Never poison the cache with a partial download. Commit only fully
     # validated history, atomically, so a later run can retry from the source.
-    if not cache_hit:
+    if not cache_hit or gaps_repaired_from_cache:
         temporary = cache_file.with_name(cache_file.name + f".{os.getpid()}.tmp")
         try:
             candles.to_csv(temporary, index=False)
@@ -379,7 +382,7 @@ def write_rankings(rows: list[dict], coverage: dict) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--symbol", default="BTCUSDT", choices=["BTCUSDT"])
+    parser.add_argument("--symbol", default="BTCUSDT", choices=["BTCUSDT", "ETHUSDT", "SOLUSDT"])
     parser.add_argument("--timeframe", default="1h", choices=list(INTERVALS))
     args = parser.parse_args()
     raw, coverage = load_real_ohlcv(args.symbol, args.timeframe)
