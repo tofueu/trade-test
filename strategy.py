@@ -1,7 +1,7 @@
 """
-策略名稱: Donchian20+ADX14
-最佳配置: BTCUSDT / 6h | 出場方式: 固定止盈3R
-五年收益: +443.58% | 最大回撤: 37.4% | 交易筆數: 220
+策略名稱: WEMA20_50+Donchian20
+最佳配置: SOLUSDT / 6h | 出場方式: 固定4R+訊號出場
+五年收益: +366.98% | 最大回撤: 34.95% | 交易筆數: 86
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Donchian20+ADX14 載入成功")
+    print("策略 WEMA20_50+Donchian20 載入成功")
