@@ -1,5 +1,5 @@
 //@version=6
-strategy("EMA200+RSI2_mean_reversion - [ETHUSDT 8h]", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.04)
+strategy("RSI2_EMA200 - [ETHUSDT 8h]", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.04)
 
 ema50 = ta.ema(close, 50)
 ema200 = ta.ema(close, 200)
