@@ -1,5 +1,5 @@
 //@version=6
-strategy("MACD+RSI50 - [SOLUSDT 3h]", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.04)
+strategy("Turtle55_20_EMA200 - [SOLUSDT 6h]", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.04)
 
 ema50 = ta.ema(close, 50)
 ema200 = ta.ema(close, 200)

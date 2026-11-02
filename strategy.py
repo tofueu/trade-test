@@ -1,7 +1,7 @@
 """
-策略名稱: MACD+RSI50
-最佳配置: SOLUSDT / 3h | 出場方式: 訊號出場(無固定TP)
-五年收益: +813.81% | 最大回撤: 56.93% | 交易筆數: 1319
+策略名稱: Turtle55_20_EMA200
+最佳配置: SOLUSDT / 6h | 出場方式: 固定止盈3R
+五年收益: +717.61% | 最大回撤: 50.78% | 交易筆數: 82
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 MACD+RSI50 載入成功")
+    print("策略 Turtle55_20_EMA200 載入成功")
