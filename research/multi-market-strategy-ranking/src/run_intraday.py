@@ -109,7 +109,8 @@ def download_archive(url: str) -> pd.DataFrame:
 
 def restore_gap_klines_from_binance_daily_archive(
         candles: pd.DataFrame, symbol: str, interval: str,
-        step: pd.Timedelta) -> tuple[pd.DataFrame, list[dict]]:
+        step: pd.Timedelta, expected_start: pd.Timestamp | None = None,
+        expected_end: pd.Timestamp | None = None) -> tuple[pd.DataFrame, list[dict]]:
     """Repair *archive omissions* only with independently downloadable Binance
     historical daily ZIP candle rows (never forward-fill or interpolation).
 
@@ -131,6 +132,14 @@ def restore_gap_klines_from_binance_daily_archive(
         if n > 18000 or len(missing) + n > 24000:
             raise RuntimeError("Exchange archive gap exceeds safe repair audit limit")
         missing.extend(pd.date_range(previous+step, periods=n, freq=step))
+    if expected_start is not None and expected_end is not None:
+        if ordered.empty:
+            raise RuntimeError("No exchange candles to repair")
+        if ordered.timestamp.iloc[0] > expected_start:
+            missing.extend(pd.date_range(expected_start, ordered.timestamp.iloc[0] - step, freq=step))
+        if ordered.timestamp.iloc[-1] < expected_end - step:
+            missing.extend(pd.date_range(ordered.timestamp.iloc[-1] + step, expected_end - step, freq=step))
+        missing = sorted(set(missing))
     if not missing:
         return ordered, []
     wanted = set(missing)
@@ -203,7 +212,18 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
     # Cached CSVs are not trusted: validate again before accepting coverage.
     validate_ohlcv(candles)
     in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
-    if in_window.empty or in_window.timestamp.iloc[0] > START or in_window.timestamp.iloc[-1] < END - step:
+    if in_window.empty:
+        raise RuntimeError("Five-year historical coverage empty; no qualified ranking")
+    # Repair only verified exchange timestamps; missing boundary and warm-up bars
+    # are never forward-filled. A large unavailable range fails closed.
+    needs_boundary_repair = (candles.timestamp.iloc[0] > warm_start
+                             or candles.timestamp.iloc[-1] < END - step)
+    boundary_receipts = []
+    if needs_boundary_repair:
+        candles, boundary_receipts = restore_gap_klines_from_binance_daily_archive(
+            candles, symbol, interval, step, warm_start, END)
+        in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
+    if in_window.empty or in_window.timestamp.iloc[0] != START or in_window.timestamp.iloc[-1] != END - step:
         raise RuntimeError("Five-year historical coverage incomplete; no qualified ranking")
     # Indicator signals depend on pre-window candles (EMA200, ATR, ADX).
     # A truncated cache can otherwise pass the five-year in-window test while
@@ -215,8 +235,8 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         raise RuntimeError("Indicator warm-up history incomplete; no qualified ranking")
     diffs = in_window.timestamp.diff().dropna()
     gaps = int((diffs != step).sum())
-    gap_repair_receipts = []
-    gaps_repaired_from_cache = bool(gaps and cache_hit)
+    gap_repair_receipts = boundary_receipts
+    gaps_repaired_from_cache = bool((gaps or needs_boundary_repair) and cache_hit)
     if cache_hit and repair_manifest.exists():
         verified = json.loads(repair_manifest.read_text(encoding="utf-8"))
         # A file in the local cache is not evidence unless its provenance
@@ -228,8 +248,9 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
     # Cached data can contain real archive omissions; verify and repair them too.
     # Do not replace the existing cache until every missing timestamp is proven.
     if gaps:
-        candles, gap_repair_receipts = restore_gap_klines_from_binance_daily_archive(
+        candles, interior_receipts = restore_gap_klines_from_binance_daily_archive(
             candles, symbol, interval, step)
+        gap_repair_receipts.extend(interior_receipts)
         in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
         diffs = in_window.timestamp.diff().dropna()
         gaps = int((diffs != step).sum())
