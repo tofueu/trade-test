@@ -1,7 +1,7 @@
 """
-策略名稱: MACD12_26_9
-最佳配置: SOLUSDT / 12h | 出場方式: 固定4R+訊號出場
-五年收益: +1405.73% | 最大回撤: 37.08% | 交易筆數: 263
+策略名稱: Supertrend+RSI50
+最佳配置: SOLUSDT / 1d | 出場方式: 訊號出場
+五年收益: +1250.27% | 最大回撤: 29.35% | 交易筆數: 118
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 MACD12_26_9 載入成功")
+    print("策略 Supertrend+RSI50 載入成功")
