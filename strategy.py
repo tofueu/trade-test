@@ -1,7 +1,7 @@
 """
-策略名稱: WEMA20_50+MACD
-最佳配置: BTCUSDT / 12h | 出場方式: 訊號出場(無固定TP)
-五年收益: +863.26% | 最大回撤: 56.63% | 交易筆數: 109
+策略名稱: MACD+RSI50
+最佳配置: SOLUSDT / 3h | 出場方式: 訊號出場(無固定TP)
+五年收益: +813.81% | 最大回撤: 56.93% | 交易筆數: 1319
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 WEMA20_50+MACD 載入成功")
+    print("策略 MACD+RSI50 載入成功")
