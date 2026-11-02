@@ -211,9 +211,12 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
     candles = candles.sort_values("timestamp").reset_index(drop=True)
     # Cached CSVs are not trusted: validate again before accepting coverage.
     validate_ohlcv(candles)
+    # An empty test window may be a repairable archive omission: first verify
+    # missing boundary bars against actual exchange daily ZIPs. Do not qualify
+    # the run until the complete five-year window is validated below.
+    if candles.empty:
+        raise RuntimeError("No exchange candles available; cannot establish repair boundaries")
     in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
-    if in_window.empty:
-        raise RuntimeError("Five-year historical coverage empty; no qualified ranking")
     # Repair only verified exchange timestamps; missing boundary and warm-up bars
     # are never forward-filled. A large unavailable range fails closed.
     needs_boundary_repair = (candles.timestamp.iloc[0] > warm_start
