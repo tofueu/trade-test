@@ -1,7 +1,7 @@
 """
-策略名稱: Donchian20_10
-最佳配置: SOLUSDT / 6h | 出場方式: 訊號出場(無固定TP)
-五年收益: +1421.65% | 最大回撤: 52.92% | 交易筆數: 203
+策略名稱: MACD12_26_9
+最佳配置: SOLUSDT / 12h | 出場方式: 固定4R+訊號出場
+五年收益: +1405.73% | 最大回撤: 37.08% | 交易筆數: 263
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Donchian20_10 載入成功")
+    print("策略 MACD12_26_9 載入成功")
