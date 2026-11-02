@@ -1,7 +1,7 @@
 """
-策略名稱: RSI14_EMA200
-最佳配置: SOLUSDT / 30m | 出場方式: ATR移動止盈3x+訊號出場
-五年收益: +161.39% | 最大回撤: 42.17% | 交易筆數: 155
+策略名稱: EMA200+RSI2_mean_reversion
+最佳配置: ETHUSDT / 8h | 出場方式: 固定1R+訊號出場
+五年收益: +161.11% | 最大回撤: 37.81% | 交易筆數: 224
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 RSI14_EMA200 載入成功")
+    print("策略 EMA200+RSI2_mean_reversion 載入成功")
