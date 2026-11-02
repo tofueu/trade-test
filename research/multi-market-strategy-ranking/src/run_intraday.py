@@ -223,22 +223,20 @@ def load_real_ohlcv(symbol: str, interval: str) -> tuple[pd.DataFrame, dict]:
         candles, boundary_receipts = restore_gap_klines_from_binance_daily_archive(
             candles, symbol, interval, step, warm_start, END)
         in_window = candles[(candles.timestamp >= START) & (candles.timestamp < END)]
-    if in_window.empty or in_window.timestamp.iloc[0] != START or in_window.timestamp.iloc[-1] != END - step:
-        raise RuntimeError("Five-year historical coverage    # Check warm-up and five-year continuity together, then repair only with
-    # independently verified daily archives. Never accept a warm-up hole.
+    # Audit both warm-up and five-year candles before rejecting remaining gaps.
+    # Missing timestamps are fetched only from verified exchange daily archives.
     gap_repair_receipts = list(boundary_receipts)
     gaps_repaired_from_cache = bool(needs_boundary_repair and cache_hit)
     if cache_hit and repair_manifest.exists():
         verified = json.loads(repair_manifest.read_text(encoding="utf-8"))
         if hashlib.sha256(cache_file.read_bytes()).hexdigest() != verified.get("cache_csv_sha256"):
             raise RuntimeError("Cached exchange-gap restoration receipt hash mismatch")
-        gap_repair_receipts = list(verified["verified_daily_zip_sources"])
+        gap_repair_receipts.extend(verified["verified_daily_zip_sources"])
     audit = candles[(candles.timestamp >= warm_start) & (candles.timestamp < END)]
     diffs = audit.timestamp.diff().dropna()
     gaps = int((diffs != step).sum())
     if gaps:
         gaps_repaired_from_cache = gaps_repaired_from_cache or cache_hit
-ified["verified_daily_zip_sources"]
     # Cached data can contain real archive omissions; verify and repair them too.
     # Do not replace the existing cache until every missing timestamp is proven.
     if gaps:
@@ -250,8 +248,8 @@ ified["verified_daily_zip_sources"]
         diffs = audit.timestamp.diff().dropna()
         gaps = int((diffs != step).sum())
     if gaps:
-        bad = in_window.loc[diffs[diffs != step].index, "timestamp"].head(16)
-        prior = in_window["timestamp"].shift(1).loc[bad.index]
+        bad = audit.loc[diffs[diffs != step].index, "timestamp"].head(16)
+        prior = audit["timestamp"].shift(1).loc[bad.index]
         details = [{"previous": p.isoformat(), "next": n.isoformat(),
                     "delta": str(n-p)} for p, n in zip(prior, bad)]
         raise RuntimeError(
