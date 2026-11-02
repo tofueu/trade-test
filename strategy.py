@@ -1,7 +1,7 @@
 """
-策略名稱: Stoch14+EMA200
-最佳配置: ETHUSDT / 8h | 出場方式: 固定止盈0.5R
-五年收益: +126.89% | 最大回撤: 34.98% | 交易筆數: 212
+策略名稱: EMA200+RSI2_extreme
+最佳配置: ETHUSDT / 4h | 出場方式: 固定止盈3R
+五年收益: +121.47% | 最大回撤: 87.66% | 交易筆數: 273
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Stoch14+EMA200 載入成功")
+    print("策略 EMA200+RSI2_extreme 載入成功")
