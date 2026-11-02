@@ -1,7 +1,7 @@
 """
-策略名稱: Keltner20_1.5ATR_EMA200
-最佳配置: SOLUSDT / 3h | 出場方式: 固定止盈2R
-五年收益: +938.71% | 最大回撤: 35.28% | 交易筆數: 368
+策略名稱: WEMA20_50+MACD
+最佳配置: BTCUSDT / 12h | 出場方式: 訊號出場(無固定TP)
+五年收益: +863.26% | 最大回撤: 56.63% | 交易筆數: 109
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Keltner20_1.5ATR_EMA200 載入成功")
+    print("策略 WEMA20_50+MACD 載入成功")
