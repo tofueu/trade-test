@@ -1,7 +1,7 @@
 """
-策略名稱: Bollinger20_2
-最佳配置: BTCUSDT / 1d | 出場方式: 固定4R+訊號出場
-五年收益: +204.84% | 最大回撤: 57.25% | 交易筆數: 72
+策略名稱: EMA200+RSI14_pullback
+最佳配置: SOLUSDT / 30m | 出場方式: 固定止盈2R
+五年收益: +201.21% | 最大回撤: 36.82% | 交易筆數: 162
 """
 import pandas as pd
 import numpy as np
@@ -15,4 +15,4 @@ def run_strategy_backtest(df: pd.DataFrame, initial_balance: float = 10000.0, fe
     return data
 
 if __name__ == '__main__':
-    print("策略 Bollinger20_2 載入成功")
+    print("策略 EMA200+RSI14_pullback 載入成功")
