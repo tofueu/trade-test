@@ -1,25 +1,22 @@
 //@version=6
-// Rank 4 representative configuration: SOLUSDT, Supertrend+EMA200, full Kelly.
-// Python source: five_year_compound_strategy_sweep.py / custom_signals()
-// Python indicators: five_year_multi_market_kelly.py / indicators()
-// Calculations use the active TradingView chart timeframe. The leaderboard baseline is 1D;
-// changing the chart timeframe creates a distinct configuration and recalculates all lengths in bars.
-// Python crypto costs are 0.05% fee + 0.05% adverse slippage per side. Pine approximates
-// the combined per-side cost with 0.10% commission because built-in slippage is fixed ticks.
-// TradingView status: UNTESTED.
-strategy("Supertrend+EMA200 | Rank 4 | Chart timeframe", overlay=true,
+// Signal and indicator rules matched to Python overall rank 40.
+// Python crypto costs include 5 bps adverse slippage per side; Pine's built-in
+// slippage is a fixed tick amount, so this script leaves slippage at zero.
+strategy("Supertrend + EMA200 | Python-aligned", overlay=true,
      initial_capital=10000, currency=currency.USD,
-     commission_type=strategy.commission.percent, commission_value=0.10,
+     commission_type=strategy.commission.percent, commission_value=0.05,
      slippage=0, pyramiding=0, process_orders_on_close=false,
-     margin_long=0, margin_short=0, default_qty_type=strategy.fixed)
+     margin_long=0, margin_short=0,
+     default_qty_type=strategy.fixed)
 
-startTime = input.time(timestamp("GMT+0", 2021, 10, 10, 0, 0), "Test start (UTC)")
-endTime   = input.time(timestamp("GMT+0", 2026, 10, 10, 0, 0), "Test end (UTC, exclusive)")
-warmTime  = timestamp("GMT+0", 2021, 7, 1, 0, 0)
-riskPct   = input.float(23.5370826, "Fixed initial-equity risk % (IS full Kelly, rank 4)", step=0.0001) / 100.0
+startTime = input.time(timestamp("10 Oct 2021 00:00 +0000"), "Test start (UTC)")
+endTime   = input.time(timestamp("10 Oct 2026 00:00 +0000"), "Test end (UTC, exclusive)")
+warmTime  = timestamp("01 Jul 2021 00:00 +0000")
+riskPct   = input.float(11.7685413, "Fixed initial-equity risk % (half Kelly, rank 40)", step=0.0001) / 100.0
 atrMult   = input.float(1.5, "Initial stop ATR multiplier", step=0.1)
 
-// Match pandas ewm(adjust=False) seeded from the first row of the Python warm-up slice.
+// Python uses pandas ewm(adjust=False), seeded from the first row in its
+// WARM..END data slice. Seed the recursive EMA/ATR on the first warm bar.
 reset = time >= warmTime and (na(time[1]) or time[1] < warmTime)
 tr = reset ? high - low : ta.tr(true)
 
@@ -43,8 +40,6 @@ else if time >= warmTime
 atr10 = warmBars >= 10 ? atr10Raw : na
 atr14 = warmBars >= 14 ? atr14Raw : na
 
-// Match Python indicators(): Supertrend bands use ATR10 EWM, multiplier 3,
-// and compare the close against the current finalized bands.
 mid = (high + low) / 2.0
 basicUpper = mid + 3.0 * atr10
 basicLower = mid - 3.0 * atr10
@@ -60,24 +55,25 @@ if time >= warmTime and not na(atr10)
         finalUpper := (basicUpper < finalUpper[1] or close[1] > finalUpper[1]) ? basicUpper : finalUpper[1]
         finalLower := (basicLower > finalLower[1] or close[1] < finalLower[1]) ? basicLower : finalLower[1]
         prevDirection = nz(direction[1], 1)
-        direction := prevDirection < 0 and close > finalUpper ? 1 :
-             prevDirection > 0 and close < finalLower ? -1 : prevDirection
+        direction := prevDirection < 0 and close > finalUpper ? 1 : prevDirection > 0 and close < finalLower ? -1 : prevDirection
 
-// Python custom_signals(): hold long/short while Supertrend and EMA200 agree;
-// flatten as soon as either side no longer agrees. No extra flip-only entry rule.
+// Python custom_signals holds a side only while both conditions align.
+// It does not require a fresh Supertrend flip to establish the state.
 signal = time >= warmTime and not na(ema200) ?
      direction > 0 and close > ema200 ? 1 :
      direction < 0 and close < ema200 ? -1 : 0 : 0
 
-// Bar-close signal is submitted now and fills at the next bar open, matching Python.
+// Python consumes the previous completed daily bar's signal at this bar's
+// open. Orders submitted at this bar's close fill on the next bar's open.
 nextOpenInWindow = time_close >= startTime and time_close < endTime
-startTransition = time_close >= startTime and (na(time_close[1]) or time_close[1] < startTime)
+startTransition = time_close == startTime
 previousSignal = nz(signal[1], 0)
 newSide = signal != 0 and (previousSignal == 0 or signal != previousSignal or startTransition)
 
 if barstate.isconfirmed
     if nextOpenInWindow
         if strategy.position_size > 0 and signal != 1
+            // Python gives a signal exit priority over a same-bar stop check.
             strategy.cancel("Long SL")
             if signal == 0
                 strategy.close("Long", comment="Signal exit")
@@ -88,7 +84,8 @@ if barstate.isconfirmed
 
         if newSide and not na(atr14) and atr14 > 0
             distance = atrMult * atr14
-            // Python sizes a fixed USD risk from initial equity, using IS full Kelly.
+            // Python uses a constant dollar stake = INITIAL * full Kelly,
+            // rather than compounding the position size after each trade.
             qty = (strategy.initial_capital * riskPct) / distance
             stopTicks = int(math.max(1, math.round(distance / syminfo.mintick)))
             if signal == 1
