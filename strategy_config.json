@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "rank": 21,
+  "strategy_name": "Supertrend_ADX20",
+  "homepage_reference": {
+    "symbol": "ETHUSDT",
+    "timeframe": "6h",
+    "return_pct": 240.71,
+    "trade_count": 81
+  },
+  "python": {
+    "engine": "research/multi-market-strategy-ranking/src/run_strategies.py",
+    "signal_function": "make_state",
+    "family": "new",
+    "multi_timeframe_entrypoint": "research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py"
+  },
+  "evidence_status": "saved_ranking_row_matched_not_rerun",
+  "saved_evidence": [
+    {
+      "path": "research/multi-market-strategy-ranking/results/all_timeframes/multi_ETHUSDT_6h_new/ranking.csv",
+      "row": {
+        "來源": "新策略實測",
+        "市場": "Crypto futures",
+        "商品": "ETHUSDT",
+        "可交易": "True",
+        "策略分類": "new",
+        "策略": "Supertrend_ADX20",
+        "策略規則": "Supertrend(10,3) 翻向且 ADX14>20 才進場；Supertrend 反向即退出。",
+        "時區": "6h",
+        "出場方式": "固定止盈3R",
+        "倉位法": "固定1R",
+        "實際風險_pct": "10.0",
+        "IS_Kelly_pct": "6.816415622260999",
+        "IS勝率_p": "0.3384615384615385",
+        "IS失敗率_q": "0.6615384615384615",
+        "IS平均贏虧比_b": "2.4474467938194713",
+        "IS交易數": "65",
+        "IS勝單數": "22",
+        "IS敗單數": "43",
+        "五年交易數": "81",
+        "五年勝率_pct": "37.03703703703704",
+        "五年收益_pct": "240.71178716624738",
+        "五年最大回撤_pct": "33.65140540980012",
+        "五年獲利因子": "1.4596632058263883",
+        "五年盈虧比": "2.48142744990486",
+        "止盈出場數": "25",
+        "止損出場數": "50",
+        "OOS收益_pct": "100.08746591750692",
+        "OOS交易數": "15",
+        "資金停止": "False",
+        "資料完整": "True",
+        "OHLCV_SHA256": "416928fe6e926a7cc4ec290af74a13b8425759686f4ba45d6401099b469e375a",
+        "交易_SHA256": "14a36f02c54678dd3ce5f9cbecdb662e235d7f6246ea1f7df8a9cb189e0f4ddb",
+        "伯努利獨立同分布驗證": "未驗證（p/q是勝敗樣本估計）"
+      },
+      "manifest": {
+        "source": "https://data.binance.vision/data/futures/um",
+        "symbol": "ETHUSDT",
+        "timeframe": "6h",
+        "warmup_start_utc": "2021-08-08T12:00:00+00:00",
+        "warmup_bar_count": 250,
+        "min_warmup_bars": 250,
+        "start_utc": "2021-10-10T00:00:00+00:00",
+        "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+        "actual_first_utc": "2021-10-10T00:00:00+00:00",
+        "actual_last_utc": "2026-10-09T18:00:00+00:00",
+        "bar_count": 7304,
+        "missing_or_irregular_intervals": 0,
+        "ohlcv_sha256": "416928fe6e926a7cc4ec290af74a13b8425759686f4ba45d6401099b469e375a",
+        "historical_data": true,
+        "verified_daily_archive_gap_repair": [],
+        "daily_archives_added": 0,
+        "tradingview_run_verified": false,
+        "pine_v6_parity_verified": false,
+        "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+        "tradable_proxy": true,
+        "family": "new",
+        "status": "complete",
+        "strategy_count": 7,
+        "completed": [
+          {
+            "strategy": "Turtle55_20_EMA200",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Supertrend_ADX20",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "EMA20_50_ADX20",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Keltner20_1.5ATR_EMA200",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "BB_Reentry_RSI_ADX25",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Donchian20_Volume_EMA200",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "MACD_EMA200_ADX20",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          }
+        ],
+        "ranking_rows": 28,
+        "saved_trade_rows": 804,
+        "ranking_sha256": "37e11b79a4dac595d5f1aefc92c4f2ccf856f91f786bdb252880a16fe0c12d62",
+        "trades_sha256": "f706fd7318de83b7d89464c4b9f217cef37dff741caf046ba8779061a38711ed"
+      }
+    }
+  ],
+  "validation": {
+    "new_backtest_run": false,
+    "pine_parity_verified": false,
+    "live_execution_verified": false
+  },
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+}
