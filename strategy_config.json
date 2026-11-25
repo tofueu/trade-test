@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "rank": 2,
+  "strategy_name": "Volume_Donchian20",
+  "homepage_reference": {
+    "symbol": "BTCUSDT",
+    "timeframe": "8h",
+    "return_pct": 1879.65,
+    "trade_count": 117
+  },
+  "python": {
+    "engine": "research/multi-market-strategy-ranking/src/five_year_multi_market_kelly.py",
+    "signal_function": "make_signals",
+    "family": "original",
+    "multi_timeframe_entrypoint": "research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py"
+  },
+  "evidence_status": "saved_ranking_row_matched_not_rerun",
+  "saved_evidence": [
+    {
+      "path": "research/multi-market-strategy-ranking/results/all_timeframes/legacy_BTCUSDT_8h_original/ranking.csv",
+      "row": {
+        "來源": "舊策略重新實測",
+        "市場": "Crypto futures",
+        "商品": "BTCUSDT",
+        "可交易": "True",
+        "策略分類": "original",
+        "策略": "Volume_Donchian20",
+        "策略規則": "",
+        "時區": "8h",
+        "出場方式": "訊號出場(無固定TP)",
+        "倉位法": "全凱利",
+        "實際風險_pct": "20.27613790380194",
+        "IS_Kelly_pct": "20.27613790380194",
+        "IS勝率_p": "0.3548387096774194",
+        "IS失敗率_q": "0.6451612903225806",
+        "IS平均贏虧比_b": "4.2423238730587824",
+        "IS交易數": "93",
+        "IS勝單數": "33",
+        "IS敗單數": "60",
+        "五年交易數": "117",
+        "五年勝率_pct": "35.04273504273504",
+        "五年收益_pct": "1879.654926392858",
+        "五年最大回撤_pct": "35.642105603144465",
+        "五年獲利因子": "2.302543334349259",
+        "五年盈虧比": "4.268129107574237",
+        "止盈出場數": "0",
+        "止損出場數": "60",
+        "OOS收益_pct": "372.9407915380517",
+        "OOS交易數": "23",
+        "資金停止": "False",
+        "資料完整": "True",
+        "OHLCV_SHA256": "df2741e951251f61d62acb97f54254a7148e3cface2522a95b657a1836f73c46",
+        "交易_SHA256": "f60131a85e67eb158672291bae073da664d72aeacc8fb000cb062909075dc6e4",
+        "伯努利獨立同分布驗證": "未驗證（p/q是勝敗樣本估計）"
+      },
+      "manifest": {
+        "source": "https://data.binance.vision/data/futures/um",
+        "symbol": "BTCUSDT",
+        "timeframe": "8h",
+        "warmup_start_utc": "2021-07-18T16:00:00+00:00",
+        "warmup_bar_count": 250,
+        "min_warmup_bars": 250,
+        "start_utc": "2021-10-10T00:00:00+00:00",
+        "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+        "actual_first_utc": "2021-10-10T00:00:00+00:00",
+        "actual_last_utc": "2026-10-09T16:00:00+00:00",
+        "bar_count": 5478,
+        "missing_or_irregular_intervals": 0,
+        "ohlcv_sha256": "df2741e951251f61d62acb97f54254a7148e3cface2522a95b657a1836f73c46",
+        "historical_data": true,
+        "verified_daily_archive_gap_repair": [],
+        "daily_archives_added": 0,
+        "tradingview_run_verified": false,
+        "pine_v6_parity_verified": false,
+        "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+        "tradable_proxy": true,
+        "family": "original",
+        "status": "complete",
+        "strategy_count": 8,
+        "completed": [
+          {
+            "strategy": "Donchian20_10",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          },
+          {
+            "strategy": "MACD12_26_9",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          },
+          {
+            "strategy": "RSI14_EMA200",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          },
+          {
+            "strategy": "EMA50_200",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          },
+          {
+            "strategy": "Supertrend10_3",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          },
+          {
+            "strategy": "Bollinger20_2",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          },
+          {
+            "strategy": "RSI2_EMA200",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          },
+          {
+            "strategy": "Volume_Donchian20",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 9
+          }
+        ],
+        "ranking_rows": 288,
+        "saved_trade_rows": 11439,
+        "ranking_sha256": "667bbcf1229c1c0b7019a112e3cd8a822b9d6d53f274dc2819f0ab023bc06e6f",
+        "trades_sha256": "7a03d9e63871a543d6b8327b2e269c439ededbeebd1237aafa33fc7983d8b660"
+      }
+    }
+  ],
+  "validation": {
+    "new_backtest_run": false,
+    "pine_parity_verified": false,
+    "live_execution_verified": false
+  },
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+}
