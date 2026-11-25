@@ -1,7 +1,8 @@
 //@version=6
 // Rank 3 Python port: Supertrend10_3, signal exit without fixed TP, full Kelly.
 // Python source: five_year_multi_market_kelly.py (indicators, make_signals, market_backtest).
-// Binance SOLUSDT daily; Python UTC window [2021-10-10, 2026-10-10), warm-up 2021-07-01.
+// Legacy SOLUSDT daily configuration; no expiry. Uses chart bars.
+// Execution-port repair 2026-11-25; TradingView compilation/performance not yet verified.
 strategy("R03 | SOLUSDT | Supertrend10_3 | signal exit | full Kelly",
      overlay=true, initial_capital=10000, currency=currency.USD,
      commission_type=strategy.commission.percent, commission_value=0.05,
@@ -10,9 +11,7 @@ strategy("R03 | SOLUSDT | Supertrend10_3 | signal exit | full Kelly",
      default_qty_type=strategy.fixed, default_qty_value=1)
 
 startTime = input.time(timestamp("10 Oct 2021 00:00 +0000"), "Test start (UTC)")
-endTime = input.time(timestamp("10 Oct 2026 00:00 +0000"), "Exclusive test end (UTC)")
 warmTime = timestamp("01 Jul 2021 00:00 +0000")
-limitTestEnd = input.bool(false, "Limit to test end (historical comparison)")
 kellyPct = input.float(24.543982453165512, "IS Kelly risk % of initial capital", step=0.000001) / 100.0
 atrMult = input.float(1.5, "Initial stop ATR multiple", step=0.1)
 
@@ -21,11 +20,11 @@ f_ewm(float src, float alpha, bool reset) =>
     if reset
         value := src
     else if not na(src)
-        value := na(value) ? src : alpha * src + (1.0 - alpha) * value
+        value := na(value) ? src : value == src ? value : alpha * src + (1.0 - alpha) * value
     value
 
-// Binance daily bars include the exact UTC warm-up timestamp used by Python.
-warmReset = time == warmTime
+// Reset on the first available warm-up bar, including charts with shorter history.
+warmReset = time >= warmTime and (na(time[1]) or time[1] < warmTime)
 trValue = warmReset ? high - low : ta.tr(true)
 atr14Raw = f_ewm(trValue, 1.0 / 14.0, warmReset)
 atr10Raw = f_ewm(trValue, 0.1, warmReset)
@@ -64,21 +63,21 @@ if stDirection > 0 and nz(stDirection[1], 0) <= 0
 else if stDirection < 0 and nz(stDirection[1], 0) >= 0
     signalState := -1
 previousSignalState = nz(signalState[1], 0)
-startTransition = time >= startTime and time[1] < startTime
-inWindow = time >= startTime and (not limitTestEnd or time < endTime)
-newLong = signalState == 1 and (previousSignalState == 0 or startTransition)
-newShort = signalState == -1 and (previousSignalState == 0 or startTransition)
+startTransition = time >= startTime and (na(time[1]) or time[1] < startTime)
+inWindow = time >= startTime
+newLong = signalState == 1 and (previousSignalState != 1 or startTransition)
+newShort = signalState == -1 and (previousSignalState != -1 or startTransition)
 
-// Python uses the prior completed daily signal at this bar's open for exits,
-// then opens the new position at this bar's open using prior-bar ATR14.
+// At this close, use this completed signal/ATR for the NEXT open.
+// strategy.entry reverses an opposite position; do not also queue a close order.
 if inWindow and barstate.isconfirmed
-    if strategy.position_size > 0 and nz(signalState[1], 0) != 1
+    if strategy.position_size > 0 and signalState != 1 and not newShort
         strategy.close("Long", comment="Signal exit")
-    if strategy.position_size < 0 and nz(signalState[1], 0) != -1
+    if strategy.position_size < 0 and signalState != -1 and not newLong
         strategy.close("Short", comment="Signal exit")
 
-if inWindow and barstate.isconfirmed and not na(atr14[1]) and atr14[1] > 0
-    stopDistance = atrMult * atr14[1]
+if inWindow and barstate.isconfirmed and not na(atr14) and atr14 > 0
+    stopDistance = atrMult * atr14
     stopTicks = int(math.max(1, math.round(stopDistance / syminfo.mintick)))
     qty = (10000.0 * kellyPct) / stopDistance
     if newLong
@@ -92,7 +91,5 @@ if inWindow and barstate.isconfirmed and not na(atr14[1]) and atr14[1] > 0
         strategy.entry("Short", strategy.short, qty=qty, comment="Supertrend10_3")
         strategy.exit("Short SL", from_entry="Short", loss=stopTicks, comment_loss="Stop loss")
 
-if limitTestEnd and time < endTime and time_close >= endTime and strategy.position_size != 0
-    strategy.close_all(comment="End of test window", immediately=true)
 
 plot(stDirection > 0 ? finalLower : stDirection < 0 ? finalUpper : na, "Python Supertrend10_3", color=stDirection > 0 ? color.green : color.red)
