@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "rank": 13,
+  "strategy_name": "MACD+RSI50",
+  "homepage_reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "3h",
+    "return_pct": 813.81,
+    "trade_count": 1319
+  },
+  "python": {
+    "engine": "research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py",
+    "signal_function": "custom_signals",
+    "family": "compound",
+    "multi_timeframe_entrypoint": "research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py"
+  },
+  "evidence_status": "saved_ranking_row_matched_not_rerun",
+  "saved_evidence": [
+    {
+      "path": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_3h_compound/ranking.csv",
+      "row": {
+        "來源": "舊策略重新實測",
+        "市場": "Crypto futures",
+        "商品": "SOLUSDT",
+        "可交易": "True",
+        "策略分類": "compound",
+        "策略": "MACD+RSI50",
+        "策略規則": "日線MACD與訊號線方向一致，且RSI14同時在50上/下方才持倉；任一方向條件失效即退場。",
+        "時區": "3h",
+        "出場方式": "訊號出場(無固定TP)",
+        "倉位法": "固定1R",
+        "實際風險_pct": "10.0",
+        "IS_Kelly_pct": "4.952397856845562",
+        "IS勝率_p": "0.2714007782101167",
+        "IS失敗率_q": "0.7285992217898833",
+        "IS平均贏虧比_b": "3.283800843380637",
+        "IS交易數": "1028",
+        "IS勝單數": "279",
+        "IS敗單數": "749",
+        "五年交易數": "1319",
+        "五年勝率_pct": "26.231993934799092",
+        "五年收益_pct": "813.8058906904067",
+        "五年最大回撤_pct": "56.931056945049704",
+        "五年獲利因子": "1.1570068363328783",
+        "五年盈虧比": "3.2536637333869667",
+        "止盈出場數": "0",
+        "止損出場數": "180",
+        "OOS收益_pct": "-108.10553479565671",
+        "OOS交易數": "290",
+        "資金停止": "False",
+        "資料完整": "True",
+        "OHLCV_SHA256": "948007cca99c23f496417405a62d8b33e5e22a35d4ad0b5f943bb1c3d50f98e6",
+        "交易_SHA256": "2912f3cf98e67d44d41b120953cf523d73f405d1d04e9ba0e3da08d314464f27",
+        "伯努利獨立同分布驗證": "未驗證（p/q是勝敗樣本估計）"
+      },
+      "manifest": {
+        "source": "https://data.binance.vision/data/futures/um",
+        "symbol": "SOLUSDT",
+        "timeframe": "3h",
+        "warmup_start_utc": "2021-09-01T00:00:00+00:00",
+        "warmup_bar_count": 312,
+        "min_warmup_bars": 250,
+        "start_utc": "2021-10-10T00:00:00+00:00",
+        "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+        "actual_first_utc": "2021-10-10T00:00:00+00:00",
+        "actual_last_utc": "2026-10-09T21:00:00+00:00",
+        "bar_count": 14608,
+        "missing_or_irregular_intervals": 0,
+        "ohlcv_sha256": "948007cca99c23f496417405a62d8b33e5e22a35d4ad0b5f943bb1c3d50f98e6",
+        "historical_data": true,
+        "verified_daily_archive_gap_repair": [
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/1h/SOLUSDT-1h-2022-02-26.zip",
+            "zip_sha256": "24fbcb67b854564ee8f0d14028b277c272083c59ad2fd8bcbc8d496712fb57dc",
+            "restored_bar_count": 24
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/1h/SOLUSDT-1h-2022-02-27.zip",
+            "zip_sha256": "4a3f57259893da63acf2978799f3fb28bc8130ca95f23fe08ed11eaaff1840b1",
+            "restored_bar_count": 24
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/1h/SOLUSDT-1h-2022-02-28.zip",
+            "zip_sha256": "ea4f7d6d0dbca651066ef3e361e5457b1eba91ac077a942f48344a174abee40e",
+            "restored_bar_count": 24
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/1h/SOLUSDT-1h-2022-04-01.zip",
+            "zip_sha256": "186d8581e36ce03557fc0e517c2923a0c7cb6f8e5ecb47b9e7086f6bcefd7971",
+            "restored_bar_count": 24
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/1h/SOLUSDT-1h-2022-04-02.zip",
+            "zip_sha256": "9fe6fc49767488828f44db95d52412dcefd2b2b28924a92ab5461590fa80844c",
+            "restored_bar_count": 24
+          }
+        ],
+        "daily_archives_added": 5,
+        "tradingview_run_verified": false,
+        "pine_v6_parity_verified": false,
+        "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+        "source_timeframe": "1h",
+        "resample_factor": 3,
+        "resampled_from_only_verified_ohlcv": true,
+        "tradable_proxy": true,
+        "family": "compound",
+        "status": "complete",
+        "strategy_count": 8,
+        "completed": [
+          {
+            "strategy": "EMA200+RSI14_pullback",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "EMA200+RSI2_mean_reversion",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Donchian20+MACD",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "MACD+RSI50",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Supertrend+EMA200",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Supertrend+RSI50",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "WEMA20_50+Donchian20",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "WEMA20_50+MACD",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          }
+        ],
+        "ranking_rows": 32,
+        "saved_trade_rows": 4462,
+        "ranking_sha256": "0df899c8c4164def6870287b3e1ab147174b823b8cce919efad0c94eb0de44ce",
+        "trades_sha256": "381f5eb9e78f33574dd93059ed66185ac8ef24eeab41a44c3f6711447a7c96bd"
+      }
+    }
+  ],
+  "validation": {
+    "new_backtest_run": false,
+    "pine_parity_verified": false,
+    "live_execution_verified": false
+  },
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+}
