@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "rank": 30,
+  "strategy_name": "EMA200+RSI2_extreme",
+  "homepage_reference": {
+    "symbol": "ETHUSDT",
+    "timeframe": "4h",
+    "return_pct": 121.47,
+    "trade_count": 273
+  },
+  "python": {
+    "engine": "research/multi-market-strategy-ranking/src/five_year_low_drawdown_fixed_rr.py",
+    "signal_function": "signals",
+    "family": "fixed",
+    "multi_timeframe_entrypoint": "research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py"
+  },
+  "evidence_status": "saved_ranking_row_matched_not_rerun",
+  "saved_evidence": [
+    {
+      "path": "research/multi-market-strategy-ranking/results/all_timeframes/multi_ETHUSDT_4h_fixed/ranking.csv",
+      "row": {
+        "來源": "舊策略重新實測",
+        "市場": "Crypto futures",
+        "商品": "ETHUSDT",
+        "可交易": "True",
+        "策略分類": "fixed",
+        "策略": "EMA200+RSI2_extreme",
+        "策略規則": "日線 EMA200 定方向；RSI2 向下穿越 10 做多（價在 EMA200 上），向上穿越 90 做空（價在 EMA200 下）。",
+        "時區": "4h",
+        "出場方式": "固定止盈3R",
+        "倉位法": "固定1R",
+        "實際風險_pct": "10.0",
+        "IS_Kelly_pct": "0.0",
+        "IS勝率_p": "0.26146788990825687",
+        "IS失敗率_q": "0.7385321100917431",
+        "IS平均贏虧比_b": "2.795297160588569",
+        "IS交易數": "218",
+        "IS勝單數": "57",
+        "IS敗單數": "161",
+        "五年交易數": "273",
+        "五年勝率_pct": "27.472527472527474",
+        "五年收益_pct": "121.46998550817041",
+        "五年最大回撤_pct": "87.66055597258017",
+        "五年獲利因子": "1.0582506619704797",
+        "五年盈虧比": "2.793781747602066",
+        "止盈出場數": "75",
+        "止損出場數": "198",
+        "OOS收益_pct": "149.55001148197292",
+        "OOS交易數": "54",
+        "資金停止": "False",
+        "資料完整": "True",
+        "OHLCV_SHA256": "b141efad84b18a902154c8810a7aadc79b8022497b4d3c1146adf40beee122af",
+        "交易_SHA256": "3e1f9e1ea7cea877d38293c3b0f53dc41fbf1837132e41f294629c211f2a67f7",
+        "伯努利獨立同分布驗證": "未驗證（p/q是勝敗樣本估計）"
+      },
+      "manifest": {
+        "source": "https://data.binance.vision/data/futures/um",
+        "symbol": "ETHUSDT",
+        "timeframe": "4h",
+        "warmup_start_utc": "2021-08-29T08:00:00+00:00",
+        "warmup_bar_count": 250,
+        "min_warmup_bars": 250,
+        "start_utc": "2021-10-10T00:00:00+00:00",
+        "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+        "actual_first_utc": "2021-10-10T00:00:00+00:00",
+        "actual_last_utc": "2026-10-09T20:00:00+00:00",
+        "bar_count": 10956,
+        "missing_or_irregular_intervals": 0,
+        "ohlcv_sha256": "b141efad84b18a902154c8810a7aadc79b8022497b4d3c1146adf40beee122af",
+        "historical_data": true,
+        "tradingview_run_verified": false,
+        "pine_v6_parity_verified": false,
+        "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+        "tradable_proxy": true,
+        "family": "fixed",
+        "status": "complete",
+        "strategy_count": 9,
+        "completed": [
+          {
+            "strategy": "EMA200+RSI14_pullback",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "EMA200+RSI2_extreme",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "EMA200+MACD_cross",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Donchian20+ADX14",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Bollinger20+RSI14_reentry",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Supertrend+EMA200_flip",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "WEMA20_50+DailyMACD",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "WEMA20_50+DailyDonchian20",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Stoch14+EMA200",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          }
+        ],
+        "ranking_rows": 36,
+        "saved_trade_rows": 2412,
+        "ranking_sha256": "0a32e133f3b88c554c41bb8af4314efd8007eb43daeb4cbf1e2821a08c33b195",
+        "trades_sha256": "4dd9cad9986f7e4e0adf09bf53385176436dae7c70cfa87f15c92f310d31640f"
+      }
+    }
+  ],
+  "validation": {
+    "new_backtest_run": false,
+    "pine_parity_verified": false,
+    "live_execution_verified": false
+  },
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+}
