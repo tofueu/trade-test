@@ -1,0 +1,143 @@
+{
+  "schema_version": 1,
+  "rank": 12,
+  "strategy_name": "WEMA20_50+MACD",
+  "homepage_reference": {
+    "symbol": "BTCUSDT",
+    "timeframe": "12h",
+    "return_pct": 863.26,
+    "trade_count": 109
+  },
+  "python": {
+    "engine": "research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py",
+    "signal_function": "custom_signals",
+    "family": "compound",
+    "multi_timeframe_entrypoint": "research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py"
+  },
+  "evidence_status": "saved_ranking_row_matched_not_rerun",
+  "saved_evidence": [
+    {
+      "path": "research/multi-market-strategy-ranking/results/all_timeframes/legacy_BTCUSDT_12h_compound/ranking.csv",
+      "row": {
+        "來源": "舊策略重新實測",
+        "市場": "Crypto futures",
+        "商品": "BTCUSDT",
+        "可交易": "True",
+        "策略分類": "compound",
+        "策略": "WEMA20_50+MACD",
+        "策略規則": "以前一個完整週線的EMA20/EMA50確認大方向；日線MACD交叉順週線方向進場，MACD反向或週線方向變更則退出。",
+        "時區": "12h",
+        "出場方式": "訊號出場(無固定TP)",
+        "倉位法": "全凱利",
+        "實際風險_pct": "20.21434047933607",
+        "IS_Kelly_pct": "20.21434047933607",
+        "IS勝率_p": "0.4",
+        "IS失敗率_q": "0.6",
+        "IS平均贏虧比_b": "3.0324993684105737",
+        "IS交易數": "85",
+        "IS勝單數": "34",
+        "IS敗單數": "51",
+        "五年交易數": "109",
+        "五年勝率_pct": "39.44954128440367",
+        "五年收益_pct": "863.2628449384006",
+        "五年最大回撤_pct": "56.6335299897314",
+        "五年獲利因子": "1.8619716989222972",
+        "五年盈虧比": "2.8579100495086425",
+        "止盈出場數": "0",
+        "止損出場數": "34",
+        "OOS收益_pct": "89.65689727209498",
+        "OOS交易數": "24",
+        "資金停止": "False",
+        "資料完整": "True",
+        "OHLCV_SHA256": "826536fd52ef7cb46b45d7a948fd4303eddc568de36411a367b01bd8a2cfb669",
+        "交易_SHA256": "35bfef6c4a3831800bd7aa9fa5a769e81fb62f29df718ab4b14c88a8a356f09b",
+        "伯努利獨立同分布驗證": "未驗證（p/q是勝敗樣本估計）"
+      },
+      "manifest": {
+        "source": "https://data.binance.vision/data/futures/um",
+        "symbol": "BTCUSDT",
+        "timeframe": "12h",
+        "warmup_start_utc": "2021-06-07T00:00:00+00:00",
+        "warmup_bar_count": 250,
+        "min_warmup_bars": 250,
+        "start_utc": "2021-10-10T00:00:00+00:00",
+        "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+        "actual_first_utc": "2021-10-10T00:00:00+00:00",
+        "actual_last_utc": "2026-10-09T12:00:00+00:00",
+        "bar_count": 3652,
+        "missing_or_irregular_intervals": 0,
+        "ohlcv_sha256": "826536fd52ef7cb46b45d7a948fd4303eddc568de36411a367b01bd8a2cfb669",
+        "historical_data": true,
+        "verified_daily_archive_gap_repair": [],
+        "daily_archives_added": 0,
+        "tradingview_run_verified": false,
+        "pine_v6_parity_verified": false,
+        "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+        "tradable_proxy": true,
+        "family": "compound",
+        "status": "complete",
+        "strategy_count": 8,
+        "completed": [
+          {
+            "strategy": "EMA200+RSI14_pullback",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "EMA200+RSI2_mean_reversion",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Donchian20+MACD",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "MACD+RSI50",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Supertrend+EMA200",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Supertrend+RSI50",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "WEMA20_50+Donchian20",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "WEMA20_50+MACD",
+            "status": "completed",
+            "tested_exit_count": 9,
+            "saved_exit_count": 1
+          }
+        ],
+        "ranking_rows": 32,
+        "saved_trade_rows": 1058,
+        "ranking_sha256": "0c3ee4a1890c1885f0e2f174bc45de0ca8c6c5c8a7123970613e0028caa2ad9a",
+        "trades_sha256": "0ede9b75a4ec61e711b61df66ef6dc01cc16cf9c487d75049dd1af7cf1b2d883"
+      }
+    }
+  ],
+  "validation": {
+    "new_backtest_run": false,
+    "pine_parity_verified": false,
+    "live_execution_verified": false
+  },
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+}
