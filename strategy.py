@@ -1,140 +1,157 @@
-"""Five-year backtest of two-indicator and higher-timeframe-confirmed strategies."""
-from __future__ import annotations
-import math
+"""Candidate composite systems with fixed ATR stop and fixed R targets."""
 from pathlib import Path
+import math
 import numpy as np
 import pandas as pd
 import five_year_multi_market_kelly as base
-import five_year_exit_method_sweep as exits
-
 ROOT=Path(__file__).resolve().parent
-OOS=base.OOS
+TP_RS=[0.5,1.0,1.5,2.0,3.0]
 
-DEFINITIONS={
- 'EMA200+RSI14_pullback':'日線EMA200定方向；RSI14由30上穿做多（EMA200上方），由70下穿做空（EMA200下方）；EMA200/RSI退出條件平倉。',
- 'EMA200+RSI2_mean_reversion':'日線EMA200定方向；RSI2<10在EMA200上方做多，RSI2>90在下方做空；RSI2回到70/30或EMA200失守出場。',
- 'Donchian20+MACD':'日線收盤突破前20日高/低，且MACD方向一致才進場；跌破/突破前10日反向通道或MACD反向時退出。',
- 'MACD+RSI50':'日線MACD與訊號線方向一致，且RSI14同時在50上/下方才持倉；任一方向條件失效即退場。',
- 'Supertrend+EMA200':'日線Supertrend翻多/空且收盤同時位於EMA200上/下才持倉；方向不再一致即退出。',
- 'Supertrend+RSI50':'日線Supertrend方向與RSI14的50線方向一致才持倉；任一條件失效即退出。',
- 'WEMA20_50+Donchian20':'以前一個完整週線的EMA20/EMA50判斷大方向；日線突破前20日高/低且方向與週線一致才進場，日線10日反向通道或週線方向變更則退出。',
- 'WEMA20_50+MACD':'以前一個完整週線的EMA20/EMA50確認大方向；日線MACD交叉順週線方向進場，MACD反向或週線方向變更則退出。',
+RULES={
+'EMA200+RSI14_pullback':'日線 EMA200 定方向；RSI14 由 30 上穿才做多（價在 EMA200 上），由 70 下穿才做空（價在 EMA200 下）。',
+'EMA200+RSI2_extreme':'日線 EMA200 定方向；RSI2 向下穿越 10 做多（價在 EMA200 上），向上穿越 90 做空（價在 EMA200 下）。',
+'EMA200+MACD_cross':'日線收盤在 EMA200 上方且 MACD 上穿訊號線做多；在下方且 MACD 下穿做空。',
+'Donchian20+ADX14':'日線收盤突破前 20 日高／低，且 ADX14>20 才順向進場。',
+'Bollinger20+RSI14_reentry':'收盤由布林 2σ 下軌外回到軌內且 RSI14<45 做多；上軌外回到軌內且 RSI14>55 做空。',
+'Supertrend+EMA200_flip':'日線 Supertrend(ATR10,3) 翻多且收盤在 EMA200 上做多；翻空且收盤在 EMA200 下做空。',
+'WEMA20_50+DailyMACD':'以前一個已完成週線 EMA20/EMA50 定方向；日線 MACD 順週線方向交叉進場。',
+'WEMA20_50+DailyDonchian20':'以前一個已完成週線 EMA20/EMA50 定方向；日線收盤突破前 20 日高／低進場。',
+'Stoch14+EMA200':'日線 EMA200 定方向；%K(14) 上穿 20 做多（價在 EMA200 上），下穿 80 做空（價在 EMA200 下）。',
 }
 
-def custom_signals(d:pd.DataFrame, name:str)->np.ndarray:
-    c=d.close.to_numpy(); n=len(d); sig=np.zeros(n,dtype=np.int8); state=0
-    rsi14=d.rsi14.to_numpy(); rsi2=d.rsi2.to_numpy(); e200=d.ema200.to_numpy()
-    macd=d.macd.to_numpy(); ms=d.macdsig.to_numpy(); st=d.st_dir.to_numpy()
-    # Weekly EMA trend; assign only the previous completed weekly bucket to daily bars.
-    weekly=d.set_index('timestamp')['close'].resample('W-SUN').last().dropna()
-    we20=weekly.ewm(span=20,adjust=False,min_periods=20).mean()
-    we50=weekly.ewm(span=50,adjust=False,min_periods=50).mean()
-    wreg=np.sign(we20-we50).fillna(0).astype(np.int8)
-    wreg.index=weekly.index.tz_localize(None).to_period('W-SUN')
-    wreg=wreg.shift(1).fillna(0).astype(np.int8)
-    wkkey=d.timestamp.dt.tz_localize(None).dt.to_period('W-SUN')
-    wr=wkkey.map(wreg).fillna(0).to_numpy(dtype=np.int8)
-    for i in range(n):
-      prev_i=max(0,i-1); nxt=state
-      if name=='EMA200+RSI14_pullback':
-        if i and c[i]>e200[i] and rsi14[prev_i]<=30<rsi14[i]: nxt=1
-        elif i and c[i]<e200[i] and rsi14[prev_i]>=70>rsi14[i]: nxt=-1
-        elif state==1 and (c[i]<e200[i] or rsi14[i]>=60): nxt=0
-        elif state==-1 and (c[i]>e200[i] or rsi14[i]<=40): nxt=0
-      elif name=='EMA200+RSI2_mean_reversion':
-        if c[i]>e200[i] and rsi2[i]<10: nxt=1
-        elif c[i]<e200[i] and rsi2[i]>90: nxt=-1
-        elif state==1 and (c[i]<e200[i] or rsi2[i]>70): nxt=0
-        elif state==-1 and (c[i]>e200[i] or rsi2[i]<30): nxt=0
-      elif name=='Donchian20+MACD':
-        if c[i]>d.hi20.iat[i] and macd[i]>ms[i]: nxt=1
-        elif c[i]<d.lo20.iat[i] and macd[i]<ms[i]: nxt=-1
-        elif state==1 and (c[i]<d.lo10.iat[i] or macd[i]<ms[i]): nxt=0
-        elif state==-1 and (c[i]>d.hi10.iat[i] or macd[i]>ms[i]): nxt=0
-      elif name=='MACD+RSI50':
-        if macd[i]>ms[i] and rsi14[i]>50: nxt=1
-        elif macd[i]<ms[i] and rsi14[i]<50: nxt=-1
-        elif state==1 and (macd[i]<=ms[i] or rsi14[i]<=50): nxt=0
-        elif state==-1 and (macd[i]>=ms[i] or rsi14[i]>=50): nxt=0
-      elif name=='Supertrend+EMA200':
-        if st[i]>0 and c[i]>e200[i]: nxt=1
-        elif st[i]<0 and c[i]<e200[i]: nxt=-1
-        else: nxt=0
-      elif name=='Supertrend+RSI50':
-        if st[i]>0 and rsi14[i]>50: nxt=1
-        elif st[i]<0 and rsi14[i]<50: nxt=-1
-        else: nxt=0
-      elif name=='WEMA20_50+Donchian20':
-        if wr[i]>0 and c[i]>d.hi20.iat[i]: nxt=1
-        elif wr[i]<0 and c[i]<d.lo20.iat[i]: nxt=-1
-        elif state==1 and (wr[i]<=0 or c[i]<d.lo10.iat[i]): nxt=0
-        elif state==-1 and (wr[i]>=0 or c[i]>d.hi10.iat[i]): nxt=0
-      elif name=='WEMA20_50+MACD':
-        if wr[i]>0 and i and macd[i]>ms[i] and macd[prev_i]<=ms[prev_i]: nxt=1
-        elif wr[i]<0 and i and macd[i]<ms[i] and macd[prev_i]>=ms[prev_i]: nxt=-1
-        elif state==1 and (wr[i]<=0 or macd[i]<ms[i]): nxt=0
-        elif state==-1 and (wr[i]>=0 or macd[i]>ms[i]): nxt=0
-      sig[i]=nxt; state=nxt
-    return sig
+def signals(d,name):
+ c=d.close.to_numpy(); n=len(d); s=np.zeros(n,dtype=np.int8)
+ e200=d.ema200.to_numpy(); m=d.macd.to_numpy(); ms=d.macdsig.to_numpy(); r14=d.rsi14.to_numpy(); r2=d.rsi2.to_numpy(); st=d.st_dir.to_numpy()
+ hi20=d.hi20.to_numpy(); lo20=d.lo20.to_numpy(); bblo=d.bblow.to_numpy(); bbhi=d.bbhi.to_numpy()
+ # ADX14 from Wilder-smoothed directional movement and true range.
+ up=d.high.diff(); down=-d.low.diff()
+ plus_dm=up.where((up>down)&(up>0),0.0); minus_dm=down.where((down>up)&(down>0),0.0)
+ prev=d.close.shift(1); tr=pd.concat([d.high-d.low,(d.high-prev).abs(),(d.low-prev).abs()],axis=1).max(axis=1)
+ atr=tr.ewm(alpha=1/14,adjust=False,min_periods=14).mean()
+ pdi=100*plus_dm.ewm(alpha=1/14,adjust=False,min_periods=14).mean()/atr.replace(0,np.nan)
+ mdi=100*minus_dm.ewm(alpha=1/14,adjust=False,min_periods=14).mean()/atr.replace(0,np.nan)
+ dx=100*(pdi-mdi).abs()/(pdi+mdi).replace(0,np.nan); adx=dx.ewm(alpha=1/14,adjust=False,min_periods=14).mean().to_numpy()
+ # stochastic %K(14)
+ low14=d.low.rolling(14,min_periods=14).min(); high14=d.high.rolling(14,min_periods=14).max()
+ k=(100*(d.close-low14)/(high14-low14).replace(0,np.nan)).to_numpy()
+ # Previous fully completed week only (no current-week look-ahead).
+ weekly=d.set_index('timestamp')['close'].resample('W-SUN').last().dropna()
+ w20=weekly.ewm(span=20,adjust=False,min_periods=20).mean(); w50=weekly.ewm(span=50,adjust=False,min_periods=50).mean()
+ wr=np.sign(w20-w50).fillna(0).astype(np.int8); wr.index=weekly.index.tz_localize(None).to_period('W-SUN')
+ wr=wr.shift(1).fillna(0).astype(np.int8)
+ wk=d.timestamp.dt.tz_localize(None).dt.to_period('W-SUN'); wtrend=wk.map(wr).fillna(0).to_numpy(dtype=np.int8)
+ for i in range(1,n):
+  p=i-1
+  if name=='EMA200+RSI14_pullback':
+   if c[i]>e200[i] and r14[p]<=30<r14[i]: s[i]=1
+   elif c[i]<e200[i] and r14[p]>=70>r14[i]: s[i]=-1
+  elif name=='EMA200+RSI2_extreme':
+   if c[i]>e200[i] and r2[p]>=10>r2[i]: s[i]=1
+   elif c[i]<e200[i] and r2[p]<=90<r2[i]: s[i]=-1
+  elif name=='EMA200+MACD_cross':
+   if c[i]>e200[i] and m[p]<=ms[p] and m[i]>ms[i]: s[i]=1
+   elif c[i]<e200[i] and m[p]>=ms[p] and m[i]<ms[i]: s[i]=-1
+  elif name=='Donchian20+ADX14':
+   if c[p]<=hi20[p] and c[i]>hi20[i] and adx[i]>20: s[i]=1
+   elif c[p]>=lo20[p] and c[i]<lo20[i] and adx[i]>20: s[i]=-1
+  elif name=='Bollinger20+RSI14_reentry':
+   if c[p]<=bblo[p] and c[i]>bblo[i] and r14[i]<45: s[i]=1
+   elif c[p]>=bbhi[p] and c[i]<bbhi[i] and r14[i]>55: s[i]=-1
+  elif name=='Supertrend+EMA200_flip':
+   if st[p]<=0<st[i] and c[i]>e200[i]: s[i]=1
+   elif st[p]>=0>st[i] and c[i]<e200[i]: s[i]=-1
+  elif name=='WEMA20_50+DailyMACD':
+   if wtrend[i]>0 and m[p]<=ms[p] and m[i]>ms[i]: s[i]=1
+   elif wtrend[i]<0 and m[p]>=ms[p] and m[i]<ms[i]: s[i]=-1
+  elif name=='WEMA20_50+DailyDonchian20':
+   if wtrend[i]>0 and c[p]<=hi20[p] and c[i]>hi20[i]: s[i]=1
+   elif wtrend[i]<0 and c[p]>=lo20[p] and c[i]<lo20[i]: s[i]=-1
+  elif name=='Stoch14+EMA200':
+   if c[i]>e200[i] and k[p]<=20<k[i]: s[i]=1
+   elif c[i]<e200[i] and k[p]>=80>k[i]: s[i]=-1
+ return s
 
-# Exit sweep calls the regular signal interface. Override it only inside this process.
-base.make_signals=custom_signals
+def run_bracket(raw,market,symbol,name,tp_r):
+ d=base.indicators(raw); sig=signals(d,name)
+ slip,fee=base.costs(market,symbol)
+ def slipamt(px): return slip*abs(px) if market=='Crypto futures' else slip
+ o,h,l,c=d.open.to_numpy(),d.high.to_numpy(),d.low.to_numpy(),d.close.to_numpy(); atr=d.atr.to_numpy(); ts=d.timestamp
+ side=0; entry=stop=take=dist=0.; entry_i=0; trades=[]
+ for i in range(1,len(d)):
+  if ts.iloc[i]<base.START: continue
+  if side:
+   slhit=(o[i]<=stop or l[i]<=stop) if side==1 else (o[i]>=stop or h[i]>=stop)
+   tphit=(o[i]>=take or h[i]>=take) if side==1 else (o[i]<=take or l[i]<=take)
+   if slhit or tphit:
+    # If both levels are reached in one daily bar, assume stop first.
+    if slhit:
+     px=min(o[i],stop) if side==1 else max(o[i],stop); reason='止損'
+    else: px=take; reason='固定止盈'
+    ex=px-side*slipamt(px); pnl=side*(ex-entry)-fee*(abs(entry)+abs(ex))
+    trades.append({'entry_time':ts.iloc[entry_i],'exit_time':ts.iloc[i],'side':side,'R':pnl/dist if dist else 0.,'reason':reason})
+    side=0
+  if not side and sig[i-1]!=0 and np.isfinite(atr[i-1]) and atr[i-1]>0:
+   side=int(sig[i-1]); entry_i=i; entry=o[i]+side*slipamt(o[i]); dist=1.5*atr[i-1]
+   stop=entry-side*dist; take=entry+side*tp_r*dist
+   slhit=(l[i]<=stop if side==1 else h[i]>=stop)
+   tphit=(h[i]>=take if side==1 else l[i]<=take)
+   if slhit or tphit:
+    if slhit: px=min(o[i],stop) if side==1 else max(o[i],stop); reason='止損'
+    else: px=take; reason='固定止盈'
+    ex=px-side*slipamt(px); pnl=side*(ex-entry)-fee*(abs(entry)+abs(ex))
+    trades.append({'entry_time':ts.iloc[entry_i],'exit_time':ts.iloc[i],'side':side,'R':pnl/dist if dist else 0.,'reason':reason}); side=0
+ if side:
+  px=c[-1]; ex=px-side*slipamt(px); pnl=side*(ex-entry)-fee*(abs(entry)+abs(ex))
+  trades.append({'entry_time':ts.iloc[entry_i],'exit_time':ts.iloc[-1],'side':side,'R':pnl/dist if dist else 0.,'reason':'期末平倉'})
+ return trades
 
 instruments=[]
 for s in base.CRYPTO: instruments.append(('Crypto futures',s,s,lambda s=s:base.binance_daily(s)))
-for s,(name,_) in base.FX.items(): instruments.append(('FX',s,name,lambda s=s:base.yahoo_daily(s)))
-for s,(name,_,_) in base.FUTURES.items(): instruments.append(('Traditional futures',s,name,lambda s=s:base.yahoo_daily(s)))
-rows=[]; ledger=[]
+for s,(label,_) in base.FX.items(): instruments.append(('FX',s,label,lambda s=s:base.yahoo_daily(s)))
+for s,(label,_,_) in base.FUTURES.items(): instruments.append(('Traditional futures',s,label,lambda s=s:base.yahoo_daily(s)))
+rawrows=[]
 for market,symbol,label,loader in instruments:
-    raw=loader().dropna(subset=['open','high','low','close']).copy()
-    raw['timestamp']=pd.to_datetime(raw.timestamp,utc=True)
-    raw=raw.sort_values('timestamp').drop_duplicates('timestamp').reset_index(drop=True)
-    for strategy in DEFINITIONS:
-      for mode,tp,trail in exits.MODES:
-        ts=exits.backtest(raw,market,symbol,strategy,tp,trail)
-        if not ts: continue
-        g=[t for t in ts]
-        is_closed=[t for t in g if pd.Timestamp(t['entry_time'])<OOS and pd.Timestamp(t['exit_time'])<OOS]
-        # Exit selection: 10% of initial equity risk, chosen only from closed IS trades.
-        isret=base.fixed_risk_stats(is_closed,.10)[0]
-        for t in g: ledger.append({'市場':market,'商品':label,'代碼':symbol,'複合策略':strategy,'出場方式':mode,**t})
-        rows.append({'市場':market,'商品':label,'代碼':symbol,'複合策略':strategy,'策略邏輯':DEFINITIONS[strategy],
-                     '出場方式':mode,'交易數':len(g),'IS已平倉數':len(is_closed),'IS固定1R收益_pct':isret,
-                     'trades':g})
-    print('DONE',market,label,flush=True)
+ raw=loader().dropna(subset=['open','high','low','close']).copy(); raw['timestamp']=pd.to_datetime(raw.timestamp,utc=True)
+ raw=raw.sort_values('timestamp').drop_duplicates('timestamp').reset_index(drop=True)
+ for strat in RULES:
+  for tp in TP_RS:
+   tr=run_bracket(raw,market,symbol,strat,tp)
+   if tr:
+    is_tr=[x for x in tr if pd.Timestamp(x['entry_time'])<base.OOS and pd.Timestamp(x['exit_time'])<base.OOS]
+    oos_tr=[x for x in tr if pd.Timestamp(x['entry_time'])>=base.OOS]
+    isret,isdd,isn,_=base.fixed_risk_stats(is_tr,.10)
+    rawrows.append({'市場':market,'商品':label,'代碼':symbol,'策略':strat,'固定TP_R':tp,'trades':tr,'IS交易數':len(is_tr),'IS固定1R收益_pct':isret,'IS固定1R回撤_pct':isdd})
+ print('DONE',market,label,flush=True)
 
-# Choose each market/strategy exit using only the first four years.
-selected=[]
-for (market,label,symbol,strategy), group in pd.DataFrame(rows).groupby(['市場','商品','代碼','複合策略'],sort=False):
-    best=group.sort_values(['IS固定1R收益_pct','IS已平倉數','出場方式'],ascending=[False,False,True]).iloc[0]
-    trades=best.trades
-    is_tr=[t for t in trades if pd.Timestamp(t['entry_time'])<OOS and pd.Timestamp(t['exit_time'])<OOS]
-    oos_tr=[t for t in trades if pd.Timestamp(t['entry_time'])>=OOS]
-    all_tr=trades
-    fs=base.formula_stats(is_tr)
-    fk=max(0.,fs['kelly']) if math.isfinite(fs['kelly']) else 0.
-    counts={r:sum(t['reason']==r for t in all_tr) for r in ['止盈','止損','訊號出場','ATR移動止盈','ATR移動止損','期末平倉']}
-    for allocation,f in [('固定1R',.10),('全凱利',fk),('半凱利',fk/2),('四分之一凱利',fk/4)]:
-      full=base.fixed_risk_stats(all_tr,f); isperf=base.fixed_risk_stats(is_tr,f); op=base.fixed_risk_stats(oos_tr,f)
-      selected.append({'市場':market,'商品':label,'代碼':symbol,'複合策略':strategy,'策略邏輯':DEFINITIONS[strategy],
-        'IS選定出場方式':best.出場方式,'倉位方法':allocation,'IS選出場固定1R收益_pct':best.IS固定1R收益_pct,
-        'IS交易數':len(is_tr),'五年交易數':len(all_tr),'止盈出場數':counts['止盈']+counts['ATR移動止盈'],
-        '固定止盈數':counts['止盈'],'ATR移動止盈數':counts['ATR移動止盈'],'止損數':counts['止損']+counts['ATR移動止損'],
-        '訊號出場數':counts['訊號出場'],'期末平倉數':counts['期末平倉'],
-        '五年收益_pct':full[0],'五年最大回撤_pct':full[1],'IS收益_pct':isperf[0],
-        'OOS收益_pct':op[0],'OOS最大回撤_pct':op[1],'OOS交易數':len(oos_tr),
-        'IS_Kelly_pct':fk*100,'IS勝率_pct':fs['p']*100 if math.isfinite(fs['p']) else np.nan,'IS平均R':fs['ev']})
-    for j,t in enumerate(all_tr,1): ledger.append({'市場':market,'商品':label,'代碼':symbol,'複合策略':strategy,'出場方式':best.出場方式,'trade_no':j,**t})
-
-out=pd.DataFrame(selected).sort_values('五年收益_pct',ascending=False).reset_index(drop=True)
-out.insert(0,'五年收益排名',np.arange(1,len(out)+1))
-out.to_csv(ROOT/'five_year_compound_is_selected_all.csv',index=False,encoding='utf-8-sig')
-out.head(50).to_csv(ROOT/'five_year_compound_is_selected_top50.csv',index=False,encoding='utf-8-sig')
-over=out[(out.五年交易數>50)&(out.五年收益_pct>0)&(out.OOS收益_pct>0)].sort_values('五年收益_pct',ascending=False).reset_index(drop=True)
-over.insert(0,'正收益且超50筆子榜排名',np.arange(1,len(over)+1))
-over.to_csv(ROOT/'five_year_compound_positive_over50.csv',index=False,encoding='utf-8-sig')
-pd.DataFrame(ledger).to_csv(ROOT/'five_year_compound_trade_ledger.csv',index=False,encoding='utf-8-sig')
-print('COMPOUND_ROWS',len(out),'positive 5y',int((out.五年收益_pct>0).sum()),'positive OOS',int((out.OOS收益_pct>0).sum()),'over50 positive both',len(over))
-print(out.head(30)[['五年收益排名','商品','複合策略','IS選定出場方式','倉位方法','五年交易數','止盈出場數','止損數','五年收益_pct','五年最大回撤_pct','OOS收益_pct','OOS交易數']].to_string(index=False))
-print('OVER50')
-print(over.head(20)[['正收益且超50筆子榜排名','商品','複合策略','IS選定出場方式','倉位方法','五年交易數','止盈出場數','五年收益_pct','OOS收益_pct','OOS交易數']].to_string(index=False))
+# Choose target R by IS Calmar proxy among profitable, adequately sampled variants.
+allrows=[]
+rawdf=pd.DataFrame(rawrows)
+for (market,label,symbol,strat),g in rawdf.groupby(['市場','商品','代碼','策略'],sort=False):
+ viable=g[(g.IS交易數>=20)&(g.IS固定1R收益_pct>0)].copy()
+ if viable.empty: viable=g[g.IS固定1R收益_pct>0].copy()
+ if viable.empty: viable=g.copy()
+ viable['IS_Return_DD']=viable.IS固定1R收益_pct/viable.IS固定1R回撤_pct.clip(lower=1.0)
+ best=viable.sort_values(['IS_Return_DD','IS固定1R收益_pct','IS交易數'],ascending=False).iloc[0]
+ tr=best.trades; is_tr=[x for x in tr if pd.Timestamp(x['entry_time'])<base.OOS and pd.Timestamp(x['exit_time'])<base.OOS]; oos_tr=[x for x in tr if pd.Timestamp(x['entry_time'])>=base.OOS]
+ fs=base.formula_stats(is_tr); fk=max(0.,fs['kelly']) if math.isfinite(fs['kelly']) else 0.
+ counts={r:sum(x['reason']==r for x in tr) for r in ['固定止盈','止損','期末平倉']}
+ for alloc,f in [('固定1R',.10),('全凱利',fk),('半凱利',fk/2),('四分之一凱利',fk/4)]:
+  fr=base.fixed_risk_stats(tr,f); ir=base.fixed_risk_stats(is_tr,f); oo=base.fixed_risk_stats(oos_tr,f)
+  allrows.append({'市場':market,'商品':label,'代碼':symbol,'策略':strat,'策略規則':RULES[strat],'止盈目標_R':best.固定TP_R,'倉位法':alloc,
+   'IS交易數':len(is_tr),'五年交易數':len(tr),'固定止盈數':counts['固定止盈'],'止損數':counts['止損'],'期末平倉數':counts['期末平倉'],
+   'IS固定1R收益_pct':best.IS固定1R收益_pct,'IS固定1R回撤_pct':best.IS固定1R回撤_pct,'五年收益_pct':fr[0],'五年最大回撤_pct':fr[1],
+   'IS收益_pct':ir[0],'OOS收益_pct':oo[0],'OOS最大回撤_pct':oo[1],'OOS交易數':len(oos_tr),'IS_Kelly_pct':fk*100,'IS勝率_pct':fs['p']*100 if math.isfinite(fs['p']) else np.nan})
+out=pd.DataFrame(allrows).sort_values(['五年最大回撤_pct','五年收益_pct'],ascending=[True,False]).reset_index(drop=True)
+out.insert(0,'低回撤排名',np.arange(1,len(out)+1))
+out.to_csv(ROOT/'five_year_fixed_rr_low_drawdown_all.csv',index=False,encoding='utf-8-sig')
+pos=out[(out['五年收益_pct']>0)&(out['OOS收益_pct']>0)].copy().sort_values(['五年最大回撤_pct','五年收益_pct'],ascending=[True,False]).reset_index(drop=True)
+pos.insert(0,'正收益低回撤排名',np.arange(1,len(pos)+1))
+pos.to_csv(ROOT/'five_year_fixed_rr_positive_low_drawdown.csv',index=False,encoding='utf-8-sig')
+over=pos[pos['五年交易數']>50].reset_index(drop=True); over.insert(0,'正收益且超50筆排名',np.arange(1,len(over)+1))
+over.to_csv(ROOT/'five_year_fixed_rr_positive_over50.csv',index=False,encoding='utf-8-sig')
+print('TOTAL',len(out),'positive 5y+OOS',len(pos),'over50',len(over))
+print('LOW_DD positive over50')
+print(over.head(30)[['正收益且超50筆排名','商品','策略','止盈目標_R','倉位法','五年交易數','固定止盈數','止損數','五年收益_pct','五年最大回撤_pct','OOS收益_pct','OOS交易數']].to_string(index=False))
+print('RETURN/DD top positive over50')
+rr=over.assign(ReturnDD=over['五年收益_pct']/over['五年最大回撤_pct'].clip(lower=1)).sort_values('ReturnDD',ascending=False)
+print(rr.head(20)[['商品','策略','止盈目標_R','倉位法','五年交易數','五年收益_pct','五年最大回撤_pct','OOS收益_pct','OOS交易數','ReturnDD']].to_string(index=False))
