@@ -10,7 +10,6 @@ strategy("Supertrend + EMA200 | Python-aligned", overlay=true,
      default_qty_type=strategy.fixed)
 
 startTime = input.time(timestamp("10 Oct 2021 00:00 +0000"), "Test start (UTC)")
-endTime   = input.time(timestamp("10 Oct 2026 00:00 +0000"), "Test end (UTC, exclusive)")
 warmTime  = timestamp("01 Jul 2021 00:00 +0000")
 riskPct   = input.float(11.7685413, "Fixed initial-equity risk % (half Kelly, rank 40)", step=0.0001) / 100.0
 atrMult   = input.float(1.5, "Initial stop ATR multiplier", step=0.1)
@@ -65,7 +64,7 @@ signal = time >= warmTime and not na(ema200) ?
 
 // Python consumes the previous completed daily bar's signal at this bar's
 // open. Orders submitted at this bar's close fill on the next bar's open.
-nextOpenInWindow = time_close >= startTime and time_close < endTime
+nextOpenInWindow = time_close >= startTime
 startTransition = time_close == startTime
 previousSignal = nz(signal[1], 0)
 newSide = signal != 0 and (previousSignal == 0 or signal != previousSignal or startTransition)
@@ -94,8 +93,6 @@ if barstate.isconfirmed
             else if signal == -1
                 strategy.entry("Short", strategy.short, qty=qty, comment="Supertrend+EMA200")
                 strategy.exit("Short SL", from_entry="Short", loss=stopTicks, comment_loss="Stop loss")
-    else if time_close >= endTime and strategy.position_size != 0
-        strategy.close_all(comment="End of test window", immediately=true)
 
 plot(direction > 0 ? finalLower : direction < 0 ? finalUpper : na, "Python Supertrend", color=direction > 0 ? color.green : color.red)
 plot(ema200, "EMA200 filter", color=color.orange)
