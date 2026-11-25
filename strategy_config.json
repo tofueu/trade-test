@@ -1,0 +1,163 @@
+{
+  "schema_version": 1,
+  "rank": 16,
+  "strategy_name": "MACD_EMA200_ADX20",
+  "homepage_reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "12h",
+    "return_pct": 449.8,
+    "trade_count": 72
+  },
+  "python": {
+    "engine": "research/multi-market-strategy-ranking/src/run_strategies.py",
+    "signal_function": "make_state",
+    "family": "new",
+    "multi_timeframe_entrypoint": "research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py"
+  },
+  "evidence_status": "saved_ranking_row_matched_not_rerun",
+  "saved_evidence": [
+    {
+      "path": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_12h_new/ranking.csv",
+      "row": {
+        "來源": "新策略實測",
+        "市場": "Crypto futures",
+        "商品": "SOLUSDT",
+        "可交易": "True",
+        "策略分類": "new",
+        "策略": "MACD_EMA200_ADX20",
+        "策略規則": "ADX14>20 時 MACD 訊號交叉且價格符合 EMA200 趨勢方向進場；反向 MACD 交叉或趨勢失效退出。",
+        "時區": "12h",
+        "出場方式": "固定止盈3R",
+        "倉位法": "全凱利",
+        "實際風險_pct": "18.946523857292206",
+        "IS_Kelly_pct": "18.946523857292206",
+        "IS勝率_p": "0.36363636363636365",
+        "IS失敗率_q": "0.6363636363636364",
+        "IS平均贏虧比_b": "3.6536689771731226",
+        "IS交易數": "55",
+        "IS勝單數": "20",
+        "IS敗單數": "35",
+        "五年交易數": "72",
+        "五年勝率_pct": "38.88888888888889",
+        "五年收益_pct": "449.8006285701358",
+        "五年最大回撤_pct": "40.51840336825981",
+        "五年獲利因子": "1.9712173548480934",
+        "五年盈虧比": "3.097627271904147",
+        "止盈出場數": "13",
+        "止損出場數": "12",
+        "OOS收益_pct": "88.04512480185282",
+        "OOS交易數": "17",
+        "資金停止": "False",
+        "資料完整": "True",
+        "OHLCV_SHA256": "c3fa46bd92b83727c2c86741d2b8c36b8b63a91c963ea04c08847de7b2e1e9e6",
+        "交易_SHA256": "572cac1a240b672a5562d72316ac028af9bcfb9e77b0d5dd066e915681be90e8",
+        "伯努利獨立同分布驗證": "未驗證（p/q是勝敗樣本估計）"
+      },
+      "manifest": {
+        "source": "https://data.binance.vision/data/futures/um",
+        "symbol": "SOLUSDT",
+        "timeframe": "12h",
+        "warmup_start_utc": "2021-06-07T00:00:00+00:00",
+        "warmup_bar_count": 250,
+        "min_warmup_bars": 250,
+        "start_utc": "2021-10-10T00:00:00+00:00",
+        "end_exclusive_utc": "2026-10-10T00:00:00+00:00",
+        "actual_first_utc": "2021-10-10T00:00:00+00:00",
+        "actual_last_utc": "2026-10-09T12:00:00+00:00",
+        "bar_count": 3652,
+        "missing_or_irregular_intervals": 0,
+        "ohlcv_sha256": "c3fa46bd92b83727c2c86741d2b8c36b8b63a91c963ea04c08847de7b2e1e9e6",
+        "historical_data": true,
+        "verified_daily_archive_gap_repair": [
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/12h/SOLUSDT-12h-2022-02-26.zip",
+            "zip_sha256": "011525637e8f03bce61b08c16a1b91afc844db514534a6d3f9661b184eb37d5d",
+            "restored_bar_count": 2
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/12h/SOLUSDT-12h-2022-02-27.zip",
+            "zip_sha256": "80befe8fde57821c44271064322e25a32e00ff9b37ff14ff980f983a3373e271",
+            "restored_bar_count": 2
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/12h/SOLUSDT-12h-2022-02-28.zip",
+            "zip_sha256": "eec61f973b704989baabf50fde5df24099680e4d043af3d629039496105ececd",
+            "restored_bar_count": 2
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/12h/SOLUSDT-12h-2022-04-01.zip",
+            "zip_sha256": "12d093b59652c3f1cf6b63d7cc82f6fc96f995f57223591dedf2f978c83260fe",
+            "restored_bar_count": 2
+          },
+          {
+            "archive_url": "https://data.binance.vision/data/futures/um/daily/klines/SOLUSDT/12h/SOLUSDT-12h-2022-04-02.zip",
+            "zip_sha256": "b954bc7b6fdd3ceb69d67230b699497121c7192a617435fd6ad7bf2dd4623f42",
+            "restored_bar_count": 2
+          }
+        ],
+        "daily_archives_added": 5,
+        "tradingview_run_verified": false,
+        "pine_v6_parity_verified": false,
+        "cost_model": "existing Binance USD-M 5bps/side slippage + 5bps/side taker fee",
+        "tradable_proxy": true,
+        "family": "new",
+        "status": "complete",
+        "strategy_count": 7,
+        "completed": [
+          {
+            "strategy": "Turtle55_20_EMA200",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Supertrend_ADX20",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "EMA20_50_ADX20",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Keltner20_1.5ATR_EMA200",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "BB_Reentry_RSI_ADX25",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "Donchian20_Volume_EMA200",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          },
+          {
+            "strategy": "MACD_EMA200_ADX20",
+            "status": "completed",
+            "tested_exit_count": 5,
+            "saved_exit_count": 1
+          }
+        ],
+        "ranking_rows": 28,
+        "saved_trade_rows": 408,
+        "ranking_sha256": "43fe319f9f3d27d0d276e3a785410f30fb7506a928c6c78d74b9587462b53255",
+        "trades_sha256": "452daba902507e8d678748c7813e55277849e5b8bb4f152c857275bb22dc67df"
+      }
+    }
+  ],
+  "validation": {
+    "new_backtest_run": false,
+    "pine_parity_verified": false,
+    "live_execution_verified": false
+  },
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+}
