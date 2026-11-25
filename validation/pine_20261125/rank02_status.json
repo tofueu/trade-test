@@ -1,0 +1,22 @@
+{
+  "rank": 2,
+  "strategy": "Volume_Donchian20",
+  "symbol": "BTCUSDT",
+  "referenceTimeframe": "8h",
+  "riskPct": 20.27613790380194,
+  "expiry": null,
+  "source": "Original Python make_signals(): prior 20-bar entry, current volume > 1.5x 20-bar SMA, prior opposite 10-bar exit",
+  "checks": {
+    "recursionAndStateFixtures": "PASS; fixture data only, no performance claim",
+    "pineCompile": "NOT_RUN",
+    "tradingviewFills": "NOT_RUN",
+    "historicalPerformanceParity": "UNVERIFIED"
+  },
+  "desktopStatus": "TradingView desktop launched and logged in; simultaneous user input interrupted setup. No strategy was added or compiled.",
+  "protectedRanksUnchanged": [
+    3,
+    4,
+    6,
+    7
+  ]
+}
