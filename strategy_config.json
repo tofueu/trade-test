@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "rank": 7,
+  "strategy_name": "Supertrend+RSI50",
+  "homepage_reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "1d",
+    "return_pct": 1250.27,
+    "trade_count": 118
+  },
+  "python": {
+    "engine": "research/multi-market-strategy-ranking/src/five_year_compound_strategy_sweep.py",
+    "signal_function": "custom_signals",
+    "family": "compound",
+    "multi_timeframe_entrypoint": "research/multi-market-strategy-ranking/tools/run_legacy_all_timeframes.py"
+  },
+  "evidence_status": "matching_raw_ranking_row_not_located",
+  "saved_evidence": [],
+  "validation": {
+    "new_backtest_run": false,
+    "pine_parity_verified": false,
+    "live_execution_verified": false
+  },
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+}
