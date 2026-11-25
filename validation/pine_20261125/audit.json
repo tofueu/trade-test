@@ -1,0 +1,538 @@
+{
+  "date": "2026-11-25",
+  "priority": "Pine verification before Binance USD-M API development",
+  "browserEvidence": "GPT in-app TradingView chart opened; Add to chart presented Log in. No Pine compilation was completed.",
+  "strategies": [
+    {
+      "rank": 1,
+      "strategy": "EMA50_200",
+      "branch": "strategy/rank-01-ema50-200",
+      "reviewed_blob_sha": "1ec9622d36a445ea7dcc6c78a1b7038ffe1150e6",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_3h_original/ranking.csv",
+      "expectedRiskPct": 13.67442526787219,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 2,
+      "strategy": "Volume_Donchian20",
+      "branch": "strategy/rank-02-volume-donchian20",
+      "reviewed_blob_sha": "1d583cfcf217627221e417984d9d503b07b682d9",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/legacy_BTCUSDT_8h_original/ranking.csv",
+      "expectedRiskPct": 20.27613790380194,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 3,
+      "strategy": "Supertrend10_3",
+      "branch": "strategy/rank-03-supertrend10-3",
+      "reviewed_blob_sha": "0395b7dc049e17b8e6925b805b5770bb2d98b060",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_3h_original/ranking.csv",
+      "expectedRiskPct": 11.700034375220048,
+      "observedRiskPct": 24.543982453165512,
+      "staticFindings": [
+        "Pine default risk 24.543982453165512% differs from saved ranking 11.700034375220048%.",
+        "Still has an optional historical end-date control; user now wants no end-date control.",
+        "newLong/newShort miss direct side reversals; exits use an additional signal[1] and sizing ATR[1], unlike Python next-open execution."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 4,
+      "strategy": "Supertrend+EMA200",
+      "branch": "strategy/rank-04-supertrend-ema200",
+      "reviewed_blob_sha": "b802b17a8251214cd5314b61198b485b46bbd2bb",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_2h_compound/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": 11.7685413,
+      "staticFindings": [
+        "Pine default risk 11.7685413% differs from saved ranking 10%.",
+        "Saved conversation script is daily half-Kelly configuration, while homepage result is SOL 2h fixed initial risk 10%."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 5,
+      "strategy": "Donchian20_10",
+      "branch": "strategy/rank-05-donchian20-10",
+      "reviewed_blob_sha": "2fc2673c5c9bfda71e64f1a98512ed3a6d4dca86",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_6h_original/ranking.csv",
+      "expectedRiskPct": 17.472233859298253,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 6,
+      "strategy": "MACD12_26_9",
+      "branch": "strategy/rank-06-macd12-26-9",
+      "reviewed_blob_sha": "eb92666c0ecc195ee8f80215d5eb70b1a277faf1",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_12h_original/ranking.csv",
+      "expectedRiskPct": 17.35827857281863,
+      "observedRiskPct": 20.067019278926047,
+      "staticFindings": [
+        "Pine default risk 20.067019278926047% differs from saved ranking 17.35827857281863%.",
+        "Still has an optional historical end-date control; user now wants no end-date control.",
+        "Saved conversation script is XRP daily configuration, while homepage rank 6 is SOL 12h."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 7,
+      "strategy": "Supertrend+RSI50",
+      "branch": "strategy/rank-07-supertrend-rsi50",
+      "reviewed_blob_sha": "9957f9876070e62926d4fc7500da7415da31eef8",
+      "sourceRanking": null,
+      "expectedRiskPct": null,
+      "observedRiskPct": 20.07779203610597,
+      "staticFindings": [
+        "Still has an optional historical end-date control; user now wants no end-date control.",
+        "newLong/newShort miss direct side reversals, compared with source custom_signals state machine.",
+        "Matching raw ranking row not located; do not guess exit/position defaults."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 8,
+      "strategy": "Donchian20_Volume_EMA200",
+      "branch": "strategy/rank-08-donchian20-volume-ema200",
+      "reviewed_blob_sha": "25daa65cee5136e943bace654cd1f977b04defeb",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_3h_new/ranking.csv",
+      "expectedRiskPct": 15.773755455260924,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 9,
+      "strategy": "EMA20_50_ADX20",
+      "branch": "strategy/rank-09-ema20-50-adx20",
+      "reviewed_blob_sha": "1e5ef6f48b7b42a1588e1144d757024a6039c24f",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_4h_new/ranking.csv",
+      "expectedRiskPct": 26.20608118102643,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 10,
+      "strategy": "Donchian20+MACD",
+      "branch": "strategy/rank-10-donchian20-macd",
+      "reviewed_blob_sha": "11df738a55e3cdb7b3e4d39ad568a0225637d228",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_8h_compound/ranking.csv",
+      "expectedRiskPct": 17.380075103573613,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 11,
+      "strategy": "Keltner20_1.5ATR_EMA200",
+      "branch": "strategy/rank-11-keltner20-1.5atr-ema200",
+      "reviewed_blob_sha": "e3990574d15e7c3cc142b3582b412fd05a46910f",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_3h_new/ranking.csv",
+      "expectedRiskPct": 14.752073584269818,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 12,
+      "strategy": "WEMA20_50+MACD",
+      "branch": "strategy/rank-12-wema20-50-macd",
+      "reviewed_blob_sha": "a201543c80694effb9e31c5e79569ca15be62eed",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/legacy_BTCUSDT_12h_compound/ranking.csv",
+      "expectedRiskPct": 20.21434047933607,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 13,
+      "strategy": "MACD+RSI50",
+      "branch": "strategy/rank-13-macd-rsi50",
+      "reviewed_blob_sha": "dc47e852dfe1004c60520633a6f1dd013b5da450",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_3h_compound/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 14,
+      "strategy": "Turtle55_20_EMA200",
+      "branch": "strategy/rank-14-turtle55-20-ema200",
+      "reviewed_blob_sha": "79f0d1e36c952934b5c4de151df27722b22f2877",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_6h_new/ranking.csv",
+      "expectedRiskPct": 19.67092557135773,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 15,
+      "strategy": "Supertrend+EMA200_flip",
+      "branch": "strategy/rank-15-supertrend-ema200-flip",
+      "reviewed_blob_sha": "80c7a83013c0838bf1b4ac53a0e47f745f4b9529",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_6h_fixed/ranking.csv",
+      "expectedRiskPct": 19.852709114014004,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 16,
+      "strategy": "MACD_EMA200_ADX20",
+      "branch": "strategy/rank-16-macd-ema200-adx20",
+      "reviewed_blob_sha": "d1399c1c6f87a10cc12631a6627c2522e55dc8b4",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_12h_new/ranking.csv",
+      "expectedRiskPct": 18.946523857292206,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 17,
+      "strategy": "Donchian20+ADX14",
+      "branch": "strategy/rank-17-donchian20-adx14",
+      "reviewed_blob_sha": "79f86734aec038c50719ad86ae149f33919e895e",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/legacy_BTCUSDT_6h_fixed/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 18,
+      "strategy": "WEMA20_50+Donchian20",
+      "branch": "strategy/rank-18-wema20-50-donchian20",
+      "reviewed_blob_sha": "a28eef30b8d2d025de7620c832a6cd504de18f5b",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_6h_compound/ranking.csv",
+      "expectedRiskPct": 16.717817688745924,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 19,
+      "strategy": "EMA200+MACD_cross",
+      "branch": "strategy/rank-19-ema200-macd-cross",
+      "reviewed_blob_sha": "80f7570dc11ebfb1e4eaf0eba519d5521497e5ea",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_12h_fixed/ranking.csv",
+      "expectedRiskPct": 27.599418358390377,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 20,
+      "strategy": "WEMA20_50+DailyDonchian20",
+      "branch": "strategy/rank-20-wema20-50-dailydonchian20",
+      "reviewed_blob_sha": "4101daa8629713d2d407f140e21f5e8e28673764",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_8h_fixed/ranking.csv",
+      "expectedRiskPct": 17.027453320875914,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 21,
+      "strategy": "Supertrend_ADX20",
+      "branch": "strategy/rank-21-supertrend-adx20",
+      "reviewed_blob_sha": "6ac6171ffe8600b04c9983086a5170d9bb844cc4",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_ETHUSDT_6h_new/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 22,
+      "strategy": "Bollinger20+RSI14_reentry",
+      "branch": "strategy/rank-22-bollinger20-rsi14-reentry",
+      "reviewed_blob_sha": "2d5cd2e76d436745dc482139cb38422f17ed5b72",
+      "sourceRanking": null,
+      "expectedRiskPct": null,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend.",
+        "Matching raw ranking row not located; do not guess exit/position defaults."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 23,
+      "strategy": "Bollinger20_2",
+      "branch": "strategy/rank-23-bollinger20-2",
+      "reviewed_blob_sha": "a063cef77203d987f9817995c49f95de1ccd3f01",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/legacy_BTCUSDT_1d_original/ranking.csv",
+      "expectedRiskPct": 18.425951545343793,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 24,
+      "strategy": "EMA200+RSI14_pullback",
+      "branch": "strategy/rank-24-ema200-rsi14-pullback",
+      "reviewed_blob_sha": "16b009f61b1d0f61659fe9beaea64be75ea2f974",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_30m_fixed/ranking.csv",
+      "expectedRiskPct": 10.963383543392428,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 25,
+      "strategy": "RSI14_EMA200",
+      "branch": "strategy/rank-25-rsi14-ema200",
+      "reviewed_blob_sha": "1010dd36d64022e10c9f5be4454272ec7ece16ea",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_30m_original/ranking.csv",
+      "expectedRiskPct": 11.885848582616207,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 26,
+      "strategy": "EMA200+RSI2_mean_reversion",
+      "branch": "strategy/rank-26-ema200-rsi2-mean-reversion",
+      "reviewed_blob_sha": "f3208dea2da2908c413290da38a129ea42378e2b",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_ETHUSDT_8h_compound/ranking.csv",
+      "expectedRiskPct": 12.25930271673979,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 27,
+      "strategy": "RSI2_EMA200",
+      "branch": "strategy/rank-27-rsi2-ema200",
+      "reviewed_blob_sha": "f3208dea2da2908c413290da38a129ea42378e2b",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_ETHUSDT_8h_original/ranking.csv",
+      "expectedRiskPct": 12.25930271673979,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 28,
+      "strategy": "WEMA20_50+DailyMACD",
+      "branch": "strategy/rank-28-wema20-50-dailymacd",
+      "reviewed_blob_sha": "d5fd21b887255911c6cbec837faba17de5f95c5b",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_SOLUSDT_12h_fixed/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 29,
+      "strategy": "Stoch14+EMA200",
+      "branch": "strategy/rank-29-stoch14-ema200",
+      "reviewed_blob_sha": "3b9e35a476d027704ce923be6819d18abdad6b96",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_ETHUSDT_8h_fixed/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 30,
+      "strategy": "EMA200+RSI2_extreme",
+      "branch": "strategy/rank-30-ema200-rsi2-extreme",
+      "reviewed_blob_sha": "aeb96e01c150e37eb57c750cac9596dc8efd60c0",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_ETHUSDT_4h_fixed/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    },
+    {
+      "rank": 31,
+      "strategy": "BB_Reentry_RSI_ADX25",
+      "branch": "strategy/rank-31-bb-reentry-rsi-adx25",
+      "reviewed_blob_sha": "e157eac3f4b249cd2a1e921a01448a7513a51e70",
+      "sourceRanking": "research/multi-market-strategy-ranking/results/all_timeframes/multi_BTCUSDT_6h_new/ranking.csv",
+      "expectedRiskPct": 10,
+      "observedRiskPct": null,
+      "staticFindings": [
+        "Uses fill recalculation; initial stop arming and lookahead behavior require correction/TV verification.",
+        "Uses TradingView built-in smoothing/initialization; not yet matched to original pandas EWM/custom Supertrend."
+      ],
+      "tradingViewCompile": "not_run_login_required",
+      "tradingViewExecution": "not_run",
+      "pythonPineTradeParity": "unverified",
+      "apiReady": false
+    }
+  ]
+}
