@@ -1,0 +1,27 @@
+{
+  "rank": 1,
+  "strategy": "EMA50_200",
+  "protectedRanksUntouched": [
+    3,
+    4,
+    6,
+    7
+  ],
+  "source": "Original Python indicators/make_signals/backtest; saved SOLUSDT 3h rank row",
+  "riskPct": 13.67442526787219,
+  "warmup": "2021-09-01T00:00:00Z",
+  "signalComparisonStart": "2021-10-10T00:00:00Z",
+  "expiry": null,
+  "checks": {
+    "emaAtrRecursionAndSignalStateVsOriginalPython": "PASS (deterministic fixtures, not historical performance)",
+    "pineCompile": "NOT_RUN_LOGIN_REQUIRED",
+    "tradingviewFills": "NOT_RUN",
+    "historicalPerformanceParity": "UNVERIFIED"
+  },
+  "knownLimits": [
+    "TV tick stop rounding versus Python price stops.",
+    "Python adverse price-relative slippage is not modeled in Pine.",
+    "Chart feed/history and broker fill simulation may differ.",
+    "Draft is not API-ready or a verified replacement for active strategy.pine."
+  ]
+}
