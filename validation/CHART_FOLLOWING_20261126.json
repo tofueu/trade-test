@@ -1,0 +1,31 @@
+{
+  "rank": 26,
+  "name": "EMA200+RSI2_mean_reversion",
+  "path": "pine/EMA200_RSI2_mean_reversion.pine",
+  "reference": {
+    "symbol": "ETHUSDT",
+    "timeframe": "8h",
+    "return_pct": 161.11,
+    "trade_count": 224
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 12.25930271673979,
+  "tp_r": 1,
+  "trail_atr": 0,
+  "warm_start": "2021-07-18T16:00:00+00:00",
+  "source_branch": "strategy/rank-26-ema200-rsi2-mean-reversion",
+  "source_commit": "c082d9ca9e40576a41e72eb836b8a3850057941e",
+  "source_family": "compound",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/rsi2_ema200.pine",
+  "previous_commit": "c082d9ca9e40576a41e72eb836b8a3850057941e",
+  "previous_pine_blob": "f3208dea2da2908c413290da38a129ea42378e2b",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
