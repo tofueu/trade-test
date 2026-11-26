@@ -1,0 +1,268 @@
+{
+  "date": "2026-11-26",
+  "updated_ranks": [
+    {
+      "rank": 2,
+      "branch": "strategy/rank-02-volume-donchian20",
+      "commit": "560643407a18480a7546f43ad583b0bf1ea7340d",
+      "pine_sha": "77b064975f969f9f6e16790c392b4cb223dbc64c",
+      "nested_path": "research/multi-market-strategy-ranking/pine/volume_donchian20.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 5,
+      "branch": "strategy/rank-05-donchian20-10",
+      "commit": "66776c08249b73c2e47c03045ce6adb4f0abaed6",
+      "pine_sha": "eb289d9caa2fb6282d5302ae17ccf669d92ffe18",
+      "nested_path": "research/multi-market-strategy-ranking/pine/donchian20_10.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 8,
+      "branch": "strategy/rank-08-donchian20-volume-ema200",
+      "commit": "64dcc3da4cdb725f0544028c7d834d2a20f3f81e",
+      "pine_sha": "093fb4da7e35827e6300defff9896994d4acdfc3",
+      "nested_path": "research/multi-market-strategy-ranking/pine/donchian20_volume_ema200.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 9,
+      "branch": "strategy/rank-09-ema20-50-adx20",
+      "commit": "31499461a976e175d36d8c2a2b2e11cdaaa1c595",
+      "pine_sha": "ad70d9782e0b1f45371970144513e56c9f49d951",
+      "nested_path": "research/multi-market-strategy-ranking/pine/ema20_50_adx20.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 10,
+      "branch": "strategy/rank-10-donchian20-macd",
+      "commit": "457dcab5c924a02eee315856f2875362c046e336",
+      "pine_sha": "83ccd11e14091b6679d70bc094e3c2b94731ed62",
+      "nested_path": "research/multi-market-strategy-ranking/pine/donchian20_macd.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 11,
+      "branch": "strategy/rank-11-keltner20-1.5atr-ema200",
+      "commit": "19d21c2b5cccfe825ff7ac1a88aac42f5f82ec47",
+      "pine_sha": "950fd888bcfc5055eb84501103d27d60ba0b1748",
+      "nested_path": "research/multi-market-strategy-ranking/pine/keltner20_15atr_ema200.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 12,
+      "branch": "strategy/rank-12-wema20-50-macd",
+      "commit": "71f3e8ef7c63d4f261e1a56b61456b492e27640d",
+      "pine_sha": "b9350c10bf1faf0c953e8e8949d8fd9373afc14a",
+      "nested_path": "research/multi-market-strategy-ranking/pine/wema20_50_macd.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 13,
+      "branch": "strategy/rank-13-macd-rsi50",
+      "commit": "57ad7a75859c18be2ac756ea1993e7ca7a36bbf1",
+      "pine_sha": "11e98836aea9f584d919e860e0743f82b31eb724",
+      "nested_path": "research/multi-market-strategy-ranking/pine/macd_rsi50.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 14,
+      "branch": "strategy/rank-14-turtle55-20-ema200",
+      "commit": "4b4ce3fe049d2ed0c4e0623683b2181b4cd8360c",
+      "pine_sha": "f0d88c7c3d339efcef014bdabc435d4144cd60e6",
+      "nested_path": "research/multi-market-strategy-ranking/pine/turtle55_20_ema200.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 15,
+      "branch": "strategy/rank-15-supertrend-ema200-flip",
+      "commit": "c012776069313a2223b93bd8e1cc13ea0404f148",
+      "pine_sha": "db994d35aad67764b4c641f9c7ec2765bcd934ec",
+      "nested_path": "research/multi-market-strategy-ranking/pine/supertrend_ema200_flip.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 16,
+      "branch": "strategy/rank-16-macd-ema200-adx20",
+      "commit": "224cebae33534ab893ebb9acaec2bbc5652d336d",
+      "pine_sha": "08f9299bb43d3f0820a80ac32b54cc218f1bee1a",
+      "nested_path": "research/multi-market-strategy-ranking/pine/macd_ema200_adx20.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 17,
+      "branch": "strategy/rank-17-donchian20-adx14",
+      "commit": "80bab0c163b917b0b4e00ece7a9440485b900883",
+      "pine_sha": "90d6bfa7cbcb9b1b0e6e35833b51a41bd7d64bc5",
+      "nested_path": "research/multi-market-strategy-ranking/pine/donchian20_adx14.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 18,
+      "branch": "strategy/rank-18-wema20-50-donchian20",
+      "commit": "388756c25353afdb81eea6cce7b54946fce27e70",
+      "pine_sha": "9f85a309fc2cb00549535f220f61b0b6ff849c2e",
+      "nested_path": "research/multi-market-strategy-ranking/pine/wema20_50_donchian20.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 19,
+      "branch": "strategy/rank-19-ema200-macd-cross",
+      "commit": "01a52a7da912d140303a1ace70d9cf9e0a23706c",
+      "pine_sha": "ef6601d1bdc9d8a333f9e9212c3d5b0e9f478ef4",
+      "nested_path": "research/multi-market-strategy-ranking/pine/ema200_macd_cross.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 20,
+      "branch": "strategy/rank-20-wema20-50-dailydonchian20",
+      "commit": "551706472676d9ef68da39d1a48826ce75806b29",
+      "pine_sha": "3d0db8e3b75c577457e4f382ece379117b05ecce",
+      "nested_path": "research/multi-market-strategy-ranking/pine/wema20_50_daily_donchian20.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 21,
+      "branch": "strategy/rank-21-supertrend-adx20",
+      "commit": "6dbb10430ce0f27a55d4dc890ff0f62920bbef13",
+      "pine_sha": "b065e3ef095ca13e961d360d724a8e6bb9eb82c6",
+      "nested_path": "research/multi-market-strategy-ranking/pine/supertrend_adx20.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 22,
+      "branch": "strategy/rank-22-bollinger20-rsi14-reentry",
+      "commit": "0bbd755534e5e91e19eeeb26252e5bac9d358312",
+      "pine_sha": "221f400450e854cddaaf613475407f2e3aa77ca3",
+      "nested_path": "research/multi-market-strategy-ranking/pine/bollinger20_rsi14_reentry.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 23,
+      "branch": "strategy/rank-23-bollinger20-2",
+      "commit": "963f8cf2a20616ab078f17c829d99fd4f57ab65e",
+      "pine_sha": "ee69b9960b30204a8bb19d1bf071dfc406f97a88",
+      "nested_path": "research/multi-market-strategy-ranking/pine/bollinger20_2.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 24,
+      "branch": "strategy/rank-24-ema200-rsi14-pullback",
+      "commit": "5e2a1588dbb0497eca9f5e90847ebbad075d4db6",
+      "pine_sha": "e022bef8e112b2782c0c65b24097ce710fffdae9",
+      "nested_path": "research/multi-market-strategy-ranking/pine/ema200_rsi14_pullback.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 25,
+      "branch": "strategy/rank-25-rsi14-ema200",
+      "commit": "47f5d98f61cd8de279bb58b7b6d835bdac5bfb4e",
+      "pine_sha": "b480950c203484dc503eda43c79240350fa3e87b",
+      "nested_path": "research/multi-market-strategy-ranking/pine/rsi14_ema200.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 26,
+      "branch": "strategy/rank-26-ema200-rsi2-mean-reversion",
+      "commit": "ec253fef0c8b32ca25c534294239bd28a7443750",
+      "pine_sha": "35c4113428af1cf63d3d7086110f667852149fdd",
+      "nested_path": "research/multi-market-strategy-ranking/pine/rsi2_ema200.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 27,
+      "branch": "strategy/rank-27-rsi2-ema200",
+      "commit": "357b30014e71705217f19a04ef5fb2c0716cc768",
+      "pine_sha": "88ec047c6dd34d53edee595a6d95c346e0e50df4",
+      "nested_path": "research/multi-market-strategy-ranking/pine/rsi2_ema200.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 28,
+      "branch": "strategy/rank-28-wema20-50-dailymacd",
+      "commit": "4011fa67b232d1d345e389b706832e30a4888434",
+      "pine_sha": "fa93a857bd9f59fcc4ed0861b099cf5c50ca2bfc",
+      "nested_path": "research/multi-market-strategy-ranking/pine/wema20_50_daily_macd.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 29,
+      "branch": "strategy/rank-29-stoch14-ema200",
+      "commit": "11f1d1eaa6f96c79afa8e4c9ee2ed620021c6a2e",
+      "pine_sha": "b0cec04ede1a77461e779f12e106adb385d7408d",
+      "nested_path": "research/multi-market-strategy-ranking/pine/stoch14_ema200.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 30,
+      "branch": "strategy/rank-30-ema200-rsi2-extreme",
+      "commit": "071369176bb1a5ee8ddf92b7eafbc37ec4059a06",
+      "pine_sha": "3a6229856ff2264fccccb21d5973a0848729bb33",
+      "nested_path": "research/multi-market-strategy-ranking/pine/ema200_rsi2_extreme.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    },
+    {
+      "rank": 31,
+      "branch": "strategy/rank-31-bb-reentry-rsi-adx25",
+      "commit": "18010cf190e14d3766f8f6c61be7ce3d8d308764",
+      "pine_sha": "244e6c8b8abeda314ce55d5b4a1c8fa29013151a",
+      "nested_path": "research/multi-market-strategy-ranking/pine/bb_reentry_rsi_adx25.pine",
+      "readback_verified": true,
+      "python_unchanged": true
+    }
+  ],
+  "protected_branches": [
+    {
+      "branch": "main",
+      "unchanged": true
+    },
+    {
+      "branch": "strategy/rank-01-ema50-200",
+      "unchanged": true
+    },
+    {
+      "branch": "strategy/rank-03-supertrend10-3",
+      "unchanged": true
+    },
+    {
+      "branch": "strategy/rank-04-supertrend-ema200",
+      "unchanged": true
+    },
+    {
+      "branch": "strategy/rank-06-macd12-26-9",
+      "unchanged": true
+    },
+    {
+      "branch": "strategy/rank-07-supertrend-rsi50",
+      "unchanged": true
+    }
+  ],
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "rank22_reference_defaults": "unverified"
+}
