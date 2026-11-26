@@ -1,0 +1,56 @@
+//@version=6
+// Repair of the existing EMA50_200 port: global state changes, next-open entries,
+// initial stops queued with entries, and no duplicate reversal close.
+// Existing risk 10%, ATR 1.5 and commission 0.10% defaults retained.
+// Margin settings are NOT changed. This is not verified against the rank 1 PnL.
+// TradingView compile/execution: NOT TESTED.
+strategy("EMA50_200 Strategy", overlay=true, initial_capital=10000,
+     default_qty_type=strategy.percent_of_equity, default_qty_value=10,
+     commission_type=strategy.commission.percent, commission_value=0.1,
+     slippage=0, calc_on_order_fills=false, process_orders_on_close=false)
+
+input_group_strat = "Strategy Parameters"
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
+// Retained for compatibility; the original port did not implement fixed TP.
+tp_r_mult = input.float(0.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
+input_group_size = "Position Sizing & Risk"
+risk_pct = input.float(10.0, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
+use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
+
+ema50 = ta.ema(close, 50)
+ema200 = ta.ema(close, 200)
+atr_val = ta.atr(14)
+long_cond = ta.crossover(ema50, ema200)
+short_cond = ta.crossunder(ema50, ema200)
+
+var int target_state = 0
+if long_cond
+    target_state := 1
+else if short_cond
+    target_state := -1
+
+// Evaluate previous state globally on every bar, outside v6 lazy conditions.
+previous_state = nz(target_state[1], 0)
+state_changed = target_state != previous_state
+ready = not na(atr_val) and atr_val > 0 and sl_atr_mult > 0
+
+if barstate.isconfirmed and state_changed and ready
+    distance = sl_atr_mult * atr_val
+    risk_per_contract = distance * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    stop_ticks = int(math.max(1, math.round(distance / syminfo.mintick)))
+    if target_state == 1
+        // strategy.entry reverses an existing short; do not also queue close().
+        strategy.cancel("SL Short")
+        strategy.entry("Long", strategy.long, qty=qty_val)
+        strategy.exit("SL Long", from_entry="Long", loss=stop_ticks)
+    else if target_state == -1
+        strategy.cancel("SL Long")
+        strategy.entry("Short", strategy.short, qty=qty_val)
+        strategy.exit("SL Short", from_entry="Short", loss=stop_ticks)
+
+plot(ema50, title="EMA50", color=color.orange, linewidth=2)
+plot(ema200, title="EMA200", color=color.blue, linewidth=2)
+// Diagnostic series in Data Window; these are signal events, not filled orders.
+plot(state_changed and ready ? target_state : 0, title="Entry signal (not a fill)", display=display.data_window)
+plot(strategy.position_size, title="Filled position size", display=display.data_window)

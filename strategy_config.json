@@ -164,9 +164,27 @@
     }
   ],
   "validation": {
-    "new_backtest_run": false,
+    "new_backtest_run": true,
     "pine_parity_verified": false,
-    "live_execution_verified": false
+    "live_execution_verified": false,
+    "python_reference_reproduced": true,
+    "new_backtest_scope": "Existing cached SOLUSDT 3h, EMA50_200 signal exit, original Python functions only; all 85 saved entry/exit times and R values reproduced"
   },
-  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters.",
+  "pine": {
+    "path": "strategy.pine",
+    "status": "Source-aligned, TradingView untested",
+    "rank_configuration_risk_pct": 13.67442526787219,
+    "initial_capital": 10000,
+    "atr_stop_multiplier": 1.5,
+    "commission_pct_per_side": 0.05,
+    "price_relative_slippage_pct_per_side_python": 0.05,
+    "pine_fixed_tick_slippage": 0,
+    "margin_research_assumption": "0% checks to reflect Python absence of notional-margin/liquidation model; not an exchange setting",
+    "warmup_start_utc": "2021-09-01T00:00:00Z",
+    "comparison_start_utc": "2021-10-10T00:00:00Z",
+    "comparison_end_exclusive_utc": "2026-10-10T00:00:00Z",
+    "trading_expiry": false,
+    "source_indicator_signal_comparison_on_cached_data": "passed"
+  }
 }

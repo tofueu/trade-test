@@ -1,0 +1,30 @@
+{
+  "cached_ohlcv_sha256": "8d7a44fdb5e880f9a44bb121b6f2de920d31baaf0fbbcdc7747a873d9a78eece",
+  "saved_ohlcv_sha256": "948007cca99c23f496417405a62d8b33e5e22a35d4ad0b5f943bb1c3d50f98e6",
+  "timestamp_unit_normalization": null,
+  "csv_float_parser": "default",
+  "dataframe_hash_matches_saved_manifest": false,
+  "cached_csv_hash_matches_restoration_receipt": true,
+  "original_python_reproduced": true,
+  "pine_formula_translation_matches_original_indicators_and_signals_on_cached_bars": true,
+  "risk_pct": 13.67442526787219,
+  "reference_return_pct": 2264.1583629955517,
+  "reference_closed_trade_drawdown_pct": 84.69248985082334,
+  "reference_trades": 85,
+  "entry_exit_times_and_R_match_saved_ledger": true,
+  "tradingview_run": false,
+  "python_start": "2021-10-10T00:00:00Z",
+  "python_end_exclusive": "2026-10-10T00:00:00Z",
+  "Pine_zero_slippage_fee005": {
+    "return_pct": 2287.54309717349,
+    "trades": 85,
+    "relative_return_difference_pct": 1.0328223749773213,
+    "note": "Python engine cost-sensitivity measurement, NOT TradingView results"
+  },
+  "Pine_fee010_cost_approximation": {
+    "return_pct": 2247.6022408929152,
+    "trades": 85,
+    "relative_return_difference_pct": 0.7312263299786228,
+    "note": "Python engine cost-sensitivity measurement, NOT TradingView results"
+  }
+}
