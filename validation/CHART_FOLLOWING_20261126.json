@@ -1,0 +1,31 @@
+{
+  "rank": 31,
+  "name": "BB_Reentry_RSI_ADX25",
+  "path": "pine/BB_Reentry_RSI_ADX25.pine",
+  "reference": {
+    "symbol": "BTCUSDT",
+    "timeframe": "6h",
+    "return_pct": 18.71,
+    "trade_count": 112
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 10,
+  "tp_r": 3,
+  "trail_atr": 0,
+  "warm_start": "2021-08-08T12:00:00+00:00",
+  "source_branch": "strategy/rank-31-bb-reentry-rsi-adx25",
+  "source_commit": "da901248f3088e84fef043bc4e6b3082e5fe424d",
+  "source_family": "new",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/bb_reentry_rsi_adx25.pine",
+  "previous_commit": "da901248f3088e84fef043bc4e6b3082e5fe424d",
+  "previous_pine_blob": "e157eac3f4b249cd2a1e921a01448a7513a51e70",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}

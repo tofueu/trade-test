@@ -1,0 +1,73 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/run_strategies.py (make_state())
+// Ranking Strategy Name: BB_Reentry_RSI_ADX25
+// Representative Top Config: AUDUSD=X | Market: FX | Timeframe: 1D | Exit: IS選定固定TP 1R／初始SL 1.5ATR＋策略出場 | Sizing: 半凱利 (IS Kelly: 31.401%)
+// Cost Settings: FX: 0.4 pips (4 ticks) slippage per side
+// TV Status: 未測 (Untested)
+strategy("BB_Reentry_RSI_ADX25 Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.cash_per_contract, commission_value=0.0, slippage=4, calc_on_order_fills=true, process_orders_on_close=false)
+
+// --- Input Parameters ---
+input_group_strat = "Strategy Parameters"
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
+tp_r_mult   = input.float(1.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
+
+input_group_size = "Position Sizing & Risk"
+risk_pct = input.float(31.401, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
+use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
+
+[bb_mid, bb_up, bb_dn] = ta.bb(close, 20, 2.0)
+rsi_val = ta.rsi(close, 14)
+[_, _, adx_val] = ta.dmi(14, 14)
+atr_val = ta.atr(14)
+
+long_cond  = adx_val < 25 and close[1] <= bb_dn[1] and close > bb_dn and rsi_val < 45
+short_cond = adx_val < 25 and close[1] >= bb_up[1] and close < bb_up and rsi_val > 55
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+var int target_state = 0
+// Persistent target state follows the source Python state machine.
+if long_cond
+    target_state := 1
+else if short_cond
+    target_state := -1
+else if target_state == 1 and close >= bb_mid
+    target_state := 0
+else if target_state == -1 and close <= bb_mid
+    target_state := 0
+
+// Gate entries by target-state transition to match Python backtest loop, preserving same-next-open reversals
+if target_state == 1 and ta.change(target_state) != 0
+    dist = sl_atr_mult * atr_val
+    // Adjust risk per contract using syminfo.pointvalue for futures contract sizing parity
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    strategy.entry("Long", strategy.long, qty=qty_val)
+
+if target_state == -1 and ta.change(target_state) != 0
+    dist = sl_atr_mult * atr_val
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    strategy.entry("Short", strategy.short, qty=qty_val)
+
+if ta.change(strategy.position_size) != 0
+    if strategy.position_size > 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+    else if strategy.position_size < 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if target_state == 0 and (close >= bb_mid)
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if target_state == 0 and (close <= bb_mid)
+        strategy.close("Short")
