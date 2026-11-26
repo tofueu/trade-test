@@ -1,0 +1,31 @@
+{
+  "rank": 16,
+  "name": "MACD_EMA200_ADX20",
+  "path": "pine/MACD_EMA200_ADX20.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "12h",
+    "return_pct": 449.8,
+    "trade_count": 72
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 18.946523857292206,
+  "tp_r": 3,
+  "trail_atr": 0,
+  "warm_start": "2021-06-07T00:00:00+00:00",
+  "source_branch": "strategy/rank-16-macd-ema200-adx20",
+  "source_commit": "83a7e74e7a7e3d1106ec3f8356593366ef359b39",
+  "source_family": "new",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/macd_ema200_adx20.pine",
+  "previous_commit": "83a7e74e7a7e3d1106ec3f8356593366ef359b39",
+  "previous_pine_blob": "d1399c1c6f87a10cc12631a6627c2522e55dc8b4",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
