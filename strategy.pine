@@ -63,3 +63,7 @@ if strategy.position_size < 0
         strategy.close("Short")
     else
         strategy.exit("SL Short", "Short", stop=short_sl)
+
+// Display only: these plots do not change signals, quantities or execution.
+plot(ema50, title="EMA50", color=color.orange, linewidth=2)
+plot(ema200, title="EMA200", color=color.blue, linewidth=2)
