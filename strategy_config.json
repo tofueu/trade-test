@@ -157,7 +157,25 @@
   "validation": {
     "new_backtest_run": false,
     "pine_parity_verified": false,
-    "live_execution_verified": false
+    "live_execution_verified": false,
+    "pine_source_rule_comparison_passed": true,
+    "pine_compile_verified": false
   },
-  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters."
+  "source_policy": "Existing local Python strategy source; no generated trading rules or assumed parameters.",
+  "pine": {
+    "path": "strategy.pine",
+    "nested_path": "research/multi-market-strategy-ranking/pine/turtle55_20_ema200.pine",
+    "chart_symbol": "syminfo.tickerid",
+    "chart_timeframe": "timeframe.period",
+    "follows_chart": true,
+    "weekly_filter_preserved": false,
+    "reference_defaults_verified": true,
+    "risk_pct": 19.67092557135773,
+    "tp_r": 3,
+    "trail_atr": 0,
+    "no_expiry": true,
+    "source_review_branch": "verification/chart-following-pine-20261126",
+    "source_review_commit": "32382f40271783b4c5ca16a07c62991b61e808b3",
+    "status": "source-rule-checked; TradingView untested"
+  }
 }

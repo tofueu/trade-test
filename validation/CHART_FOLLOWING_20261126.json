@@ -1,0 +1,31 @@
+{
+  "rank": 14,
+  "name": "Turtle55_20_EMA200",
+  "path": "pine/Turtle55_20_EMA200.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "6h",
+    "return_pct": 717.61,
+    "trade_count": 82
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 19.67092557135773,
+  "tp_r": 3,
+  "trail_atr": 0,
+  "warm_start": "2021-08-08T12:00:00+00:00",
+  "source_branch": "strategy/rank-14-turtle55-20-ema200",
+  "source_commit": "884bd7045b233ec405e26fa7fc364a4235fc38ea",
+  "source_family": "new",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/turtle55_20_ema200.pine",
+  "previous_commit": "884bd7045b233ec405e26fa7fc364a4235fc38ea",
+  "previous_pine_blob": "79f0d1e36c952934b5c4de151df27722b22f2877",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
