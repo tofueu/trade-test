@@ -1,0 +1,31 @@
+{
+  "rank": 25,
+  "name": "RSI14_EMA200",
+  "path": "pine/RSI14_EMA200.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "30m",
+    "return_pct": 161.39,
+    "trade_count": 155
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 11.885848582616207,
+  "tp_r": 0,
+  "trail_atr": 3,
+  "warm_start": "2021-09-01T00:00:00+00:00",
+  "source_branch": "strategy/rank-25-rsi14-ema200",
+  "source_commit": "2c4a05b21e526c691fcc655d5de62712aaaf659e",
+  "source_family": "original",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/rsi14_ema200.pine",
+  "previous_commit": "2c4a05b21e526c691fcc655d5de62712aaaf659e",
+  "previous_pine_blob": "1010dd36d64022e10c9f5be4454272ec7ece16ea",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
