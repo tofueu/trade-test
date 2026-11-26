@@ -1,0 +1,31 @@
+{
+  "rank": 21,
+  "name": "Supertrend_ADX20",
+  "path": "pine/Supertrend_ADX20.pine",
+  "reference": {
+    "symbol": "ETHUSDT",
+    "timeframe": "6h",
+    "return_pct": 240.71,
+    "trade_count": 81
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 10,
+  "tp_r": 3,
+  "trail_atr": 0,
+  "warm_start": "2021-08-08T12:00:00+00:00",
+  "source_branch": "strategy/rank-21-supertrend-adx20",
+  "source_commit": "f052c693fd9e92b7ffa4b866fab75693dedd3436",
+  "source_family": "new",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/supertrend_adx20.pine",
+  "previous_commit": "f052c693fd9e92b7ffa4b866fab75693dedd3436",
+  "previous_pine_blob": "6ac6171ffe8600b04c9983086a5170d9bb844cc4",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
