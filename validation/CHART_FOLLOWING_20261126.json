@@ -1,0 +1,31 @@
+{
+  "rank": 24,
+  "name": "EMA200+RSI14_pullback",
+  "path": "pine/EMA200_RSI14_pullback.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "30m",
+    "return_pct": 201.21,
+    "trade_count": 162
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 10.963383543392428,
+  "tp_r": 2,
+  "trail_atr": 0,
+  "warm_start": "2021-09-01T00:00:00+00:00",
+  "source_branch": "strategy/rank-24-ema200-rsi14-pullback",
+  "source_commit": "93f743f80ba679b5044e0a68a2963e74f54a6f55",
+  "source_family": "fixed",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/ema200_rsi14_pullback.pine",
+  "previous_commit": "93f743f80ba679b5044e0a68a2963e74f54a6f55",
+  "previous_pine_blob": "16b009f61b1d0f61659fe9beaea64be75ea2f974",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}

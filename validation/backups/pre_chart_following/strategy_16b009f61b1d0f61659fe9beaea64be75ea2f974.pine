@@ -1,0 +1,64 @@
+//@version=6
+// Python Source: research/multi-market-strategy-ranking/src/five_year_low_drawdown_fixed_rr.py & five_year_compound_strategy_sweep.py
+// Ranking Strategy Name: EMA200+RSI14_pullback
+// Representative Top Config: ETHUSDT | Market: Crypto futures | Timeframe: 1D | Exit: 純固定TP 3.0R／初始SL 1.5ATR (or Compound Signal Exit) | Sizing: 全凱利 (IS Kelly: 55.257%)
+// Cost Settings: Pine commission 0.10% per side approximates Python 5bps fee + 5bps price slippage; not identical.
+// TV Status: 未測 (Untested)
+strategy("EMA200+RSI14_pullback Strategy", overlay=true, initial_capital=10000, default_qty_type=strategy.percent_of_equity, default_qty_value=10, commission_type=strategy.commission.percent, commission_value=0.1, slippage=0, calc_on_order_fills=true, process_orders_on_close=false)
+
+// --- Input Parameters ---
+input_group_strat = "Strategy Parameters"
+exit_mode   = input.string("Pure Fixed-RR", title="Exit Mode Variant", options=["Pure Fixed-RR", "Compound Signal Exit (EMA200 / RSI 60/40)"], group=input_group_strat)
+sl_atr_mult = input.float(1.5, title="SL ATR Multiplier", group=input_group_strat)
+tp_r_mult   = input.float(3.0, title="TP R Multiplier (0 = Signal Exit Only)", group=input_group_strat)
+
+input_group_size = "Position Sizing & Risk"
+risk_pct = input.float(55.257, title="Position Risk Fraction (% of Initial Capital)", group=input_group_size)
+use_risk_sizing = input.bool(true, title="Enable Fixed Initial-Capital Risk Sizing", group=input_group_size)
+
+rsi_val = ta.rsi(close, 14)
+ema_val = ta.ema(close, 200)
+atr_val = ta.atr(14)
+
+long_cond  = close > ema_val and rsi_val[1] <= 30 and rsi_val > 30
+short_cond = close < ema_val and rsi_val[1] >= 70 and rsi_val < 70
+
+var float long_sl = na
+var float long_tp = na
+var float short_sl = na
+var float short_tp = na
+
+// Entry Gating
+if long_cond and (strategy.position_size == 0 or (exit_mode != "Pure Fixed-RR" and strategy.position_size < 0))
+    dist = sl_atr_mult * atr_val
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    strategy.entry("Long", strategy.long, qty=qty_val)
+
+if short_cond and (strategy.position_size == 0 or (exit_mode != "Pure Fixed-RR" and strategy.position_size > 0))
+    dist = sl_atr_mult * atr_val
+    risk_per_contract = dist * syminfo.pointvalue
+    qty_val = use_risk_sizing and risk_per_contract > 0 ? (strategy.initial_capital * (risk_pct / 100.0)) / risk_per_contract : na
+    strategy.entry("Short", strategy.short, qty=qty_val)
+
+if ta.change(strategy.position_size) != 0
+    if strategy.position_size > 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        long_sl := entry_p - dist
+        long_tp := tp_r_mult > 0 ? entry_p + tp_r_mult * dist : na
+    else if strategy.position_size < 0
+        entry_p = strategy.opentrades.entry_price(0)
+        dist = sl_atr_mult * atr_val[1]
+        short_sl := entry_p + dist
+        short_tp := tp_r_mult > 0 ? entry_p - tp_r_mult * dist : na
+
+if strategy.position_size > 0
+    strategy.exit("SL/TP Long", "Long", stop=long_sl, limit=long_tp)
+    if exit_mode == "Compound Signal Exit (EMA200 / RSI 60/40)" and not short_cond and (close < ema_val or rsi_val >= 60)
+        strategy.close("Long")
+
+if strategy.position_size < 0
+    strategy.exit("SL/TP Short", "Short", stop=short_sl, limit=short_tp)
+    if exit_mode == "Compound Signal Exit (EMA200 / RSI 60/40)" and not long_cond and (close > ema_val or rsi_val <= 40)
+        strategy.close("Short")
