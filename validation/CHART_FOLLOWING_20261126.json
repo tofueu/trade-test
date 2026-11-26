@@ -1,0 +1,31 @@
+{
+  "rank": 11,
+  "name": "Keltner20_1.5ATR_EMA200",
+  "path": "pine/Keltner20_1_5ATR_EMA200.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "3h",
+    "return_pct": 938.71,
+    "trade_count": 368
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 14.752073584269818,
+  "tp_r": 2,
+  "trail_atr": 0,
+  "warm_start": "2021-09-01T00:00:00+00:00",
+  "source_branch": "strategy/rank-11-keltner20-1.5atr-ema200",
+  "source_commit": "233150c05f46bbe0ba9749f8add811e5b0391f28",
+  "source_family": "new",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/keltner20_15atr_ema200.pine",
+  "previous_commit": "233150c05f46bbe0ba9749f8add811e5b0391f28",
+  "previous_pine_blob": "e3990574d15e7c3cc142b3582b412fd05a46910f",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
