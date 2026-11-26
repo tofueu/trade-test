@@ -1,0 +1,31 @@
+{
+  "rank": 20,
+  "name": "WEMA20_50+DailyDonchian20",
+  "path": "pine/WEMA20_50_DailyDonchian20.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "8h",
+    "return_pct": 333.67,
+    "trade_count": 150
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 17.027453320875914,
+  "tp_r": 1,
+  "trail_atr": 0,
+  "warm_start": "2021-07-18T16:00:00+00:00",
+  "source_branch": "strategy/rank-20-wema20-50-dailydonchian20",
+  "source_commit": "0c36cb5db48fe5c02c1f1cfa29ab620c593c3d76",
+  "source_family": "fixed",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/wema20_50_daily_donchian20.pine",
+  "previous_commit": "0c36cb5db48fe5c02c1f1cfa29ab620c593c3d76",
+  "previous_pine_blob": "4101daa8629713d2d407f140e21f5e8e28673764",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
