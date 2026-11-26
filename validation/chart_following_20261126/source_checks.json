@@ -1,0 +1,221 @@
+{
+  "tested_on": "Existing cached SOLUSDT 3h bars; signal logic comparison only",
+  "RSI_ATR_ADX_weekly_EWM_scalar_recursion": "passed",
+  "results": [
+    {
+      "rank": 2,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 5,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 8,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 9,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 10,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 11,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 12,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 13,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 14,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 15,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 16,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 17,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 18,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 19,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 20,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 21,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 22,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 23,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 24,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 25,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 26,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 27,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 28,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 29,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 30,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    },
+    {
+      "rank": 31,
+      "bars": 14920,
+      "rule_state_equal_to_original_python": true,
+      "chart_source_static_checks": "passed",
+      "tradingview_compiled": false,
+      "performance_verified": false
+    }
+  ],
+  "limits": [
+    "Pine compiler not run",
+    "TradingView fills not run",
+    "No strategy performance/ranking claim",
+    "Fixed-RR same-bar exit/re-entry and SL/TP priority may differ in TradingView",
+    "Weekly calendar/exchange sessions must be checked on other markets"
+  ]
+}

@@ -1,0 +1,218 @@
+//@version=6
+// Independent chart-following port: BB_Reentry_RSI_ADX25.
+// Python family: new; source commit da901248f3088e84fef043bc4e6b3082e5fe424d.
+// Reference ONLY: BTCUSDT 6h, exit 固定止盈3R.
+// Reference defaults verified from saved row: true.
+// Changing chart symbol/interval changes price series, NOT optimal risk/exit parameters.
+// Research margin=0 matches Python's lack of margin/liquidation simulation.
+// Pine tick slippage cannot reproduce Python price-percentage slippage.
+// Status: signal-source tests required; TV compilation/fills/performance NOT VERIFIED.
+strategy("R31 | BB_Reentry_RSI_ADX25 | Chart-following", overlay=true, initial_capital=10000, currency=currency.USD,
+     commission_type=strategy.commission.percent, commission_value=0.05, slippage=0, pyramiding=0,
+     margin_long=0, margin_short=0, default_qty_type=strategy.fixed,
+     calc_on_order_fills=false, process_orders_on_close=false)
+warmTime = input.time(timestamp("2021-08-08T12:00:00+00:00"), "Indicator seed start UTC (reference warm-up)")
+startTime = input.time(timestamp("2021-10-10T00:00:00+00:00"), "Trade start UTC (no expiry)")
+riskPct = input.float(10.0, "Fixed initial-capital risk % (reference, NOT auto Kelly)", minval=0.000001)
+atrMult = input.float(1.5, "Initial ATR14 stop multiplier", minval=0.000001)
+tpR = input.float(3.0, "Fixed TP in R (0 = none)", minval=0.0)
+trailATR = input.float(0.0, "Trailing ATR multiplier (0 = none)", minval=0.0)
+
+// All OHLCV series use the CURRENT chart symbol and chart interval.
+// Fixed indicator lengths count chart bars; they are not locked to daily bars.
+reset = time >= warmTime and (na(time[1]) or time[1] < warmTime)
+f_ewm(float v, float alpha, bool doReset, int minimum) =>
+    var float value = na
+    var int count = 0
+    if doReset
+        value := v
+        count := na(v) ? 0 : 1
+    else if time >= warmTime and not na(v)
+        value := na(value) ? v : value == v ? value : (1.0 - alpha) * value + alpha * v
+        count += 1
+    count >= minimum ? value : na
+
+c = close
+pc = close[1]
+tr = reset ? high - low : ta.tr(true)
+atr = f_ewm(tr, 1.0 / 14.0, reset, 14)
+atr10 = f_ewm(tr, 0.1, reset, 10)
+e20 = f_ewm(c, 2.0 / 21.0, reset, 1)
+e50 = f_ewm(c, 2.0 / 51.0, reset, 1)
+e200 = f_ewm(c, 2.0 / 201.0, reset, 1)
+pe20 = e20[1]
+pe50 = e50[1]
+fast = f_ewm(c, 2.0 / 13.0, reset, 1)
+slow = f_ewm(c, 2.0 / 27.0, reset, 1)
+m = fast - slow
+ms = f_ewm(m, 0.2, reset, 1)
+pm = m[1]
+pms = ms[1]
+delta = reset ? na : c - pc
+gain = math.max(delta, 0.0)
+loss = math.max(-delta, 0.0)
+g14 = f_ewm(gain, 1.0 / 14.0, reset, 14)
+l14 = f_ewm(loss, 1.0 / 14.0, reset, 14)
+g2 = f_ewm(gain, 0.5, reset, 2)
+l2 = f_ewm(loss, 0.5, reset, 2)
+r14 = l14 == 0 ? (g14 == 0 ? 50.0 : 100.0) : 100.0 - 100.0 / (1.0 + g14 / l14)
+r2 = l2 == 0 ? (g2 == 0 ? 50.0 : 100.0) : 100.0 - 100.0 / (1.0 + g2 / l2)
+pr14 = r14[1]
+pr2 = r2[1]
+var int warmBars = 0
+var bool fullWarmup = false
+if reset
+    warmBars := 1
+    fullWarmup := time == warmTime
+else if time >= warmTime
+    warmBars += 1
+hi20Raw = ta.highest(high[1], 20)
+lo20Raw = ta.lowest(low[1], 20)
+hi10Raw = ta.highest(high[1], 10)
+lo10Raw = ta.lowest(low[1], 10)
+hi55Raw = ta.highest(high[1], 55)
+lo55Raw = ta.lowest(low[1], 55)
+hi20 = warmBars >= 21 ? hi20Raw : na
+lo20 = warmBars >= 21 ? lo20Raw : na
+hi10 = warmBars >= 11 ? hi10Raw : na
+lo10 = warmBars >= 11 ? lo10Raw : na
+hi55 = warmBars >= 56 ? hi55Raw : na
+lo55 = warmBars >= 56 ? lo55Raw : na
+phi20 = hi20[1]
+plo20 = lo20[1]
+volumeMean = ta.sma(volume, 20)
+vol_ok = warmBars >= 20 and not na(volumeMean) and volume > 1.5 * volumeMean
+bbMean = ta.sma(c, 20)
+bbStd = ta.stdev(c, 20, true)
+bbmid = warmBars >= 20 ? bbMean : na
+bblo = bbmid - 2.0 * bbStd
+bbhi = bbmid + 2.0 * bbStd
+pbblo = bblo[1]
+pbbhi = bbhi[1]
+low14 = ta.lowest(low, 14)
+high14 = ta.highest(high, 14)
+k = warmBars >= 14 and high14 != low14 ? 100.0 * (c - low14) / (high14 - low14) : na
+pk = k[1]
+up = reset ? 0.0 : high - high[1]
+down = reset ? 0.0 : low[1] - low
+plusDM = up > down and up > 0 ? up : 0.0
+minusDM = down > up and down > 0 ? down : 0.0
+plusSmooth = f_ewm(plusDM, 1.0 / 14.0, reset, 14)
+minusSmooth = f_ewm(minusDM, 1.0 / 14.0, reset, 14)
+pdi = atr != 0 ? 100.0 * plusSmooth / atr : na
+mdi = atr != 0 ? 100.0 * minusSmooth / atr : na
+dx = pdi + mdi != 0 ? 100.0 * math.abs(pdi - mdi) / (pdi + mdi) : na
+adx = f_ewm(dx, 1.0 / 14.0, reset, 14)
+
+basicUpper = (high + low) / 2.0 + 3.0 * atr10
+basicLower = (high + low) / 2.0 - 3.0 * atr10
+var float finalUpper = na
+var float finalLower = na
+var int direction = 0
+if reset
+    finalUpper := na
+    finalLower := na
+    direction := 0
+if not na(atr10)
+    if na(finalUpper[1])
+        finalUpper := basicUpper
+        finalLower := basicLower
+        direction := 1
+    else
+        finalUpper := basicUpper < finalUpper[1] or c[1] > finalUpper[1] ? basicUpper : finalUpper[1]
+        finalLower := basicLower > finalLower[1] or c[1] < finalLower[1] ? basicLower : finalLower[1]
+        prevDir = nz(direction[1], 1)
+        direction := prevDir < 0 and c > finalUpper ? 1 : prevDir > 0 and c < finalLower ? -1 : prevDir
+pdirection = nz(direction[1], 0)
+
+wr = 0
+
+// Entry/exit state rules transcribed from the ORIGINAL Python.
+var int state = 0
+if reset
+    state := 0
+if time >= warmTime
+    if pc <= pbblo and c > bblo and r14 < 45 and adx < 25
+        state := 1
+    else if pc >= pbbhi and c < bbhi and r14 > 55 and adx < 25
+        state := -1
+    else if state == 1 and (c >= bbmid)
+        state := 0
+    else if state == -1 and (c <= bbmid)
+        state := 0
+
+previousState = nz(state[1], 0)
+canTrade = time_close >= startTime and warmBars >= 14 and not na(atr) and atr > 0
+startTransition = time_close == startTime
+newSide = state != 0 and (state != previousState or false)
+riskCash = strategy.initial_capital * riskPct / 100.0
+var bool capitalHalted = false
+if strategy.initial_capital + strategy.netprofit < riskCash
+    capitalHalted := true
+entryIntent = newSide
+willLong = barstate.isconfirmed and canTrade and entryIntent and state == 1 and not capitalHalted
+willShort = barstate.isconfirmed and canTrade and entryIntent and state == -1 and not capitalHalted
+var float pendingLongDistance = na
+var float pendingShortDistance = na
+var float longStop = na
+var float shortStop = na
+var float longTake = na
+var float shortTake = na
+var float bestLong = na
+var float bestShort = na
+positionChanged = strategy.position_size != strategy.position_size[1]
+
+if barstate.isconfirmed and canTrade
+    if strategy.position_size > 0
+        if true and state != 1
+            strategy.cancel("Long SLTP")
+            if not willShort
+                strategy.close("Long", comment="Signal exit")
+        else
+            if positionChanged or na(longStop)
+                longStop := strategy.position_avg_price - pendingLongDistance
+                longTake := tpR > 0 ? strategy.position_avg_price + tpR * pendingLongDistance : na
+                bestLong := strategy.position_avg_price
+            bestLong := math.max(bestLong, high)
+            if trailATR > 0
+                longStop := math.max(longStop, bestLong - trailATR * atr)
+            strategy.exit("Long SLTP", from_entry="Long", stop=longStop, limit=longTake)
+    if strategy.position_size < 0
+        if true and state != -1
+            strategy.cancel("Short SLTP")
+            if not willLong
+                strategy.close("Short", comment="Signal exit")
+        else
+            if positionChanged or na(shortStop)
+                shortStop := strategy.position_avg_price + pendingShortDistance
+                shortTake := tpR > 0 ? strategy.position_avg_price - tpR * pendingShortDistance : na
+                bestShort := strategy.position_avg_price
+            bestShort := math.min(bestShort, low)
+            if trailATR > 0
+                shortStop := math.min(shortStop, bestShort + trailATR * atr)
+            strategy.exit("Short SLTP", from_entry="Short", stop=shortStop, limit=shortTake)
+    distance = atrMult * atr
+    quantity = riskCash / (distance * syminfo.pointvalue)
+    stopTicks = int(math.max(1, math.round(distance / syminfo.mintick)))
+    tpTicks = tpR > 0 ? int(math.max(1, math.round(tpR * distance / syminfo.mintick))) : na
+    if willLong
+        strategy.cancel("Short SLTP")
+        pendingLongDistance := distance
+        strategy.entry("Long", strategy.long, qty=quantity)
+        strategy.exit("Long SLTP", from_entry="Long", loss=stopTicks, profit=tpTicks)
+    else if willShort
+        strategy.cancel("Long SLTP")
+        pendingShortDistance := distance
+        strategy.entry("Short", strategy.short, qty=quantity)
+        strategy.exit("Short SLTP", from_entry="Short", loss=stopTicks, profit=tpTicks)
+
+var table chartInfo = table.new(position.top_right, 1, 3)
+if barstate.islast
+    table.cell(chartInfo, 0, 0, syminfo.tickerid + " | chart " + timeframe.period, text_color=color.white, bgcolor=color.new(color.black, 30))
+    table.cell(chartInfo, 0, 1, "Parameters are manual; Kelly is NOT re-estimated on chart changes", text_color=color.orange, bgcolor=color.new(color.black, 30))
+    table.cell(chartInfo, 0, 2, fullWarmup ? "" : "Loaded history does not include reference warm-up start", text_color=color.orange, bgcolor=color.new(color.black, 30))
+
+plot(bbmid, "BB middle", color=color.orange)
+plot(bblo, "BB lower", color=color.blue)
+plot(bbhi, "BB upper", color=color.blue)
+plot(state, "Python signal state (not filled position)", display=display.data_window)
