@@ -1,0 +1,31 @@
+{
+  "rank": 10,
+  "name": "Donchian20+MACD",
+  "path": "pine/Donchian20_MACD.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "8h",
+    "return_pct": 1054.51,
+    "trade_count": 205
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 17.380075103573613,
+  "tp_r": 4,
+  "trail_atr": 0,
+  "warm_start": "2021-07-18T16:00:00+00:00",
+  "source_branch": "strategy/rank-10-donchian20-macd",
+  "source_commit": "7c3d1ad80226c1dff49205697b8b0964c0b5041f",
+  "source_family": "compound",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/donchian20_macd.pine",
+  "previous_commit": "7c3d1ad80226c1dff49205697b8b0964c0b5041f",
+  "previous_pine_blob": "11df738a55e3cdb7b3e4d39ad568a0225637d228",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
