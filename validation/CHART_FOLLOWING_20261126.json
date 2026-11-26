@@ -1,0 +1,31 @@
+{
+  "rank": 22,
+  "name": "Bollinger20+RSI14_reentry",
+  "path": "pine/Bollinger20_RSI14_reentry.pine",
+  "reference": {
+    "symbol": "USDJPY=X",
+    "timeframe": "1d",
+    "return_pct": 239.96,
+    "trade_count": 71
+  },
+  "reference_defaults_verified": false,
+  "risk_pct": 17.806,
+  "tp_r": 3,
+  "trail_atr": 0,
+  "warm_start": "2021-07-01T00:00:00+00:00",
+  "source_branch": "strategy/rank-22-bollinger20-rsi14-reentry",
+  "source_commit": "10ccc96d2246412fd32fbaee7cc6b745b42a0091",
+  "source_family": "fixed",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/bollinger20_rsi14_reentry.pine",
+  "previous_commit": "10ccc96d2246412fd32fbaee7cc6b745b42a0091",
+  "previous_pine_blob": "2d5cd2e76d436745dc482139cb38422f17ed5b72",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
