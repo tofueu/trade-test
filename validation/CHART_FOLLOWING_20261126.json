@@ -1,0 +1,31 @@
+{
+  "rank": 17,
+  "name": "Donchian20+ADX14",
+  "path": "pine/Donchian20_ADX14.pine",
+  "reference": {
+    "symbol": "BTCUSDT",
+    "timeframe": "6h",
+    "return_pct": 443.58,
+    "trade_count": 220
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 10,
+  "tp_r": 3,
+  "trail_atr": 0,
+  "warm_start": "2021-08-08T12:00:00+00:00",
+  "source_branch": "strategy/rank-17-donchian20-adx14",
+  "source_commit": "964c8710f5876cefb36428d308896103f588b183",
+  "source_family": "fixed",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/donchian20_adx14.pine",
+  "previous_commit": "964c8710f5876cefb36428d308896103f588b183",
+  "previous_pine_blob": "79f86734aec038c50719ad86ae149f33919e895e",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
