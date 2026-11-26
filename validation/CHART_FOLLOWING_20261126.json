@@ -1,0 +1,31 @@
+{
+  "rank": 15,
+  "name": "Supertrend+EMA200_flip",
+  "path": "pine/Supertrend_EMA200_flip.pine",
+  "reference": {
+    "symbol": "SOLUSDT",
+    "timeframe": "6h",
+    "return_pct": 468.16,
+    "trade_count": 73
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 19.852709114014004,
+  "tp_r": 2,
+  "trail_atr": 0,
+  "warm_start": "2021-08-08T12:00:00+00:00",
+  "source_branch": "strategy/rank-15-supertrend-ema200-flip",
+  "source_commit": "de6ed6daeb03c8be942f8fe1a0200ea235e245cc",
+  "source_family": "fixed",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/supertrend_ema200_flip.pine",
+  "previous_commit": "de6ed6daeb03c8be942f8fe1a0200ea235e245cc",
+  "previous_pine_blob": "80c7a83013c0838bf1b4ac53a0e47f745f4b9529",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
