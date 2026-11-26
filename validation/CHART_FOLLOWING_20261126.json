@@ -1,0 +1,31 @@
+{
+  "rank": 23,
+  "name": "Bollinger20_2",
+  "path": "pine/Bollinger20_2.pine",
+  "reference": {
+    "symbol": "BTCUSDT",
+    "timeframe": "1d",
+    "return_pct": 204.84,
+    "trade_count": 72
+  },
+  "reference_defaults_verified": true,
+  "risk_pct": 18.425951545343793,
+  "tp_r": 4,
+  "trail_atr": 0,
+  "warm_start": "2021-02-02T00:00:00+00:00",
+  "source_branch": "strategy/rank-23-bollinger20-2",
+  "source_commit": "7afdbb953df6ad256ddc41d2e9a9f55801c24244",
+  "source_family": "original",
+  "signal_tests": "passed_original_python_comparison",
+  "tradingview_compile": "not_run",
+  "tradingview_execution": "not_run",
+  "installed_at": "2026-11-26",
+  "canonical_path": "strategy.pine",
+  "nested_path": "research/multi-market-strategy-ranking/pine/bollinger20_2.pine",
+  "previous_commit": "7afdbb953df6ad256ddc41d2e9a9f55801c24244",
+  "previous_pine_blob": "a063cef77203d987f9817995c49f95de1ccd3f01",
+  "source_rule_check": "Compared original Python states on cached SOLUSDT 3h; passed. Not TV execution or performance.",
+  "pine_compilation": "not_run",
+  "tradingview_fills": "not_run",
+  "return_and_trade_count_parity": "unverified"
+}
