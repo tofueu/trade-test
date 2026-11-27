@@ -59,6 +59,12 @@ ema200 = ta.ema(close, 200)
 var int signalState = 0
 if not na(rsi14) and stDirection != 0
     signalState := stDirection > 0 and rsi14 > 50 and close > ema200 ? 1 : stDirection < 0 and rsi14 < 50 and close < ema200 ? -1 : 0
+// Receiver metadata only; strategy conditions, sizing and dates remain unchanged.
+f_entry_meta(float distance) =>
+    '{"kind":"entry","stop_distance":"' + str.tostring(distance, format.mintick) + '","take_profit":null}'
+f_exit_meta(string kind) =>
+    '{"kind":"' + kind + '","take_profit":null}'
+
 previousSignalState = nz(signalState[1], 0)
 startTransition = time >= startTime and time[1] < startTime
 inWindow = time >= startTime and (not limitTestEnd or time < endTime)
@@ -66,9 +72,9 @@ newLong = signalState == 1 and (previousSignalState == 0 or startTransition)
 newShort = signalState == -1 and (previousSignalState == 0 or startTransition)
 if inWindow and barstate.isconfirmed
     if strategy.position_size > 0 and signalState != 1
-        strategy.close("Long", comment="Signal exit")
+        strategy.close("Long", comment="Signal exit", alert_message=f_exit_meta("signal_exit"))
     if strategy.position_size < 0 and signalState != -1
-        strategy.close("Short", comment="Signal exit")
+        strategy.close("Short", comment="Signal exit", alert_message=f_exit_meta("signal_exit"))
 if inWindow and barstate.isconfirmed and not na(atr14) and atr14 > 0
     stopDistance = atrMult * atr14
     stopTicks = int(math.round(stopDistance / syminfo.mintick))
@@ -76,15 +82,15 @@ if inWindow and barstate.isconfirmed and not na(atr14) and atr14 > 0
     if newLong
         if strategy.position_size < 0
             strategy.cancel("Short SL")
-        strategy.entry("Long", strategy.long, qty=qty, comment="Supertrend+RSI50+EMA200")
-        strategy.exit("Long SL", from_entry="Long", loss=stopTicks, comment_loss="Stop loss")
+        strategy.entry("Long", strategy.long, qty=qty, comment="Supertrend+RSI50+EMA200", alert_message=f_entry_meta(stopTicks * syminfo.mintick))
+        strategy.exit("Long SL", from_entry="Long", loss=stopTicks, comment_loss="Stop loss", alert_message=f_exit_meta("stop_exit"))
     if newShort
         if strategy.position_size > 0
             strategy.cancel("Long SL")
-        strategy.entry("Short", strategy.short, qty=qty, comment="Supertrend+RSI50+EMA200")
-        strategy.exit("Short SL", from_entry="Short", loss=stopTicks, comment_loss="Stop loss")
+        strategy.entry("Short", strategy.short, qty=qty, comment="Supertrend+RSI50+EMA200", alert_message=f_entry_meta(stopTicks * syminfo.mintick))
+        strategy.exit("Short SL", from_entry="Short", loss=stopTicks, comment_loss="Stop loss", alert_message=f_exit_meta("stop_exit"))
 if limitTestEnd and time < endTime and time_close >= endTime and strategy.position_size != 0
-    strategy.close_all(comment="End of test window", immediately=true)
+    strategy.close_all(comment="End of test window", immediately=true, alert_message=f_exit_meta("window_exit"))
 plot(stDirection > 0 ? finalLower : stDirection < 0 ? finalUpper : na, "Python Supertrend", color=stDirection > 0 ? color.green : color.red)
 plot(ema200, "EMA200 filter", color=color.orange)
 plot(rsi14, "Python RSI14", color=color.blue, display=display.data_window)
